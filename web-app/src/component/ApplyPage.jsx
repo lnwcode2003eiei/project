@@ -96,6 +96,9 @@ export default function ApplyPage() {
 
   const handleOpenModal = (major) => {
     setSelectedMajor(major);
+    if (masterMajors.some((item) => item.id === major.id)) {
+      setFormData((current) => ({ ...current, secondMajor: "" }));
+    }
     setFormError("");
     setIsModalOpen(true);
   };
@@ -121,7 +124,9 @@ export default function ApplyPage() {
           fullname: formData.fullname.trim(),
           old_school: formData.oldSchool.trim(),
           education: formData.education,
-          second_major_name: formData.secondMajor,
+          second_major_name: masterMajors.some((major) => major.id === selectedMajor.id)
+            ? ""
+            : formData.secondMajor,
         }),
       });
 
@@ -255,7 +260,7 @@ export default function ApplyPage() {
                 </p>
               </div>
               <div className="inline-flex items-center gap-1 border-t border-[#7A0019]/10 pt-2 text-xs font-semibold text-[#7A0019] transition-transform group-hover:translate-x-1">
-                เลือกสมัครสาขานี้ <span>→</span>
+                สนใจสาขานี้ <span>→</span>
               </div>
             </div>
           ))}
@@ -297,23 +302,25 @@ export default function ApplyPage() {
                 />
               </div>
 
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#171717]/75">
-                  สาขาที่สนใจเป็นอันดับสอง
-                </label>
-                <select
-                  value={formData.secondMajor}
-                  onChange={(e) => setFormData({ ...formData, secondMajor: e.target.value })}
-                  className="w-full rounded-lg border border-[#171717]/20 bg-white px-4 py-2.5 text-sm text-[#171717] transition focus:border-[#7A0019] focus:outline-none focus:ring-1 focus:ring-[#7A0019]"
-                >
-                  <option value="">ไม่ระบุ</option>
-                  {bachelorMajors.map((major) => (
-                    <option key={major.id} value={major.name} disabled={major.name === selectedMajor.name}>
-                      {major.name}{major.name === selectedMajor.name ? " (เลือกเป็นอันดับหนึ่ง)" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {!masterMajors.some((major) => major.id === selectedMajor.id) && (
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#171717]/75">
+                    สาขาที่สนใจเป็นอันดับสอง
+                  </label>
+                  <select
+                    value={formData.secondMajor}
+                    onChange={(e) => setFormData({ ...formData, secondMajor: e.target.value })}
+                    className="w-full rounded-lg border border-[#171717]/20 bg-white px-4 py-2.5 text-sm text-[#171717] transition focus:border-[#7A0019] focus:outline-none focus:ring-1 focus:ring-[#7A0019]"
+                  >
+                    <option value="">ไม่ระบุ</option>
+                    {bachelorMajors.map((major) => (
+                      <option key={major.id} value={major.name} disabled={major.name === selectedMajor.name}>
+                        {major.name}{major.name === selectedMajor.name ? " (เลือกเป็นอันดับหนึ่ง)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#171717]/75">
