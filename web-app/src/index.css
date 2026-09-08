@@ -1,0 +1,370 @@
+@import url('https://fonts.googleapis.com/css2?family=Chonburi&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  font-family: 'Noto Sans Thai', sans-serif;
+  background: #ffffff;
+  color: #171717;
+}
+
+.font-display {
+  font-family: 'Chonburi', serif;
+}
+
+/* Custom สีปุ่มลูกศรและ จุด Pagination ของ Swiper */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #ffffff !important;
+  background: rgba(0, 0, 0, 0.4);
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 18px !important;
+  font-weight: bold;
+}
+
+.swiper-pagination-bullet {
+  background: #ffffff !important;
+  opacity: 0.5;
+}
+
+.swiper-pagination-bullet-active {
+  opacity: 1;
+  background: #7A0019 !important;
+  width: 24px !important;
+  border-radius: 10px !important;
+}
+
+/* Academic programs */
+.programs-showcase {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(122, 0, 25, 0.08), transparent 30rem),
+    #fff;
+}
+
+.programs-showcase__intro {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.programs-showcase__intro::after {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 4.5rem;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: #7a0019;
+  content: "";
+  transform: translateX(-50%);
+}
+
+.programs-showcase__grid .swiper-wrapper {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1.5rem;
+  transform: none !important;
+}
+
+.programs-showcase__grid .swiper-slide {
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+@media (min-width: 1024px) {
+  .programs-showcase__grid--centered .swiper-wrapper {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .programs-showcase__grid--centered .swiper-slide {
+    grid-column: span 2;
+  }
+
+  .programs-showcase__grid--centered .swiper-slide:first-child {
+    grid-column: 2 / span 2;
+  }
+}
+
+.programs-showcase .swiper-slide > div {
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(122, 0, 25, 0.12);
+  border-radius: 1.5rem;
+  background: #fff;
+  box-shadow: 0 0.75rem 2.25rem rgba(23, 23, 23, 0.09);
+  transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
+}
+
+.programs-showcase .swiper-slide > div:hover {
+  border-color: rgba(122, 0, 25, 0.45);
+  box-shadow: 0 1.25rem 2.75rem rgba(122, 0, 25, 0.18);
+  transform: translateY(-0.5rem);
+}
+
+.programs-showcase .swiper-slide > div > img {
+  display: block;
+  height: 14rem;
+  border-bottom: 0.25rem solid #7a0019;
+  background: #f7e9ec;
+  color: transparent;
+  font-size: 0;
+}
+
+.programs-showcase .swiper-slide > div > img.programs-showcase__image-empty {
+  object-fit: none;
+}
+
+.programs-showcase .swiper-slide > div > div:last-child {
+  display: flex;
+  min-height: 14rem;
+  flex-direction: column;
+  padding: 1.5rem;
+}
+
+.programs-showcase .swiper-slide h3 {
+  color: #171717;
+  font-size: 1.35rem;
+  line-height: 1.45;
+}
+
+.programs-showcase .swiper-slide p {
+  color: #5a4549;
+}
+
+.programs-showcase .swiper-slide p.text-\[\#7A0019\] {
+  color: #7a0019;
+  font-weight: 700;
+}
+
+.programs-showcase .swiper-slide a {
+  margin-top: auto !important;
+  border-radius: 0.8rem;
+  background: #7a0019;
+  box-shadow: 0 0.45rem 1rem rgba(122, 0, 25, 0.2);
+}
+
+.programs-showcase .swiper-slide a:hover {
+  background: #500011;
+}
+
+@media (max-width: 640px) {
+  .programs-showcase .swiper-slide > div > div:last-child {
+    min-height: 15rem;
+  }
+}
+
+.career-showcase {
+  color: #171717;
+}
+
+.career-showcase .mx-auto.max-w-2xl {
+  max-width: 48rem;
+  text-align: left;
+}
+
+.career-showcase .mx-auto.max-w-2xl span {
+  color: #8f001e;
+  font-weight: 800;
+}
+
+.career-showcase .mx-auto.max-w-2xl h2,
+.career-showcase__admin-heading h2 {
+  color: #171717;
+}
+
+.career-showcase .mx-auto.max-w-2xl p {
+  color: #654b51;
+}
+
+.career-showcase__list {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding: 0.25rem 0 1rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: #8f001e #f4e7ea;
+  scrollbar-width: thin;
+}
+
+.career-showcase__list::-webkit-scrollbar {
+  height: 0.55rem;
+}
+
+.career-showcase__list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #8f001e;
+}
+
+.career-showcase__card {
+  position: relative;
+  display: block !important;
+  min-width: min(18rem, 82vw);
+  height: 25rem;
+  overflow: hidden;
+  border-radius: 1.4rem;
+  background: linear-gradient(145deg, #9a0022, #3f000e);
+  box-shadow: 0 0.8rem 1.8rem rgba(43, 8, 15, 0.14);
+  scroll-snap-align: start;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.career-showcase__card:hover {
+  box-shadow: 0 1.2rem 2.4rem rgba(122, 0, 25, 0.25);
+  transform: translateY(-0.35rem);
+}
+
+.career-showcase__card > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.career-showcase__card::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(11, 7, 8, 0.02) 32%, rgba(11, 7, 8, 0.9) 100%);
+  content: "";
+}
+
+.career-showcase__card > span:last-child {
+  position: absolute;
+  right: 1.35rem;
+  bottom: 3.5rem;
+  left: 1.35rem;
+  z-index: 2;
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.career-showcase__card::after {
+  position: absolute;
+  right: 1.35rem;
+  bottom: 1.2rem;
+  left: 1.35rem;
+  z-index: 2;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.88);
+  content: attr(data-description);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.career-showcase__admin-heading {
+  text-align: left;
+}
+
+.learning-atmosphere-swiper .swiper-button-next,
+.learning-atmosphere-swiper .swiper-button-prev {
+  color: #fff;
+}
+
+.learning-atmosphere-swiper .swiper-pagination-bullet {
+  width: 0.7rem;
+  height: 0.7rem;
+  background: #fff;
+  opacity: 0.7;
+}
+
+.learning-atmosphere-swiper .swiper-pagination-bullet-active {
+  background: #9e0022;
+  opacity: 1;
+}
+
+.admin-shell {
+  background: #fff !important;
+  color: #171717;
+}
+
+.admin-shell > main > header {
+  border-color: #5c0013;
+  background: #7a0019 !important;
+}
+
+.admin-shell > main > header h1,
+.admin-shell > main > header p {
+  color: #fff !important;
+}
+
+.admin-sidebar {
+  border-color: #f1dce1 !important;
+  background: #fff !important;
+}
+
+.admin-sidebar .border-gray-200,
+.admin-shell .border-gray-200 {
+  border-color: #f1dce1;
+}
+
+.admin-shell .bg-gray-50 {
+  background-color: #fff;
+}
+
+.admin-shell .text-gray-900 {
+  color: #171717;
+}
+
+.admin-shell .text-gray-500,
+.admin-shell .text-gray-400 {
+  color: #707070;
+}
+
+.admin-shell .bg-red-50 {
+  background-color: #f5e7ea;
+}
+
+.admin-shell .text-red-600 {
+  color: #7a0019;
+}
+
+/* ให้ปุ่มในระบบ Admin ตอบสนองชัดเจนเมื่อชี้ กด หรือใช้งานด้วยคีย์บอร์ด */
+.admin-shell button:not(:disabled) {
+  cursor: pointer;
+  transition:
+    filter 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.admin-shell button:not(:disabled):hover {
+  filter: brightness(1.16) saturate(1.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(122, 0, 25, 0.18);
+}
+
+.admin-shell button:not(:disabled):active {
+  filter: brightness(0.82);
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 6px rgba(122, 0, 25, 0.16);
+}
+
+.admin-shell button:not(:disabled):focus-visible {
+  outline: 3px solid rgba(179, 18, 58, 0.35);
+  outline-offset: 3px;
+}
+
+@media (min-width: 768px) {
+  .career-showcase__card {
+    min-width: 19.5rem;
+    height: 26rem;
+  }
+}

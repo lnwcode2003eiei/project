@@ -1,0 +1,10 @@
+import { useEffect, useState } from "react";
+import { apiUrl } from "../../../config/api";
+
+export default function Teacher() {
+  const [teachers, setTeachers] = useState([]);
+  useEffect(() => { fetch(apiUrl("/api/faculty-teachers")).then((response) => response.json()).then((data) => data.success && setTeachers(data.teachers)); }, []);
+  const groups = Object.entries(teachers.reduce((all, teacher) => ({ ...all, [teacher.group_name]: [...(all[teacher.group_name] || []), teacher] }), {}));
+
+  return <section className="min-h-screen bg-[#faf8ef] px-5 pb-16 pt-32"><div className="mx-auto max-w-6xl"><h1 className="text-center text-4xl font-bold text-[#682122]">คณาจารย์ / นักวิจัย</h1><p className="mt-3 text-center text-slate-500">บุคลากรสายวิชาการ คณะเทคโนโลยีอุตสาหกรรม</p>{groups.length === 0 ? <p className="mt-16 text-center text-slate-400">กำลังเตรียมข้อมูลคณาจารย์</p> : groups.map(([group, members]) => <section key={group} className="mt-12"><h2 className="border-l-4 border-[#7A0019] bg-[#f2f0e7] px-4 py-3 text-xl font-bold">หลักสูตร{group}</h2><div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">{members.map((teacher) => <article key={teacher.id} className="overflow-hidden rounded-2xl bg-white text-center shadow-sm"><div className="flex h-52 items-end justify-center bg-gray-50 p-3">{teacher.image_filename ? teacher.profile_link ? <a href={teacher.profile_link} target="_blank" rel="noopener noreferrer" className="h-full w-full cursor-pointer transition hover:opacity-80" title={`ดูรายละเอียด ${teacher.full_name}`}><img src={apiUrl(`/uploads/teachers/${teacher.image_filename}`)} alt={teacher.full_name} className="h-full w-full object-contain" /></a> : <img src={apiUrl(`/uploads/teachers/${teacher.image_filename}`)} alt={teacher.full_name} className="h-full w-full object-contain" /> : <span>รอรูปภาพ</span>}</div><div className="p-4"><h3>{teacher.full_name}</h3><p>{teacher.position}</p>{teacher.profile_link && <p className="mt-2 text-xs font-medium text-[#7A0019]">กดรูปภาพเพื่อดูรายละเอียด</p>}</div></article>)}</div></section>)}</div></section>;
+}

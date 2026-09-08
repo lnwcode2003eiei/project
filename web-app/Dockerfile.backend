@@ -1,0 +1,21 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+# ติดตั้ง dependencies
+COPY package*.json ./
+RUN npm install
+
+# คัดลอก server
+COPY server ./server
+
+# สร้างโฟลเดอร์สำหรับเก็บรูปข่าว
+RUN mkdir -p /app/uploads/news
+RUN mkdir -p /app/uploads/courses
+RUN mkdir -p /app/uploads/teachers
+RUN mkdir -p /app/uploads/structure
+RUN mkdir -p /app/uploads/vision
+
+EXPOSE 5000
+
+CMD ["node", "server/server.js"]

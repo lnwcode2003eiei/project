@@ -1,0 +1,111 @@
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: webapp-mysql
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: university_web
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: webapp-phpmyadmin
+    restart: unless-stopped
+
+    depends_on:
+      - mysql
+
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+
+    ports:
+      - "8080:80"
+
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+
+    container_name: webapp-backend
+    restart: unless-stopped
+
+    depends_on:
+      - mysql
+
+    ports:
+      - "5000:5000"
+
+    environment:
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: university_web
+      ADMIN_TOKEN_SECRET: ${ADMIN_TOKEN_SECRET}
+      ADMIN_BOOTSTRAP_USERNAME: ${ADMIN_BOOTSTRAP_USERNAME}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD}
+
+    volumes:
+      # เก็บรูปที่ Admin อัปโหลด
+      # ฝั่งเครื่องเรา: ./uploads
+      # ฝั่ง container: /app/uploads
+      - ./uploads:/app/uploads
+
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: /
+
+    container_name: webapp-frontend
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    ports:
+      - "80:80"
+
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: webapp-n8n
+    restart: unless-stopped
+
+    ports:
+      - "5678:5678"
+
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678/
+      GENERIC_TIMEZONE: Asia/Bangkok
+      TZ: Asia/Bangkok
+      N8N_SECURE_COOKIE: "false"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+
+volumes:
+  mysql_data:
+  n8n_data:
+
