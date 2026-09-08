@@ -1,0 +1,8 @@
+technologyfaculty.tech, www.technologyfaculty.tech {
+    encode zstd gzip
+    reverse_proxy frontend:80
+}
+
+http://localhost, http://127.0.0.1 {
+    reverse_proxy frontend:80
+}
