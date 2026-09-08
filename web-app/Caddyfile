@@ -1,6 +1,19 @@
 technologyfaculty.tech, www.technologyfaculty.tech {
     encode zstd gzip
-    reverse_proxy frontend:80
+
+    # Send application data and uploaded files directly to Express.
+    handle /api/* {
+        reverse_proxy backend:5000
+    }
+
+    handle /uploads/* {
+        reverse_proxy backend:5000
+    }
+
+    # All remaining routes are handled by the React frontend.
+    handle {
+        reverse_proxy frontend:80
+    }
 }
 
 http://localhost, http://127.0.0.1 {
