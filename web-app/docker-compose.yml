@@ -121,13 +121,15 @@ services:
       - "127.0.0.1:5678:5678"
 
     environment:
-      N8N_HOST: localhost
+      N8N_HOST: n8n.technologyfaculty.tech
       N8N_PORT: 5678
-      N8N_PROTOCOL: http
-      WEBHOOK_URL: http://localhost:5678/
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://n8n.technologyfaculty.tech/
+      N8N_EDITOR_BASE_URL: https://n8n.technologyfaculty.tech/
+      N8N_PROXY_HOPS: 1
       GENERIC_TIMEZONE: Asia/Bangkok
       TZ: Asia/Bangkok
-      N8N_SECURE_COOKIE: "false"
+      N8N_SECURE_COOKIE: "true"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
 
     volumes:

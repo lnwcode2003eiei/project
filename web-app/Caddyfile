@@ -16,6 +16,11 @@ technologyfaculty.tech, www.technologyfaculty.tech {
     }
 }
 
+n8n.technologyfaculty.tech {
+    encode zstd gzip
+    reverse_proxy n8n:5678
+}
+
 http://localhost, http://127.0.0.1 {
     reverse_proxy frontend:80
 }
