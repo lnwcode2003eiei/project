@@ -1168,7 +1168,7 @@ const teacherStorage = multer.diskStorage({
   },
 });
 
-const teacherUpload = multer({
+const teacherUploadOptions = {
   storage: teacherStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
@@ -1176,6 +1176,12 @@ const teacherUpload = multer({
     if (allowedTypes.includes(file.mimetype)) return cb(null, true);
     return cb(new Error("รองรับเฉพาะ JPG, PNG และ WebP"));
   },
+};
+
+const teacherUpload = multer(teacherUploadOptions);
+const facultyTeacherUpload = multer({
+  ...teacherUploadOptions,
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
 const structureStorage = multer.diskStorage({
@@ -1327,7 +1333,7 @@ app.get("/api/faculty-teachers", (req, res) => {
   });
 });
 
-app.post("/api/admin/faculty-teachers", requireAdmin, requireSuperAdmin, teacherUpload.single("image"), (req, res) => {
+app.post("/api/admin/faculty-teachers", requireAdmin, requireSuperAdmin, facultyTeacherUpload.single("image"), (req, res) => {
   const groupName = String(req.body.group_name || "").trim(); const fullName = String(req.body.full_name || "").trim(); const position = String(req.body.position || "").trim(); const profileLink = String(req.body.profile_link || "").trim(); const imageFilename = req.file ? req.file.filename : "";
   if (!groupName || !fullName || !position || (profileLink && !/^https?:\/\/\S+$/i.test(profileLink))) {
     safeDeleteFile(req.file?.path);
@@ -1342,7 +1348,7 @@ app.post("/api/admin/faculty-teachers", requireAdmin, requireSuperAdmin, teacher
   });
 });
 
-app.patch("/api/admin/faculty-teachers/:id", requireAdmin, requireSuperAdmin, teacherUpload.single("image"), (req, res) => {
+app.patch("/api/admin/faculty-teachers/:id", requireAdmin, requireSuperAdmin, facultyTeacherUpload.single("image"), (req, res) => {
   const id = Number(req.params.id); const groupName = String(req.body.group_name || "").trim(); const fullName = String(req.body.full_name || "").trim(); const position = String(req.body.position || "").trim(); const profileLink = String(req.body.profile_link || "").trim();
   if (!Number.isInteger(id) || !groupName || !fullName || !position || (profileLink && !/^https?:\/\/\S+$/i.test(profileLink))) {
     safeDeleteFile(req.file?.path);
