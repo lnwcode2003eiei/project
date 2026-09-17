@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { apiUrl } from "../config/api";
 import { useNavigate } from "react-router-dom";
+import { saveVisitorName } from "../config/visitor";
 
 const VISITOR_COOKIE = "industrial_technology_visitor";
 const VISITOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 3;
@@ -24,13 +25,14 @@ function Register() {
 
   const [isOpen, setIsOpen] = useState(() => !hasVisitorCookie());
   const [name, setName] = useState("");
+  const [anonymous, setAnonymous] = useState(false);
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !status) {
+    if ((!anonymous && !name.trim()) || !status) {
       alert("กรุณากรอกข้อมูลให้ครบ");
       return;
     }
@@ -46,7 +48,8 @@ function Register() {
         },
 
         body: JSON.stringify({
-          name,
+          name: anonymous ? "ไม่ระบุชื่อ" : name.trim(),
+          anonymous,
           status,
         }),
       });
@@ -56,6 +59,7 @@ function Register() {
       if (data.success) {
         // เก็บเพียงสถานะว่าเคยกรอกข้อมูลแล้ว ไม่เก็บข้อมูลส่วนบุคคลไว้ใน Cookie
         saveVisitorCookie();
+        saveVisitorName(anonymous ? "" : name.trim());
         setIsOpen(false);
 
         navigate("/home");
@@ -100,9 +104,20 @@ function Register() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="ชื่อ"
-            required
+            required={!anonymous}
+            disabled={anonymous}
             className="w-full rounded-md bg-[#303030] px-4 py-4 text-sm text-white placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-[#7A0019]"
           />
+
+          <label className="flex cursor-pointer items-center gap-3 text-sm text-gray-200">
+            <input type="checkbox" checked={anonymous}
+              onChange={(event) => {
+                setAnonymous(event.target.checked);
+                if (event.target.checked) setName("");
+              }}
+              className="h-5 w-5 accent-[#950020]" />
+            ไม่ระบุชื่อ
+          </label>
 
           {/* สถานะ */}
           <select

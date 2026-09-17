@@ -238,7 +238,17 @@ const ensureFacultyTeacherProfileLinkColumn = () => {
   });
 };
 
-const ensureFacultyProfilesTable = () => db.query(`CREATE TABLE IF NOT EXISTS faculty_profiles (id INT AUTO_INCREMENT PRIMARY KEY, profile_type VARCHAR(20) NOT NULL, group_name VARCHAR(255) NOT NULL, full_name VARCHAR(255) NOT NULL, position VARCHAR(255) NOT NULL, image_filename VARCHAR(255) NULL, display_order INT NOT NULL DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`, () => ensureFacultyStructureImageTable());
+const ensureFacultyProfilesTable = () => db.query(`CREATE TABLE IF NOT EXISTS faculty_profiles (id INT AUTO_INCREMENT PRIMARY KEY, profile_type VARCHAR(20) NOT NULL, group_name VARCHAR(255) NOT NULL, full_name VARCHAR(255) NOT NULL, position VARCHAR(255) NOT NULL, image_filename VARCHAR(255) NULL, profile_link VARCHAR(1000) NULL, display_order INT NOT NULL DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`, (error) => {
+  if (error) { console.error("Profile schema:", error.message); return; }
+  db.query("SHOW COLUMNS FROM faculty_profiles LIKE 'profile_link'", (err, columns) => {
+    if (err) { console.error("Profile schema:", err.message); return; }
+    if (columns.length) return ensureFacultyStructureImageTable();
+    db.query("ALTER TABLE faculty_profiles ADD COLUMN profile_link VARCHAR(1000) NULL", (alterError) => {
+      if (alterError && alterError.code !== "ER_DUP_FIELDNAME") { console.error("Profile migration:", alterError.message); return; }
+      ensureFacultyStructureImageTable();
+    });
+  });
+});
 
 const ensureFacultyStructureImageTable = () => {
   db.query(`CREATE TABLE IF NOT EXISTS faculty_structure_image (
@@ -552,9 +562,11 @@ app.get("/", (req, res) => {
 // ==========================================
 
 app.post("/api/visitors", (req, res) => {
-  const { name, status } = req.body;
+  const { status, anonymous } = req.body;
+  const name = anonymous === true ? "ไม่ระบุชื่อ" :
+    (typeof req.body.name === "string" ? req.body.name.trim() : "");
 
-  if (!name || !status) {
+  if (!name || !["นักเรียน", "นักศึกษา", "ครู", "ผู้ปกครอง"].includes(status)) {
     return res.status(400).json({
       success: false,
       message: "กรุณากรอกข้อมูลให้ครบ",
@@ -1380,12 +1392,12 @@ app.delete("/api/admin/faculty-teachers/:id", requireAdmin, requireSuperAdmin, (
 });
 
 app.get("/api/faculty-profiles/:type", (req,res) => {
-  db.query("SELECT id, group_name, full_name, position, image_filename, display_order FROM faculty_profiles WHERE profile_type=? ORDER BY group_name, display_order, id", [req.params.type], (err, profiles) => {
+  db.query("SELECT id, group_name, full_name, position, image_filename, profile_link, display_order FROM faculty_profiles WHERE profile_type=? ORDER BY group_name, display_order, id", [req.params.type], (err, profiles) => {
     res.json({ success: !err, profiles: profiles || [] });
   });
 });
-app.post("/api/admin/faculty-profiles/:type",requireAdmin,requireSuperAdmin,teacherUpload.single("image"),(req,res)=>{const {group_name,full_name,position}=req.body;if(!group_name||!full_name||!position)return res.status(400).json({success:false,message:"กรุณากรอกข้อมูลให้ครบ"});db.query("INSERT INTO faculty_profiles (profile_type,group_name,full_name,position,image_filename,display_order) VALUES (?,?,?,?,?,?)",[req.params.type,group_name,full_name,position,req.file?.filename||"",Number(req.body.display_order)||0],(err)=>res.json({success:!err,message:err?"ไม่สามารถบันทึกได้":"เพิ่มข้อมูลแล้ว"}))});
-app.patch("/api/admin/faculty-profiles/:id",requireAdmin,requireSuperAdmin,teacherUpload.single("image"),(req,res)=>{const {group_name,full_name,position}=req.body;db.query("SELECT image_filename FROM faculty_profiles WHERE id=?",[req.params.id],(e,rows)=>{if(e||!rows.length)return res.status(404).json({success:false,message:"ไม่พบข้อมูล"});const image=req.file?.filename||rows[0].image_filename;db.query("UPDATE faculty_profiles SET group_name=?,full_name=?,position=?,image_filename=? WHERE id=?",[group_name,full_name,position,image,req.params.id],err=>res.json({success:!err,message:err?"แก้ไขไม่สำเร็จ":"แก้ไขข้อมูลแล้ว"}))})});
+app.post("/api/admin/faculty-profiles/:type",requireAdmin,requireSuperAdmin,teacherUpload.single("image"),(req,res)=>{const {group_name,full_name,position}=req.body;const profile_link=String(req.body.profile_link||"").trim();if(profile_link){try{const url=new URL(profile_link);if(!["http:","https:"].includes(url.protocol)||profile_link.length>1000)throw new Error();}catch{if(req.file)safeDeleteFile(req.file.path);return res.status(400).json({success:false,message:"กรุณาระบุลิงก์ http:// หรือ https:// ที่ถูกต้อง"});}}if(!group_name||!full_name||!position)return res.status(400).json({success:false,message:"กรุณากรอกข้อมูลให้ครบ"});db.query("INSERT INTO faculty_profiles (profile_type,group_name,full_name,position,image_filename,profile_link,display_order) VALUES (?,?,?,?,?,?,?)",[req.params.type,group_name,full_name,position,req.file?.filename||"",profile_link,Number(req.body.display_order)||0],(err)=>res.json({success:!err,message:err?"ไม่สามารถบันทึกได้":"เพิ่มข้อมูลแล้ว"}))});
+app.patch("/api/admin/faculty-profiles/:id",requireAdmin,requireSuperAdmin,teacherUpload.single("image"),(req,res)=>{const {group_name,full_name,position}=req.body;const profile_link=String(req.body.profile_link||"").trim();if(profile_link){try{const url=new URL(profile_link);if(!["http:","https:"].includes(url.protocol)||profile_link.length>1000)throw new Error();}catch{if(req.file)safeDeleteFile(req.file.path);return res.status(400).json({success:false,message:"กรุณาระบุลิงก์ http:// หรือ https:// ที่ถูกต้อง"});}}db.query("SELECT image_filename FROM faculty_profiles WHERE id=?",[req.params.id],(e,rows)=>{if(e||!rows.length)return res.status(404).json({success:false,message:"ไม่พบข้อมูล"});const image=req.file?.filename||rows[0].image_filename;db.query("UPDATE faculty_profiles SET group_name=?,full_name=?,position=?,image_filename=?,profile_link=? WHERE id=?",[group_name,full_name,position,image,profile_link,req.params.id],err=>res.json({success:!err,message:err?"แก้ไขไม่สำเร็จ":"แก้ไขข้อมูลแล้ว"}))})});
 app.delete("/api/admin/faculty-profiles/:id", requireAdmin, requireSuperAdmin, (req, res) => {
   db.query("SELECT image_filename FROM faculty_profiles WHERE id=?", [req.params.id], (findError, rows) => {
     if (findError || !rows.length) return res.status(404).json({ success: false, message: "ไม่พบข้อมูล" });

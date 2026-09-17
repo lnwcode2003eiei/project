@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { apiUrl } from "../config/api";
+import { getVisitorName } from "../config/visitor";
 
 export default function ApplyPage() {
   const [selectedMajor, setSelectedMajor] = useState(null);
@@ -11,7 +12,7 @@ export default function ApplyPage() {
   const [activeTab, setActiveTab] = useState("bachelor"); // 'bachelor' หรือ 'master'
 
   const [formData, setFormData] = useState({
-    fullname: "",
+    fullname: getVisitorName(),
     oldSchool: "",
     education: "มัธยมศึกษาปีที่ 6 (ม.6)",
     secondMajor: "",
@@ -95,6 +96,7 @@ export default function ApplyPage() {
   ];
 
   const handleOpenModal = (major) => {
+    setFormData((current) => ({ ...current, fullname: current.fullname || getVisitorName() }));
     setSelectedMajor(major);
     if (masterMajors.some((item) => item.id === major.id)) {
       setFormData((current) => ({ ...current, secondMajor: "" }));
@@ -134,7 +136,7 @@ export default function ApplyPage() {
 
       if (data.success) {
         setFormData({
-          fullname: "",
+          fullname: getVisitorName(),
           oldSchool: "",
           education: "มัธยมศึกษาปีที่ 6 (ม.6)",
           secondMajor: "",

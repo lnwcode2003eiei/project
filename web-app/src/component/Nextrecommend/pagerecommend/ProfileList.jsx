@@ -35,7 +35,11 @@ export default function ProfileList({ type, title }) {
               <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
                 {members.map((item) => (
                   <article key={item.id} className="rounded-3xl bg-white p-5 text-center shadow-sm">
-                    {item.image_filename ? (
+                    {item.image_filename && /^https?:\/\//i.test(item.profile_link || "") ? (
+                      <a href={item.profile_link} target="_blank" rel="noopener noreferrer" aria-label={`ดูรายละเอียด ${item.full_name}`}>
+                        <img src={apiUrl(`/uploads/teachers/${item.image_filename}`)} alt={item.full_name} className="mx-auto h-52 w-full rounded-xl object-cover transition hover:opacity-80" />
+                      </a>
+                    ) : item.image_filename ? (
                       <img
                         src={apiUrl(`/uploads/teachers/${item.image_filename}`)}
                         alt={item.full_name}
@@ -48,6 +52,9 @@ export default function ProfileList({ type, title }) {
                     )}
                     <h3 className="mt-4 font-bold text-slate-800">{item.full_name}</h3>
                     <p className="mt-1 text-sm text-slate-500">{item.position}</p>
+                    {/^https?:\/\//i.test(item.profile_link || "") && (
+                      <a href={item.profile_link} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded-xl bg-[#7a0019] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#500011]">ดูรายละเอียด ↗</a>
+                    )}
                   </article>
                 ))}
               </div>
