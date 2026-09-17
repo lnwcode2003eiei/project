@@ -31,12 +31,11 @@ function Hero() {
           </h2>
 
           {/* Description */}
-          <p className="mx-auto mt-8 max-w-4xl text-lg font-medium leading-relaxed text-white drop-shadow-md md:text-2xl">
-            มุ่งผลิตบัณฑิตที่มีความรู้ความสามารถด้านวิศวกรรมคอมพิวเตอร์
-            <br />
-            พร้อมสร้างสรรค์นวัตกรรมและเทคโนโลยี
-            <br />
-            เพื่อพัฒนาสังคมและประเทศอย่างยั่งยืน
+          <h3 className="mx-auto mt-8 max-w-4xl text-xl font-bold leading-relaxed text-white drop-shadow-md md:text-3xl">
+            มุ่งเน้นนวัตกรรม เทคโนโลยี และการปฏิบัติจริง
+          </h3>
+          <p className="mx-auto mt-4 max-w-4xl text-base font-medium leading-relaxed text-white drop-shadow-md md:text-xl">
+            เรามุ่งสร้างบัณฑิตนักปฏิบัติสายวิศวกรรมและเทคโนโลยีที่มีทักษะตรงความต้องการของอุตสาหกรรมยุคใหม่ พร้อมขับเคลื่อนผู้ประกอบการในอนาคต
           </p>
 
         </div>
