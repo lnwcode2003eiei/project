@@ -2,6 +2,7 @@
 import express from "express";
 import cors from "cors";
 import db from "./db.js";
+import { registerCourseDetails } from "./course-details.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -511,6 +512,8 @@ const checkAdminEditPermission = (req, sakaPath, callback) => {
 // ==========================================
 // Multer Upload รูปข่าว
 // ==========================================
+
+registerCourseDetails(app, db, requireAdmin, checkAdminEditPermission);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

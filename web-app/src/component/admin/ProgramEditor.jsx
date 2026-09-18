@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiUrl } from "../../config/api";
+import CourseDetailsEditor from "./CourseDetailsEditor";
 
 function EditableSection({ children, onEdit }) {
   return (
@@ -1033,6 +1034,7 @@ function ProgramEditor() {
 
   return (
     <div className="mx-auto max-w-7xl pb-24">
+      {sakaPath && <CourseDetailsEditor key={sakaPath} slug={sakaPath} />}
       {/* ================================= */}
       {/* Header */}
       {/* ================================= */}

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { apiUrl } from "../../config/api";
 import LearningAtmosphere from "./LearningAtmosphere";
 import CurriculumSwitcher from "./CurriculumSwitcher";
+import CourseDetails, { CourseSectionNav } from "./CourseDetails";
 
 function Computer() {
   const [course, setCourse] = useState(null);
@@ -120,6 +121,7 @@ function Computer() {
 
       {/* Hero */}
       <HeaderSection course={course} />
+      <CourseSectionNav />
 
       {/* About */}
       <AboutSection course={course} />
@@ -128,7 +130,7 @@ function Computer() {
       <HighlightsSection course={course} />
 
       {/* Curriculum */}
-      <StudyPlanSection course={course} totalCredits={totalCredits} />
+      <div id="course-curriculum" className="scroll-mt-44"><StudyPlanSection course={course} totalCredits={totalCredits} /></div>
 
       {/* Skills */}
       <SkillsSection course={course} />
@@ -138,6 +140,7 @@ function Computer() {
       <CareersSection course={course} />
 
       {/* Footer */}
+      <CourseDetails slug="computer" />
       <FooterCTA course={course} />
 
     </div>

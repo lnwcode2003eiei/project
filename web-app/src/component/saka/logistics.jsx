@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { apiUrl } from "../../config/api";
 import LearningAtmosphere from "./LearningAtmosphere";
 import CurriculumSwitcher from "./CurriculumSwitcher";
+import CourseDetails, { CourseSectionNav } from "./CourseDetails";
 
 function Logistics() {
   const [course, setCourse] = useState(null);
@@ -119,12 +120,14 @@ function Logistics() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-gray-800 antialiased">
       <HeaderSection course={course} />
+      <CourseSectionNav />
       <AboutSection course={course} />
       <HighlightsSection course={course} />
-      <StudyPlanSection course={course} totalCredits={totalCredits} />
+      <div id="course-curriculum" className="scroll-mt-44"><StudyPlanSection course={course} totalCredits={totalCredits} /></div>
       <SkillsSection course={course} />
       <LearningAtmosphere course={course} />
       <CareersSection course={course} />
+      <CourseDetails slug="logistics" />
       <FooterCTA course={course} />
     </div>
   );

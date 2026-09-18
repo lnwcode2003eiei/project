@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { apiUrl } from "../../config/api";
 import LearningAtmosphere from "./LearningAtmosphere";
 import CurriculumSwitcher from "./CurriculumSwitcher";
+import CourseDetails, { CourseSectionNav } from "./CourseDetails";
 
 function Digital() {
   const [course, setCourse] = useState(null);
@@ -121,6 +122,7 @@ function Digital() {
 
       {/* Hero */}
       <HeaderSection course={course} />
+      <CourseSectionNav />
 
       {/* About */}
       <AboutSection course={course} />
@@ -129,7 +131,7 @@ function Digital() {
       <HighlightsSection course={course} />
 
       {/* Curriculum */}
-      <StudyPlanSection course={course} totalCredits={totalCredits} />
+      <div id="course-curriculum" className="scroll-mt-44"><StudyPlanSection course={course} totalCredits={totalCredits} /></div>
 
       {/* Skills */}
       <SkillsSection course={course} />
@@ -139,6 +141,7 @@ function Digital() {
       <CareersSection course={course} />
 
       {/* Footer */}
+      <CourseDetails slug="digital" />
       <FooterCTA course={course} />
 
     </div>

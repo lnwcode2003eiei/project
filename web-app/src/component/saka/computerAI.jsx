@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { apiUrl } from "../../config/api";
 import LearningAtmosphere from "./LearningAtmosphere";
 import CurriculumSwitcher from "./CurriculumSwitcher";
+import CourseDetails, { CourseSectionNav } from "./CourseDetails";
 
 function ComputerAI() {
   const [course, setCourse] = useState(null);
@@ -119,6 +120,7 @@ function ComputerAI() {
     <div className="min-h-screen bg-slate-50 font-sans text-gray-800 antialiased">
       {/* Hero */}
       <HeaderSection course={course} />
+      <CourseSectionNav />
 
       {/* About */}
       <AboutSection course={course} />
@@ -127,7 +129,7 @@ function ComputerAI() {
       <HighlightsSection course={course} />
 
       {/* Curriculum */}
-      <StudyPlanSection course={course} totalCredits={totalCredits} />
+      <div id="course-curriculum" className="scroll-mt-44"><StudyPlanSection course={course} totalCredits={totalCredits} /></div>
 
       {/* Skills */}
       <SkillsSection course={course} />
@@ -137,6 +139,7 @@ function ComputerAI() {
       <CareersSection course={course} />
 
       {/* Footer */}
+      <CourseDetails slug="computer-ai" />
       <FooterCTA course={course} />
     </div>
   );
