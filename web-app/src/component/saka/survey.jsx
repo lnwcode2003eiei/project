@@ -1,6 +1,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { apiUrl } from "../../config/api";
+import { courseHeroStyle } from "../../config/courseHeroes";
 import LearningAtmosphere from "./LearningAtmosphere";
 import CurriculumSwitcher from "./CurriculumSwitcher";
 import CourseDetails, { CourseSectionNav } from "./CourseDetails";
@@ -158,7 +159,7 @@ function getImageUrl(imagePath) {
 
 function HeaderSection({ course }) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-20 text-white shadow-lg">
+    <section style={courseHeroStyle("survey")} className="course-generated-hero relative overflow-hidden bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-20 text-white shadow-lg">
       <div className="mx-auto max-w-7xl">
         <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-red-200 backdrop-blur-md">
           {course.english_title ||

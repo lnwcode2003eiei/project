@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiUrl } from "../../config/api";
 import CourseDetailsEditor from "./CourseDetailsEditor";
+import { courseHeroStyle } from "../../config/courseHeroes";
 
 function EditableSection({ children, onEdit }) {
   return (
@@ -1093,7 +1094,7 @@ function ProgramEditor() {
           setEditing("hero")
         }
       >
-        <section className={`${sakaPath === "computer" ? "computer-generated-hero" : ""} relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-16 text-white shadow-xl md:px-10 md:py-20`}>
+        <section style={courseHeroStyle(sakaPath)} className="course-generated-hero relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-16 text-white shadow-xl md:px-10 md:py-20">
           <div className="mx-auto max-w-7xl">
             <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-red-200 backdrop-blur-md">
               {form.english_title ||

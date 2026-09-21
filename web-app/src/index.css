@@ -13,13 +13,12 @@ body,
   font-family: 'Chonburi', serif;
 }
 
-.computer-generated-hero {
+.course-generated-hero {
   background-color: #580012;
-  background-image: linear-gradient(90deg, rgba(55, 0, 12, .6), rgba(55, 0, 12, .12)), url('/image/computer-hero-generated-v1.png');
   background-size: cover;
   background-position: center;
 }
-.computer-generated-hero p { max-width: 48rem; }
+.course-generated-hero p { max-width: 48rem; }
 
 /* Consistent reading width and spacing for all ten course pages. */
 .course-page > section:first-child { padding-top: 8.5rem; padding-bottom: 4rem; }
