@@ -1,3 +1,4 @@
+import ImageFileInput from "./ImageFileInput";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiUrl } from "../../config/api";
@@ -1092,7 +1093,7 @@ function ProgramEditor() {
           setEditing("hero")
         }
       >
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-16 text-white shadow-xl md:px-10 md:py-20">
+        <section className={`${sakaPath === "computer" ? "computer-generated-hero" : ""} relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-16 text-white shadow-xl md:px-10 md:py-20`}>
           <div className="mx-auto max-w-7xl">
             <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-red-200 backdrop-blur-md">
               {form.english_title ||
@@ -1634,8 +1635,8 @@ function ProgramEditor() {
                     รูปภาพสาขา
                   </label>
 
-                  <input
-                    type="file"
+                  <ImageFileInput selectedFiles={imageFile}
+
                     accept="image/jpeg,image/png,image/webp,image/jpg"
                     onChange={
                       handleImageChange
@@ -1713,8 +1714,8 @@ function ProgramEditor() {
                             รูปภาพจุดเด่น
                           </label>
 
-                          <input
-                            type="file"
+                          <ImageFileInput selectedFiles={highlightImageFiles[index]}
+
                             accept="image/jpeg,image/png,image/webp,image/jpg"
                             onChange={(e) =>
                               handleHighlightImageChange(
@@ -2132,8 +2133,8 @@ function ProgramEditor() {
                           ) : (
                             "เพิ่มรูป"
                           )}
-                          <input
-                            type="file"
+                          <ImageFileInput selectedFiles={careerImageFiles[index]}
+
                             accept="image/jpeg,image/png,image/webp,image/jpg"
                             onChange={(e) => handleCareerImageChange(index, e)}
                             className="sr-only"
@@ -2196,12 +2197,11 @@ function ProgramEditor() {
                 <div className="mt-4 space-y-4">
                   {form.learning_environment.map((item, index) => (
                     <div key={index} className="rounded-2xl border border-gray-200 p-4">
-                      <label className="inline-flex cursor-pointer items-center rounded-xl bg-[#7A0019] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#5C0013]">
-                        เลือกรูปภาพ
-                        <input type="file" accept="image/jpeg,image/png,image/webp,image/jpg" onChange={(e) => handleAtmosphereImageChange(index, e)} className="sr-only" />
+                      <label className="block">
+                        <ImageFileInput selectedFiles={atmosphereImageFiles[index]}  accept="image/jpeg,image/png,image/webp,image/jpg" onChange={(e) => handleAtmosphereImageChange(index, e)} className="sr-only" />
                       </label>
                       <span className="ml-3 text-sm text-gray-500">
-                        {atmosphereImageFiles[index]?.name || (item.image ? "มีรูปภาพแล้ว" : "ยังไม่ได้เลือกรูปภาพ")}
+                        {item.image ? "มีรูปภาพเดิมแล้ว เลือกรูปใหม่เพื่อแทนที่" : ""}
                       </span>
                       <p className="mt-2 text-xs text-gray-500">
                         แนะนำภาพแนวนอน 1920 × 1080 px (16:9) · JPG, PNG หรือ WebP · ไม่เกิน 5MB

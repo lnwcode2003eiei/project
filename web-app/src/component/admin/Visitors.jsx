@@ -191,7 +191,7 @@ function Visitors() {
               <option value="นักเรียน">นักเรียน</option>
               <option value="นักศึกษา">นักศึกษา</option>
               <option value="ครู">ครู</option>
-              <option value="บุคลากร">บุคลากร</option>
+              <option value="ผู้ปกครอง">ผู้ปกครอง</option>
             </select>
           </div>
         </div>

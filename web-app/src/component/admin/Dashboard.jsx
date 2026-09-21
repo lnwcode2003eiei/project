@@ -34,6 +34,7 @@ function Dashboard() {
     universityStudents: 0,
     teachers: 0,
     staff: 0,
+    parents: 0,
     todayVisitors: 0,
   });
 
@@ -223,7 +224,9 @@ function Dashboard() {
   // คำนวณประเภทผู้เข้าชม
   // ==========================================
 
+  stats.splice(4, 0, { title: "ผู้ปกครอง", value: Number(dashboard.parents || 0) });
   const visitorTypes = [
+    { name: "ผู้ปกครอง", count: Number(dashboard.parents || 0), color: "#D69E24" },
     {
       name: "นักเรียน",
       count: dashboard.students,
@@ -425,7 +428,7 @@ function Dashboard() {
               Stats Grid
           ========================================== */}
 
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
 
             {stats.map((item) => (
               <div
@@ -783,7 +786,7 @@ function Dashboard() {
                     )
                   ) : (
                     <p className="py-4 text-center text-xs text-gray-400">
-                      ยังไม่มีข้อมูลการสมัคร
+                      ยังไม่มีข้อมูลความสนใจ
                     </p>
                   )}
 

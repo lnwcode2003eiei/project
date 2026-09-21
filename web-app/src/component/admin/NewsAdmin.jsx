@@ -1,3 +1,4 @@
+import ImageFileInput from "./ImageFileInput";
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { apiUrl } from "../../config/api";
@@ -288,9 +289,9 @@ function NewsAdmin() {
               รูปภาพข่าว
             </label>
 
-            <input
+            <ImageFileInput selectedFiles={image}
               id="news-image"
-              type="file"
+
               accept="image/jpeg,image/png,image/webp"
               onChange={handleImageChange}
               className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 outline-none transition file:mr-4 file:rounded-lg file:border-0 file:bg-[#7A0019] file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-[#5C0013]"

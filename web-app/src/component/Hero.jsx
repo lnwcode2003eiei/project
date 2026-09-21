@@ -1,6 +1,6 @@
 function Hero() {
   return (
-    <section id="home" className="font-display relative h-screen w-full overflow-hidden">
+    <section id="home" className="relative min-h-svh w-full overflow-hidden">
 
       {/* Background Video */}
       <video
@@ -17,11 +17,11 @@ function Hero() {
       <div className="absolute inset-0 bg-black/40"></div>
 
       {/* Content */}
-      <div className="relative z-10 flex h-full items-center justify-center px-6 text-center">
+      <div className="relative z-10 flex min-h-svh items-center justify-center px-6 pb-28 pt-32 text-center">
         <div className="max-w-6xl">
 
           {/* Title */}
-          <h1 className="text-4xl font-extrabold text-white drop-shadow-lg md:text-6xl lg:text-7xl">
+          <h1 className="text-3xl font-bold leading-snug text-white drop-shadow-lg md:text-5xl lg:text-6xl">
             คณะเทคโนโลยีอุตสาหกรรม
           </h1>
 

@@ -117,7 +117,7 @@ function Computer() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-gray-800 antialiased">
+    <div className="course-page min-h-screen bg-slate-50 text-gray-800 antialiased">
 
       {/* Hero */}
       <HeaderSection course={course} />
@@ -172,7 +172,7 @@ function getImageUrl(imagePath) {
 
 function HeaderSection({ course }) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-20 text-white shadow-lg">
+    <section className="computer-generated-hero relative overflow-hidden bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-20 text-white shadow-lg">
       <div className="mx-auto max-w-7xl">
 
         <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-red-200 backdrop-blur-md">
@@ -665,9 +665,9 @@ function FooterCTA({ course }) {
 
         <div>
 
-          <button className="rounded-xl bg-[#7A0019] px-8 py-4 font-semibold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#580012] hover:shadow-xl">
+          <a href="/apply?major=comp-eng" className="inline-block rounded-xl bg-[#7A0019] px-8 py-4 font-semibold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#580012] hover:shadow-xl">
             สนใจเข้าศึกษา
-          </button>
+          </a>
 
         </div>
 

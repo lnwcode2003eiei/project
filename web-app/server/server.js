@@ -695,6 +695,7 @@ app.get("/api/admin/dashboard", requireAdmin, (req, res) => {
 
       SUM(status = 'บุคลากร')
         AS staff,
+      SUM(status = 'ผู้ปกครอง') AS parents,
 
       SUM(
         DATE(created_at) = CURDATE()
@@ -727,6 +728,7 @@ app.get("/api/admin/dashboard", requireAdmin, (req, res) => {
           data.universityStudents || 0,
         ),
         teachers: Number(data.teachers || 0),
+        parents: Number(data.parents || 0),
         staff: Number(data.staff || 0),
         todayVisitors: Number(data.todayVisitors || 0),
       },
@@ -980,7 +982,7 @@ app.post("/api/applications", (req, res) => {
     (err, result) => {
       if (err) {
         console.error(
-          "❌ บันทึกข้อมูลการสมัครไม่สำเร็จ",
+          "❌ บันทึกข้อมูลความสนใจไม่สำเร็จ",
         );
 
         console.error(err);
@@ -988,19 +990,19 @@ app.post("/api/applications", (req, res) => {
         return res.status(500).json({
           success: false,
           message:
-            "ไม่สามารถบันทึกข้อมูลการสมัครได้",
+            "ไม่สามารถบันทึกข้อมูลความสนใจได้",
           error: err.message,
         });
       }
 
       console.log(
-        "✅ บันทึกข้อมูลการสมัครเรียนเรียบร้อย ID:",
+        "✅ บันทึกข้อมูลความสนใจเรียบร้อย ID:",
         result.insertId,
       );
 
       res.status(201).json({
         success: true,
-        message: "ส่งใบสมัครเรียบร้อยแล้ว",
+        message: "บันทึกความสนใจเรียบร้อยแล้ว",
         id: result.insertId,
       });
     },
@@ -1028,7 +1030,7 @@ app.get("/api/admin/applications", requireAdmin, (req, res) => {
   db.query(sql, (err, results) => {
     if (err) {
       console.error(
-        "❌ ดึงข้อมูลการสมัครไม่สำเร็จ",
+        "❌ ดึงข้อมูลความสนใจไม่สำเร็จ",
       );
 
       console.error(err);
@@ -1036,7 +1038,7 @@ app.get("/api/admin/applications", requireAdmin, (req, res) => {
       return res.status(500).json({
         success: false,
         message:
-          "ไม่สามารถดึงข้อมูลการสมัครได้",
+          "ไม่สามารถดึงข้อมูลความสนใจได้",
         error: err.message,
       });
     }

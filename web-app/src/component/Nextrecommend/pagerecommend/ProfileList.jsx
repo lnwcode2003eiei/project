@@ -1,67 +1,32 @@
 import { useEffect, useState } from "react";
 import { apiUrl } from "../../../config/api";
+import PersonnelCard from "./PersonnelCard";
 
 export default function ProfileList({ type, title }) {
   const [items, setItems] = useState([]);
-
+  const [error, setError] = useState("");
   useEffect(() => {
-    fetch(apiUrl(`/api/faculty-profiles/${type}`))
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) setItems(data.profiles || []);
-      });
+    const controller = new AbortController();
+    fetch(apiUrl(type === "teacher" ? "/api/faculty-teachers" : `/api/faculty-profiles/${type}`), { signal: controller.signal })
+      .then(async response => {
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error("ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่");
+        setItems((type === "teacher" ? data.teachers : data.profiles) || []);
+      }).catch(error => { if (error.name !== "AbortError") setError(error.message); });
+    return () => controller.abort();
   }, [type]);
-
   const groups = items.reduce((result, item) => {
-    const groupName = item.group_name?.trim() || "หน่วยงาน";
-    if (!result[groupName]) result[groupName] = [];
-    result[groupName].push(item);
+    const group = item.group_name?.trim() || title;
+    if (!result.has(group)) result.set(group, []);
+    result.get(group).push(item);
     return result;
-  }, {});
-
-  return (
-    <section className="min-h-screen bg-[#faf8ef] px-5 pb-16 pt-32">
-      <div className="mx-auto max-w-6xl">
-        <h1 className="text-center text-4xl font-bold text-[#682122]">{title}</h1>
-
-        {Object.keys(groups).length === 0 ? (
-          <p className="mt-14 text-center text-lg text-slate-400">กำลังเตรียมข้อมูล{title}</p>
-        ) : (
-          Object.entries(groups).map(([groupName, members]) => (
-            <section key={groupName} className="mt-10">
-              <h2 className="border-l-4 border-[#7a0019] bg-[#f2f0e7] px-4 py-3 text-xl font-bold text-[#542022]">
-                {groupName}
-              </h2>
-              <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
-                {members.map((item) => (
-                  <article key={item.id} className="rounded-3xl bg-white p-5 text-center shadow-sm">
-                    {item.image_filename && /^https?:\/\//i.test(item.profile_link || "") ? (
-                      <a href={item.profile_link} target="_blank" rel="noopener noreferrer" aria-label={`ดูรายละเอียด ${item.full_name}`}>
-                        <img src={apiUrl(`/uploads/teachers/${item.image_filename}`)} alt={item.full_name} className="mx-auto h-52 w-full rounded-xl object-cover transition hover:opacity-80" />
-                      </a>
-                    ) : item.image_filename ? (
-                      <img
-                        src={apiUrl(`/uploads/teachers/${item.image_filename}`)}
-                        alt={item.full_name}
-                        className="mx-auto h-52 w-full rounded-xl object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-52 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                        รอรูปภาพ
-                      </div>
-                    )}
-                    <h3 className="mt-4 font-bold text-slate-800">{item.full_name}</h3>
-                    <p className="mt-1 text-sm text-slate-500">{item.position}</p>
-                    {/^https?:\/\//i.test(item.profile_link || "") && (
-                      <a href={item.profile_link} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded-xl bg-[#7a0019] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#500011]">ดูรายละเอียด ↗</a>
-                    )}
-                  </article>
-                ))}
-              </div>
-            </section>
-          ))
-        )}
-      </div>
-    </section>
-  );
+  }, new Map());
+  return <section className="min-h-screen bg-[#faf8ef] px-5 pb-20 pt-32 sm:px-8"><div className="mx-auto max-w-7xl">
+    <h1 className="text-center text-3xl font-bold text-[#682122] sm:text-4xl">{title}</h1>
+    <p className="mt-4 text-center leading-7 text-slate-500">{type === "teacher" ? "บุคลากรสายวิชาการ " : ""}คณะเทคโนโลยีอุตสาหกรรม</p>
+    {error ? <p role="alert" className="mt-16 text-center text-red-700">{error}</p> : !items.length ? <p className="mt-16 text-center text-slate-500">กำลังเตรียมข้อมูล{title}</p> : [...groups].map(([group, members]) => <section key={group} className="mt-12">
+      <h2 className="border-l-4 border-[#7A0019] bg-[#f2f0e7] px-5 py-4 text-lg font-bold leading-relaxed text-[#542022] sm:text-xl">{type === "teacher" ? "หลักสูตร" : ""}{group}</h2>
+      <div className="mt-6 grid grid-cols-1 items-stretch gap-6 min-[480px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">{members.map(person => <PersonnelCard key={person.id} person={person} />)}</div>
+    </section>)}
+  </div></section>;
 }

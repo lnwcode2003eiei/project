@@ -19,7 +19,7 @@ export function CourseSectionNav() {
     return () => window.removeEventListener("scroll", update);
   }, []);
   return <nav aria-label="ข้อมูลหลักสูตร" className="sticky top-20 z-30 border-b border-white/20 bg-[#650015] px-4 py-3 shadow-md">
-    <div className="mx-auto flex max-w-7xl gap-3 overflow-x-auto">
+    <div className="mx-auto flex w-fit max-w-full gap-3 overflow-x-auto">
       {sections.map(([id, title]) => <a key={id} href={`#${id}`} aria-current={active === id ? "location" : undefined}
         onClick={() => setActive(id)} className={`shrink-0 rounded-lg border px-5 py-3 text-center text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${active === id ? "border-amber-500 bg-amber-500 text-gray-950" : "border-white/30 text-white hover:bg-white/10"}`}>{title}</a>)}
     </div>
@@ -36,7 +36,7 @@ function Cards({ rows = [], twoColumns = false }) {
   </article>)}</div>;
 }
 function Section({ id, title, children }) {
-  return <section id={id} className="scroll-mt-44 border-t border-rose-100 px-5 py-16 sm:px-8"><div className="mx-auto max-w-7xl">
+  return <section id={id} className="course-detail-section scroll-mt-44 border-t border-rose-100 px-5 py-16 text-center sm:px-8"><div className="mx-auto max-w-7xl">
     <h2 className="mb-8 text-3xl font-bold text-[#7A0019] md:text-4xl">{title}</h2>{children}
   </div></section>;
 }
@@ -64,7 +64,7 @@ export default function CourseDetails({ slug }) {
       {!!data.documents?.length && <><h3 className="mb-5 mt-10 text-xl font-bold">เอกสารที่เกี่ยวข้อง</h3><Cards rows={data.documents} /></>}
     </Section>
     <Section id="course-philosophy" title="ปรัชญาและวัตถุประสงค์">
-      <div className="grid gap-10 lg:grid-cols-[1fr_2fr]"><div><h3 className="mb-4 text-xl font-bold">ปรัชญาของหลักสูตร</h3><p className="whitespace-pre-line leading-8 text-gray-600">{data.philosophy || "อยู่ระหว่างจัดเตรียมข้อมูล"}</p></div>
+      <div className="grid gap-10 lg:grid-cols-2"><div><h3 className="mb-4 text-xl font-bold">ปรัชญาของหลักสูตร</h3><p className="whitespace-pre-line leading-8 text-gray-600">{data.philosophy || "อยู่ระหว่างจัดเตรียมข้อมูล"}</p></div>
         <div><h3 className="mb-4 text-xl font-bold">วัตถุประสงค์ของหลักสูตร</h3><Cards rows={data.objectives} twoColumns /></div></div>
     </Section>
     <Section id="course-supports" title="สิ่งสนับสนุนการเรียนการสอน"><Cards rows={data.supports} /></Section>

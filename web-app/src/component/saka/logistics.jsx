@@ -118,7 +118,7 @@ function Logistics() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-gray-800 antialiased">
+    <div className="course-page min-h-screen bg-slate-50 text-gray-800 antialiased">
       <HeaderSection course={course} />
       <CourseSectionNav />
       <AboutSection course={course} />
@@ -564,9 +564,9 @@ function FooterCTA({ course }) {
         </p>
 
         <div>
-          <button className="rounded-xl bg-[#7A0019] px-8 py-4 font-semibold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#580012] hover:shadow-xl">
+          <a href="/apply?major=logistics-eng" className="inline-block rounded-xl bg-[#7A0019] px-8 py-4 font-semibold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#580012] hover:shadow-xl">
             สนใจเข้าศึกษา
-          </button>
+          </a>
         </div>
 
       </div>

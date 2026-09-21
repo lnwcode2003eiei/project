@@ -13,6 +13,30 @@ body,
   font-family: 'Chonburi', serif;
 }
 
+.computer-generated-hero {
+  background-color: #580012;
+  background-image: linear-gradient(90deg, rgba(55, 0, 12, .6), rgba(55, 0, 12, .12)), url('/image/computer-hero-generated-v1.png');
+  background-size: cover;
+  background-position: center;
+}
+.computer-generated-hero p { max-width: 48rem; }
+
+/* Consistent reading width and spacing for all ten course pages. */
+.course-page > section:first-child { padding-top: 8.5rem; padding-bottom: 4rem; }
+.course-page h1 { max-width: 65rem; font-size: clamp(2rem, 4.3vw, 3.75rem); line-height: 1.4; text-wrap: balance; }
+.course-page h2 { line-height: 1.5; text-wrap: balance; }
+.course-page p { overflow-wrap: anywhere; }
+.course-page > section:not(:first-child) { padding-top: 4rem; padding-bottom: 4rem; }
+.course-page #course-curriculum { overflow-x: auto; }
+.course-page table { width: 100%; }
+.course-detail-section article { text-align: left; }
+.course-detail-section address { max-width: 48rem; margin-inline: auto; }
+@media (max-width: 639px) {
+  .course-page > section:first-child { padding-top: 7rem; padding-bottom: 2.5rem; }
+  .course-page h2 { font-size: 1.75rem; }
+  .course-page > section:not(:first-child) { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+}
+
 /* Custom สีปุ่มลูกศรและ จุด Pagination ของ Swiper */
 .swiper-button-next,
 .swiper-button-prev {

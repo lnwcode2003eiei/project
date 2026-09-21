@@ -1,22 +1,8 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { apiUrl } from "../config/api";
 import { getVisitorName } from "../config/visitor";
-
-export default function ApplyPage() {
-  const [selectedMajor, setSelectedMajor] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showLineQr, setShowLineQr] = useState(false);
-  const [formError, setFormError] = useState("");
-  const [activeTab, setActiveTab] = useState("bachelor"); // 'bachelor' หรือ 'master'
-
-  const [formData, setFormData] = useState({
-    fullname: getVisitorName(),
-    oldSchool: "",
-    education: "มัธยมศึกษาปีที่ 6 (ม.6)",
-    secondMajor: "",
-  });
 
   // 📌 แยกข้อมูลสาขาวิชาตามระดับการศึกษา
   const bachelorMajors = [
@@ -95,6 +81,24 @@ export default function ApplyPage() {
     },
   ];
 
+
+export default function ApplyPage() {
+  const [params] = useSearchParams();
+  const initialMajor = [...bachelorMajors, ...masterMajors].find(major => major.id === params.get("major")) || null;
+  const [selectedMajor, setSelectedMajor] = useState(initialMajor);
+  const [isModalOpen, setIsModalOpen] = useState(Boolean(initialMajor));
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLineQr, setShowLineQr] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [activeTab, setActiveTab] = useState(masterMajors.some(major => major.id === initialMajor?.id) ? "master" : "bachelor"); // 'bachelor' หรือ 'master'
+
+  const [formData, setFormData] = useState({
+    fullname: getVisitorName(),
+    oldSchool: "",
+    education: "มัธยมศึกษาปีที่ 6 (ม.6)",
+    secondMajor: "",
+  });
+
   const handleOpenModal = (major) => {
     setFormData((current) => ({ ...current, fullname: current.fullname || getVisitorName() }));
     setSelectedMajor(major);
@@ -144,7 +148,7 @@ export default function ApplyPage() {
         setIsModalOpen(false);
         setShowLineQr(true);
       } else {
-        setFormError(data.message || "ไม่สามารถส่งข้อมูลสมัครเรียนได้");
+        setFormError(data.message || "ไม่สามารถบันทึกความสนใจได้");
       }
     } catch (error) {
       console.error("Error submitting application:", error);
@@ -163,7 +167,7 @@ export default function ApplyPage() {
         {/* หัวข้อหน้า */}
         <div className="text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-white/70">
-            Admissions
+            Program Interests
           </p>
           <h1 className="mb-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
             เลือกสาขาที่สนใจ
@@ -283,10 +287,10 @@ export default function ApplyPage() {
 
             <div className="mb-6 border-b border-[#7A0019]/10 pb-4">
               <h2 className="text-xl font-bold text-[#7A0019]">
-                แบบฟอร์มกรอกข้อมูลผู้สมัคร
+                แบบฟอร์มแสดงความสนใจในสาขาวิชา
               </h2>
               <p className="mt-1 text-xs text-[#171717]/60">
-                กรุณากรอกข้อมูลให้ถูกต้องตามความเป็นจริง
+                ข้อมูลนี้ใช้เพื่อสำรวจและวิเคราะห์ความสนใจในสาขาวิชาของคณะเทคโนโลยีอุตสาหกรรม ไม่ใช่การสมัครเข้าศึกษา
               </p>
             </div>
 
@@ -389,7 +393,7 @@ export default function ApplyPage() {
                   disabled={isSubmitting}
                   className="w-2/3 py-2.5 rounded-lg bg-[#7A0019] hover:bg-[#5C0013] text-white font-semibold text-sm transition shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? "กำลังบันทึก..." : "ยืนยันการสมัครเรียน"}
+                  {isSubmitting ? "กำลังบันทึก..." : "บันทึกความสนใจ"}
                 </button>
               </div>
             </form>
@@ -400,6 +404,7 @@ export default function ApplyPage() {
       {showLineQr && selectedMajor && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-3xl bg-white p-7 text-center shadow-2xl">
+            <h2 role="status" className="mb-4 text-xl font-bold text-[#7A0019]">บันทึกความสนใจเรียบร้อยแล้ว</h2>
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#06c755]/10 text-[#06c755]">
               <Icon icon="mdi:message-text" className="text-3xl" />
             </div>

@@ -3,10 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [hasScrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("/");
 
   const location = useLocation();
+  const scrolled = hasScrolled || ["/Teacher", "/Department", "/Executive"].includes(location.pathname);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,7 +45,9 @@ function Header() {
     };
   }, [location.pathname]);
 
-  const activePath = location.pathname === "/" || location.pathname === "/home"
+  const isCoursePage = ["/computer", "/computerAI", "/computer-ai", "/construction", "/digital", "/electrical", "/energy", "/industrial", "/logistics", "/management", "/survey"].includes(location.pathname.replace(/\/$/, ""));
+  const isFacultyPage = ["/recommendpage", "/history", "/vision", "/structure", "/executive", "/teacher", "/department"].includes(location.pathname.toLowerCase().replace(/\/$/, ""));
+  const activePath = isCoursePage ? "/#programs" : isFacultyPage ? "/Recommendpage" : location.pathname.startsWith("/news") ? "/news" : location.pathname === "/" || location.pathname === "/home"
     ? activeSection
     : location.pathname;
 
@@ -70,7 +73,7 @@ function Header() {
 
   return (
     <header
-      className={`font-display fixed left-0 top-0 z-50 w-full transition-all duration-300 ${
+      className={`fixed left-0 top-0 z-50 w-full transition-all duration-300 ${
         scrolled
           ? "border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur-xl"
           : "bg-transparent"
@@ -113,7 +116,7 @@ function Header() {
                   className={`relative rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
                     active
                       ? scrolled
-                        ? "bg-[#7A0019] text-white"
+                        ? "bg-white text-[#7A0019] shadow-sm"
                         : "bg-white text-[#7A0019]"
                       : scrolled
                         ? "text-gray-700 hover:bg-white hover:text-[#7A0019]"
@@ -130,7 +133,7 @@ function Header() {
               className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 contactActive
                   ? scrolled
-                    ? "bg-[#7A0019] text-white"
+                    ? "bg-white text-[#7A0019] shadow-sm"
                     : "bg-white text-[#7A0019]"
                   : scrolled
                     ? "text-gray-700 hover:bg-white hover:text-[#7A0019]"
@@ -195,7 +198,7 @@ function Header() {
                     onClick={() => setMenuOpen(false)}
                     className={`relative rounded-xl px-4 py-3 text-sm font-semibold transition ${
                       active
-                        ? "bg-[#7A0019] text-white"
+                        ? "bg-white text-[#7A0019] shadow-sm"
                         : scrolled
                           ? "text-gray-700 hover:bg-gray-100 hover:text-[#7A0019]"
                           : "text-white hover:bg-white/10"
@@ -211,7 +214,7 @@ function Header() {
                 onClick={() => setMenuOpen(false)}
                 className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
                   contactActive
-                    ? "bg-[#7A0019] text-white"
+                    ? "bg-white text-[#7A0019] shadow-sm"
                     : scrolled
                       ? "text-gray-700 hover:bg-gray-100 hover:text-[#7A0019]"
                       : "text-white hover:bg-white/10"
@@ -227,7 +230,7 @@ function Header() {
                 onClick={() => setMenuOpen(false)}
                 className="rounded-xl bg-[#7A0019] px-4 py-3 text-center text-sm font-bold text-white transition hover:bg-[#5C0013]"
               >
-                สมัครเรียน
+                สนใจเข้าศึกษา
               </Link>
             </nav>
           </div>
