@@ -277,7 +277,7 @@ export default function AdminLogin() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4 font-sans md:p-8">
       <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl md:min-h-[620px] md:grid-cols-2">
-        <section className="relative flex min-h-[320px] flex-col justify-end bg-[#7a0016] p-8 text-white md:min-h-full md:p-12">
+        <section className="relative flex min-h-[320px] flex-col justify-end bg-[#701D10] p-8 text-white md:min-h-full md:p-12">
           <img
             src="/image/BGadmin.png"
             alt=""
@@ -299,7 +299,7 @@ export default function AdminLogin() {
             <button
               type="button"
               onClick={switchMode}
-              className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#7a0016] shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100"
+              className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#701D10] shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-100"
             >
               <Icon icon="lucide:user-round-plus" className="text-lg" aria-hidden="true" />
               {isRegistering ? "กลับไปเข้าสู่ระบบ" : "สร้างบัญชีผู้ดูแล"}
@@ -313,11 +313,11 @@ export default function AdminLogin() {
         {/* Header */}
         {/* ================================= */}
 
-        <div className="mx-auto flex h-16 w-16 items-center justify-center text-[#7a0016]">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center text-[#701D10]">
           <Icon icon="lucide:shield-user" className="text-5xl" aria-hidden="true" />
         </div>
 
-        <h1 className="mt-0 text-center text-2xl font-bold tracking-tight text-[#7a0016]">
+        <h1 className="mt-0 text-center text-2xl font-bold tracking-tight text-[#701D10]">
           {isRegistering ? "สร้างบัญชีผู้ดูแล" : "เข้าสู่ระบบ Admin"}
         </h1>
 
@@ -349,11 +349,11 @@ export default function AdminLogin() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-slate-700">ชื่อจริง</label>
-                <input type="text" value={firstName} onChange={(e) => { setFirstName(e.target.value); setBranch(""); }} onBlur={lookupApprovedBranch} required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-[#7a0016] focus:bg-white" />
+                <input type="text" value={firstName} onChange={(e) => { setFirstName(e.target.value); setBranch(""); }} onBlur={lookupApprovedBranch} required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-[#701D10] focus:bg-white" />
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-slate-700">นามสกุล</label>
-                <input type="text" value={lastName} onChange={(e) => { setLastName(e.target.value); setBranch(""); }} onBlur={lookupApprovedBranch} required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-[#7a0016] focus:bg-white" />
+                <input type="text" value={lastName} onChange={(e) => { setLastName(e.target.value); setBranch(""); }} onBlur={lookupApprovedBranch} required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-[#701D10] focus:bg-white" />
               </div>
             </div>
           )}
@@ -376,7 +376,7 @@ export default function AdminLogin() {
               placeholder="Username"
               autoComplete="username"
               required
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#7a0016] focus:bg-white"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#701D10] focus:bg-white"
             />
           </div>
 
@@ -400,12 +400,12 @@ export default function AdminLogin() {
                 autoComplete={isRegistering ? "new-password" : "current-password"}
                 minLength={isRegistering ? 8 : undefined}
                 required
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 pr-12 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#7a0016] focus:bg-white"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 pr-12 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#701D10] focus:bg-white"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
-                className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-slate-400 transition hover:text-[#7a0016]"
+                className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-slate-400 transition hover:text-[#701D10]"
                 aria-label={showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
                 title={showPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
               >
@@ -439,7 +439,7 @@ export default function AdminLogin() {
                   e.target.checked,
                 )
               }
-              className="h-4 w-4 rounded border-slate-300 accent-[#7a0016]"
+              className="h-4 w-4 rounded border-slate-300 accent-[#701D10]"
             />
 
             <label
@@ -455,7 +455,7 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 w-full rounded-xl bg-[#7a0016] py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-[#600011] hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-400"
+            className="mt-2 w-full rounded-xl bg-[#701D10] py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-[#093341] hover:shadow-lg active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-400"
           >
             {loading
               ? isRegistering ? "กำลังสร้างบัญชี..." : "กำลังเข้าสู่ระบบ..."
@@ -469,14 +469,14 @@ export default function AdminLogin() {
       {registrationSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm">
           <section role="dialog" aria-modal="true" aria-labelledby="register-success-title" className="w-full max-w-md overflow-hidden rounded-3xl bg-white text-center shadow-2xl">
-            <div className="h-2 bg-gradient-to-r from-[#7a0016] via-[#b3123a] to-[#7a0016]" />
+            <div className="h-2 bg-gradient-to-r from-[#701D10] via-[#701D10] to-[#701D10]" />
             <div className="p-8 sm:p-10">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shadow-inner">
                 <Icon icon="lucide:badge-check" className="text-5xl" aria-hidden="true" />
               </div>
               <h2 id="register-success-title" className="mt-6 text-2xl font-bold text-slate-900">สร้างบัญชีสำเร็จกรุณาเข้าสู่ระบบ</h2>
               <p className="mt-3 leading-7 text-slate-500">บัญชีผู้ดูแลของคุณพร้อมใช้งานแล้ว<br />กรุณาเข้าสู่ระบบเพื่อเริ่มจัดการเว็บไซต์</p>
-              <button type="button" onClick={() => setRegistrationSuccess(false)} className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#7a0016] px-6 py-3.5 font-bold text-white shadow-lg transition hover:bg-[#600011] hover:shadow-xl">
+              <button type="button" onClick={() => setRegistrationSuccess(false)} className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#701D10] px-6 py-3.5 font-bold text-white shadow-lg transition hover:bg-[#093341] hover:shadow-xl">
                 <Icon icon="lucide:log-in" className="text-xl" aria-hidden="true" />
                 เข้าสู่ระบบ
               </button>

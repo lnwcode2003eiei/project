@@ -18,10 +18,10 @@ export function CourseSectionNav() {
     update();
     return () => window.removeEventListener("scroll", update);
   }, []);
-  return <nav aria-label="ข้อมูลหลักสูตร" className="sticky top-20 z-30 border-b border-white/20 bg-[#650015] px-4 py-3 shadow-md">
+  return <nav aria-label="ข้อมูลหลักสูตร" className="sticky top-20 z-30 border-b border-white/20 bg-[#093341] px-4 py-3 shadow-md">
     <div className="mx-auto flex w-fit max-w-full gap-3 overflow-x-auto">
       {sections.map(([id, title]) => <a key={id} href={`#${id}`} aria-current={active === id ? "location" : undefined}
-        onClick={() => setActive(id)} className={`shrink-0 rounded-lg border px-5 py-3 text-center text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${active === id ? "border-amber-500 bg-amber-500 text-gray-950" : "border-white/30 text-white hover:bg-white/10"}`}>{title}</a>)}
+        onClick={() => setActive(id)} className={`shrink-0 rounded-lg border px-5 py-3 text-center text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${active === id ? "border-[#F7941D] bg-[#F7941D] text-black" : "border-white/30 text-white hover:bg-white/10"}`}>{title}</a>)}
     </div>
   </nav>;
 }
@@ -29,15 +29,15 @@ const safeUrl = value => { try { return ["http:", "https:"].includes(new URL(val
 function Cards({ rows = [], twoColumns = false }) {
   if (!rows.length) return <p className="text-gray-500">อยู่ระหว่างจัดเตรียมข้อมูล</p>;
   return <div className={`grid gap-5 sm:grid-cols-2 ${twoColumns ? "" : "lg:grid-cols-3"}`}>{rows.map((row, index) => <article key={index} className="flex flex-col rounded-2xl border border-rose-100 bg-white p-7 shadow-sm">
-    <Icon icon={(detailIcons[row.icon] || detailIcons.book)[1]} aria-hidden="true" className="mb-5 h-10 w-10 text-[#7A0019]" />
-    <h3 className="text-xl font-bold text-[#7A0019]">{row.title}</h3>
+    <Icon icon={(detailIcons[row.icon] || detailIcons.book)[1]} aria-hidden="true" className="mb-5 h-10 w-10 text-[#701D10]" />
+    <h3 className="text-xl font-bold text-[#701D10]">{row.title}</h3>
     {row.description && <p className="mt-3 whitespace-pre-line break-words leading-8 text-gray-600">{row.description}</p>}
-    {safeUrl(row.url) && <a className="mt-auto pt-5 font-semibold text-[#7A0019] underline underline-offset-4" href={safeUrl(row.url)} target="_blank" rel="noopener noreferrer">ดูรายละเอียด<span className="sr-only"> {row.title} (เปิดหน้าต่างใหม่)</span> →</a>}
+    {safeUrl(row.url) && <a className="mt-auto pt-5 font-semibold text-[#701D10] underline underline-offset-4" href={safeUrl(row.url)} target="_blank" rel="noopener noreferrer">ดูรายละเอียด<span className="sr-only"> {row.title} (เปิดหน้าต่างใหม่)</span> →</a>}
   </article>)}</div>;
 }
 function Section({ id, title, children }) {
   return <section id={id} className="course-detail-section scroll-mt-44 border-t border-rose-100 px-5 py-16 text-center sm:px-8"><div className="mx-auto max-w-7xl">
-    <h2 className="mb-8 text-3xl font-bold text-[#7A0019] md:text-4xl">{title}</h2>{children}
+    <h2 className="mb-8 text-3xl font-bold text-[#701D10] md:text-4xl">{title}</h2>{children}
   </div></section>;
 }
 export default function CourseDetails({ slug }) {
@@ -74,7 +74,7 @@ export default function CourseDetails({ slug }) {
         {contact.address && <p className="whitespace-pre-line">{contact.address}</p>}
         {contact.phone && <p>โทรศัพท์: {contact.phone}</p>}
         {contact.email && <p>อีเมล: <a className="underline" href={`mailto:${contact.email}`}>{contact.email}</a></p>}
-        {safeUrl(contact.url) && <a className="inline-block font-semibold text-[#7A0019] underline" href={safeUrl(contact.url)} target="_blank" rel="noopener noreferrer">ช่องทางติดต่อเพิ่มเติม ↗</a>}
+        {safeUrl(contact.url) && <a className="inline-block font-semibold text-[#701D10] underline" href={safeUrl(contact.url)} target="_blank" rel="noopener noreferrer">ช่องทางติดต่อเพิ่มเติม ↗</a>}
       </address> : <p className="text-gray-500">อยู่ระหว่างจัดเตรียมข้อมูลติดต่อ</p>}
     </Section>
   </div>;

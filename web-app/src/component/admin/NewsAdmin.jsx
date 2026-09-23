@@ -234,7 +234,7 @@ function NewsAdmin() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="กรอกหัวข้อข่าว"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-[#7A0019] focus:bg-white focus:ring-2 focus:ring-[#7A0019]/10"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-[#701D10] focus:bg-white focus:ring-2 focus:ring-[#701D10]/10"
             />
           </div>
 
@@ -247,7 +247,7 @@ function NewsAdmin() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-[#7A0019] focus:bg-white"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-[#701D10] focus:bg-white"
             >
               <option value="">เลือกหมวดหมู่</option>
 
@@ -276,7 +276,7 @@ function NewsAdmin() {
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
               placeholder="กรอกรายละเอียดข่าว"
-              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-[#7A0019] focus:bg-white focus:ring-2 focus:ring-[#7A0019]/10"
+              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-[#701D10] focus:bg-white focus:ring-2 focus:ring-[#701D10]/10"
             />
           </div>
 
@@ -294,7 +294,7 @@ function NewsAdmin() {
 
               accept="image/jpeg,image/png,image/webp"
               onChange={handleImageChange}
-              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 outline-none transition file:mr-4 file:rounded-lg file:border-0 file:bg-[#7A0019] file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-[#5C0013]"
+              className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 outline-none transition file:mr-4 file:rounded-lg file:border-0 file:bg-[#701D10] file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-[#093341]"
             />
 
             <p className="mt-2 text-xs text-gray-400">
@@ -331,7 +331,7 @@ function NewsAdmin() {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-xl bg-[#7A0019] px-6 py-3 font-semibold text-white transition hover:bg-[#5C0013] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl bg-[#701D10] px-6 py-3 font-semibold text-white transition hover:bg-[#093341] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? "กำลังบันทึก..." : editingNews ? "บันทึกการแก้ไข" : "เพิ่มข่าว"}
             </button>
@@ -394,7 +394,7 @@ function NewsAdmin() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-[#7A0019]/10 px-3 py-1 text-xs font-semibold text-[#7A0019]">
+                    <span className="rounded-full bg-[#701D10]/10 px-3 py-1 text-xs font-semibold text-[#701D10]">
                       {item.category}
                     </span>
 
@@ -404,7 +404,7 @@ function NewsAdmin() {
                     </div>
                     {(isSuperAdmin || Number(item.created_by_admin_id) === currentAdminId) && (
                       <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => startEdit(item)} className="inline-flex items-center gap-1.5 rounded-lg border border-[#7A0019]/20 px-3 py-1.5 text-xs font-bold text-[#7A0019] transition hover:bg-[#7A0019]/10"><Icon icon="lucide:pencil" />แก้ไข</button>
+                        <button type="button" onClick={() => startEdit(item)} className="inline-flex items-center gap-1.5 rounded-lg border border-[#701D10]/20 px-3 py-1.5 text-xs font-bold text-[#701D10] transition hover:bg-[#701D10]/10"><Icon icon="lucide:pencil" />แก้ไข</button>
                         <button type="button" onClick={() => { setMessage(""); setErrorMessage(""); setDeleteTarget(item); }} className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-50"><Icon icon="lucide:trash-2" />ลบข่าว</button>
                       </div>
                     )}
@@ -432,7 +432,7 @@ function NewsAdmin() {
           aria-labelledby="news-success-dialog-title"
         >
           <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/60 bg-white shadow-2xl">
-            <div className="h-1.5 bg-gradient-to-r from-[#7A0019] via-[#b20a36] to-[#e36a86]" />
+            <div className="h-1.5 bg-gradient-to-r from-[#701D10] via-[#701D10] to-[#F7941D]" />
             <div className="px-7 py-8 text-center sm:px-9">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/60">
                 <Icon icon="lucide:circle-check-big" className="text-5xl" />
@@ -450,7 +450,7 @@ function NewsAdmin() {
                 type="button"
                 autoFocus
                 onClick={() => setSuccessDialog("")}
-                className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#7A0019] px-5 py-3.5 font-bold text-white shadow-lg shadow-[#7A0019]/20 transition hover:bg-[#a00027]"
+                className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#701D10] px-5 py-3.5 font-bold text-white shadow-lg shadow-[#701D10]/20 transition hover:bg-[#093341]"
               >
                 <Icon icon="lucide:check" className="text-xl" />
                 ตกลง
@@ -463,7 +463,7 @@ function NewsAdmin() {
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="delete-news-dialog-title">
           <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
-            <div className="h-1.5 bg-gradient-to-r from-[#7A0019] via-[#b20a36] to-[#e36a86]" />
+            <div className="h-1.5 bg-gradient-to-r from-[#701D10] via-[#701D10] to-[#F7941D]" />
             <div className="p-7 text-center">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-600"><Icon icon="lucide:trash-2" className="text-3xl" /></div>
               <h3 id="delete-news-dialog-title" className="mt-5 text-xl font-bold text-slate-900">ยืนยันการลบข่าว</h3>

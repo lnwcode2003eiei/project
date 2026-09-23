@@ -161,8 +161,8 @@ export default function ApplyPage() {
   const currentMajors = activeTab === "bachelor" ? bachelorMajors : masterMajors;
 
   return (
-    <div className="min-h-screen bg-white pt-20 text-[#171717]">
-      <div className="bg-[#7A0019] px-6 py-16 md:py-20 lg:px-12">
+    <div className="min-h-screen bg-white pt-20 text-black">
+      <div className="bg-[#701D10] px-6 py-16 md:py-20 lg:px-12">
         <div className="mx-auto max-w-6xl">
         {/* หัวข้อหน้า */}
         <div className="text-center">
@@ -183,13 +183,13 @@ export default function ApplyPage() {
 
         {/* 📌 แถบสลับระดับการศึกษา (Tabs) */}
         <div className="flex justify-center mb-10">
-          <div className="flex w-full max-w-md gap-2 rounded-xl bg-[#7A0019]/10 p-1.5 shadow-inner">
+          <div className="flex w-full max-w-md gap-2 rounded-xl bg-[#701D10]/10 p-1.5 shadow-inner">
             <button
               onClick={() => setActiveTab("bachelor")}
               className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
                 activeTab === "bachelor"
-                  ? "bg-white text-[#7A0019] shadow-md"
-                  : "text-[#171717]/65 hover:text-[#7A0019]"
+                  ? "bg-white text-[#701D10] shadow-md"
+                  : "text-black/65 hover:text-[#701D10]"
               }`}
             >
               <Icon icon="mdi:school-outline" className="text-lg" />
@@ -197,8 +197,8 @@ export default function ApplyPage() {
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${
                   activeTab === "bachelor"
-                    ? "bg-red-50 text-[#7A0019]"
-                    : "bg-white/80 text-[#171717]/70"
+                    ? "bg-red-50 text-[#701D10]"
+                    : "bg-white/80 text-black/70"
                 }`}
               >
                 {bachelorMajors.length}
@@ -209,8 +209,8 @@ export default function ApplyPage() {
               onClick={() => setActiveTab("master")}
               className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
                 activeTab === "master"
-                  ? "bg-white text-[#7A0019] shadow-md"
-                  : "text-[#171717]/65 hover:text-[#7A0019]"
+                  ? "bg-white text-[#701D10] shadow-md"
+                  : "text-black/65 hover:text-[#701D10]"
               }`}
             >
               <Icon icon="mdi:school" className="text-lg" />
@@ -218,8 +218,8 @@ export default function ApplyPage() {
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${
                   activeTab === "master"
-                    ? "bg-red-50 text-[#7A0019]"
-                    : "bg-white/80 text-[#171717]/70"
+                    ? "bg-red-50 text-[#701D10]"
+                    : "bg-white/80 text-black/70"
                 }`}
               >
                 {masterMajors.length}
@@ -229,16 +229,16 @@ export default function ApplyPage() {
         </div>
 
         {/* หัวข้อระดับการศึกษาปัจจุบัน */}
-        <div className="mb-6 flex items-center justify-between border-b border-[#7A0019]/20 pb-3">
+        <div className="mb-6 flex items-center justify-between border-b border-[#701D10]/20 pb-3">
           <div className="flex items-center gap-3">
-            <span className="w-1.5 h-6 bg-[#7A0019] rounded-full inline-block"></span>
-            <h2 className="text-xl font-bold text-[#171717]">
+            <span className="w-1.5 h-6 bg-[#701D10] rounded-full inline-block"></span>
+            <h2 className="text-xl font-bold text-black">
               {activeTab === "bachelor"
                 ? "หลักสูตรระดับปริญญาตรี (ทล.บ. / วศ.บ.)"
                 : "หลักสูตรระดับปริญญาโท (วศ.ม.)"}
             </h2>
           </div>
-          <span className="text-xs font-semibold text-[#171717]/60">
+          <span className="text-xs font-semibold text-black/60">
             ทั้งหมด {currentMajors.length} สาขาวิชา
           </span>
         </div>
@@ -249,23 +249,23 @@ export default function ApplyPage() {
             <div
               key={major.id}
               onClick={() => handleOpenModal(major)}
-              className="group flex cursor-pointer flex-col justify-between rounded-xl border border-[#7A0019]/15 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#7A0019] hover:shadow-lg"
+              className="group flex cursor-pointer flex-col justify-between rounded-xl border border-[#701D10]/15 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-[#701D10] hover:shadow-lg"
             >
               <div>
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-[#7A0019]/10 text-[#7A0019] transition group-hover:bg-[#7A0019] group-hover:text-white">
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-[#701D10]/10 text-[#701D10] transition group-hover:bg-[#701D10] group-hover:text-white">
                   <Icon icon={major.icon} className="text-2xl" />
                 </div>
-                <h3 className="mb-1 text-lg font-bold text-[#171717] transition group-hover:text-[#7A0019]">
+                <h3 className="mb-1 text-lg font-bold text-black transition group-hover:text-[#701D10]">
                   {major.name}
                 </h3>
-                <span className="text-xs font-semibold text-[#7A0019] bg-red-50 border border-red-100 px-2.5 py-0.5 rounded-full inline-block mb-3">
+                <span className="text-xs font-semibold text-[#701D10] bg-red-50 border border-red-100 px-2.5 py-0.5 rounded-full inline-block mb-3">
                   {major.degree}
                 </span>
-                <p className="mb-4 text-xs leading-relaxed text-[#171717]/60">
+                <p className="mb-4 text-xs leading-relaxed text-black/60">
                   {major.desc}
                 </p>
               </div>
-              <div className="inline-flex items-center gap-1 border-t border-[#7A0019]/10 pt-2 text-xs font-semibold text-[#7A0019] transition-transform group-hover:translate-x-1">
+              <div className="inline-flex items-center gap-1 border-t border-[#701D10]/10 pt-2 text-xs font-semibold text-[#701D10] transition-transform group-hover:translate-x-1">
                 สนใจสาขานี้ <span>→</span>
               </div>
             </div>
@@ -276,20 +276,20 @@ export default function ApplyPage() {
       {/* Modal หน้าต่างเด้งกรอกข้อมูล */}
       {isModalOpen && selectedMajor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-xl rounded-2xl border border-[#7A0019]/20 bg-white p-6 text-[#171717] shadow-2xl md:p-8">
+          <div className="relative w-full max-w-xl rounded-2xl border border-[#701D10]/20 bg-white p-6 text-black shadow-2xl md:p-8">
             <button
               onClick={handleCloseModal}
               disabled={isSubmitting}
-              className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full text-xl font-bold text-[#171717]/40 transition hover:bg-[#7A0019]/10 hover:text-[#7A0019] disabled:opacity-50"
+              className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full text-xl font-bold text-black/40 transition hover:bg-[#701D10]/10 hover:text-[#701D10] disabled:opacity-50"
             >
               ✕
             </button>
 
-            <div className="mb-6 border-b border-[#7A0019]/10 pb-4">
-              <h2 className="text-xl font-bold text-[#7A0019]">
+            <div className="mb-6 border-b border-[#701D10]/10 pb-4">
+              <h2 className="text-xl font-bold text-[#701D10]">
                 แบบฟอร์มแสดงความสนใจในสาขาวิชา
               </h2>
-              <p className="mt-1 text-xs text-[#171717]/60">
+              <p className="mt-1 text-xs text-black/60">
                 ข้อมูลนี้ใช้เพื่อสำรวจและวิเคราะห์ความสนใจในสาขาวิชาของคณะเทคโนโลยีอุตสาหกรรม ไม่ใช่การสมัครเข้าศึกษา
               </p>
             </div>
@@ -297,26 +297,26 @@ export default function ApplyPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {formError && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{formError}</p>}
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#171717]/75">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-black/75">
                   สาขาวิชาที่สนใจ
                 </label>
                 <input
                   type="text"
                   readOnly
                   value={selectedMajor.name}
-                  className="w-full cursor-not-allowed rounded-lg border border-[#7A0019]/10 bg-[#7A0019]/5 px-4 py-2.5 text-sm font-semibold text-[#171717]"
+                  className="w-full cursor-not-allowed rounded-lg border border-[#701D10]/10 bg-[#701D10]/5 px-4 py-2.5 text-sm font-semibold text-black"
                 />
               </div>
 
               {!masterMajors.some((major) => major.id === selectedMajor.id) && (
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#171717]/75">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-black/75">
                     สาขาที่สนใจเป็นอันดับสอง
                   </label>
                   <select
                     value={formData.secondMajor}
                     onChange={(e) => setFormData({ ...formData, secondMajor: e.target.value })}
-                    className="w-full rounded-lg border border-[#171717]/20 bg-white px-4 py-2.5 text-sm text-[#171717] transition focus:border-[#7A0019] focus:outline-none focus:ring-1 focus:ring-[#7A0019]"
+                    className="w-full rounded-lg border border-[#093341]/20 bg-white px-4 py-2.5 text-sm text-black transition focus:border-[#701D10] focus:outline-none focus:ring-1 focus:ring-[#701D10]"
                   >
                     <option value="">ไม่ระบุ</option>
                     {bachelorMajors.map((major) => (
@@ -329,7 +329,7 @@ export default function ApplyPage() {
               )}
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#171717]/75">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-black/75">
                   ชื่อ - นามสกุล <span className="text-red-600">*</span>
                 </label>
                 <input
@@ -340,12 +340,12 @@ export default function ApplyPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, fullname: e.target.value })
                   }
-                  className="w-full rounded-lg border border-[#171717]/20 bg-white px-4 py-2.5 text-sm text-[#171717] transition focus:border-[#7A0019] focus:outline-none focus:ring-1 focus:ring-[#7A0019]"
+                  className="w-full rounded-lg border border-[#093341]/20 bg-white px-4 py-2.5 text-sm text-black transition focus:border-[#701D10] focus:outline-none focus:ring-1 focus:ring-[#701D10]"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#171717]/75">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-black/75">
                   สถานศึกษาเดิม / โรงเรียนที่สำเร็จการศึกษา{" "}
                   <span className="text-red-600">*</span>
                 </label>
@@ -357,12 +357,12 @@ export default function ApplyPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, oldSchool: e.target.value })
                   }
-                  className="w-full rounded-lg border border-[#171717]/20 bg-white px-4 py-2.5 text-sm text-[#171717] transition focus:border-[#7A0019] focus:outline-none focus:ring-1 focus:ring-[#7A0019]"
+                  className="w-full rounded-lg border border-[#093341]/20 bg-white px-4 py-2.5 text-sm text-black transition focus:border-[#701D10] focus:outline-none focus:ring-1 focus:ring-[#701D10]"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#171717]/75">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-black/75">
                   วุฒิการศึกษาเดิม / กำลังศึกษา
                 </label>
                 <select
@@ -370,7 +370,7 @@ export default function ApplyPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, education: e.target.value })
                   }
-                  className="w-full rounded-lg border border-[#171717]/20 bg-white px-4 py-2.5 text-sm text-[#171717] transition focus:border-[#7A0019] focus:outline-none focus:ring-1 focus:ring-[#7A0019]"
+                  className="w-full rounded-lg border border-[#093341]/20 bg-white px-4 py-2.5 text-sm text-black transition focus:border-[#701D10] focus:outline-none focus:ring-1 focus:ring-[#701D10]"
                 >
                   <option value="มัธยมศึกษาปีที่ 6 (ม.6)">มัธยมศึกษาปีที่ 6 (ม.6)</option>
                   <option value="ประกาศนียบัตรวิชาชีพ (ปวช.)">ประกาศนียบัตรวิชาชีพ (ปวช.)</option>
@@ -379,19 +379,19 @@ export default function ApplyPage() {
                 </select>
               </div>
 
-              <div className="flex gap-3 border-t border-[#7A0019]/10 pt-4">
+              <div className="flex gap-3 border-t border-[#701D10]/10 pt-4">
                 <button
                   type="button"
                   onClick={handleCloseModal}
                   disabled={isSubmitting}
-                  className="w-1/3 rounded-lg bg-[#171717]/10 py-2.5 text-sm font-semibold text-[#171717] transition hover:bg-[#171717]/20 disabled:opacity-50"
+                  className="w-1/3 rounded-lg bg-[#093341]/10 py-2.5 text-sm font-semibold text-black transition hover:bg-[#093341]/20 disabled:opacity-50"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-2/3 py-2.5 rounded-lg bg-[#7A0019] hover:bg-[#5C0013] text-white font-semibold text-sm transition shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-2/3 py-2.5 rounded-lg bg-[#701D10] hover:bg-[#093341] text-white font-semibold text-sm transition shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? "กำลังบันทึก..." : "บันทึกความสนใจ"}
                 </button>
@@ -404,15 +404,15 @@ export default function ApplyPage() {
       {showLineQr && selectedMajor && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-3xl bg-white p-7 text-center shadow-2xl">
-            <h2 role="status" className="mb-4 text-xl font-bold text-[#7A0019]">บันทึกความสนใจเรียบร้อยแล้ว</h2>
+            <h2 role="status" className="mb-4 text-xl font-bold text-[#701D10]">บันทึกความสนใจเรียบร้อยแล้ว</h2>
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#06c755]/10 text-[#06c755]">
               <Icon icon="mdi:message-text" className="text-3xl" />
             </div>
-            <p className="mt-4 text-sm leading-6 text-slate-600">สแกน QR Code เพื่อพูดคุยกับ LINE Chatbot<br />เกี่ยวกับสาขา <span className="font-bold text-[#7A0019]">{selectedMajor.name}</span></p>
+            <p className="mt-4 text-sm leading-6 text-slate-600">สแกน QR Code เพื่อพูดคุยกับ LINE Chatbot<br />เกี่ยวกับสาขา <span className="font-bold text-[#701D10]">{selectedMajor.name}</span></p>
             <div className="mx-auto mt-5 w-full max-w-[250px] rounded-2xl border border-[#06c755]/20 bg-[#06c755]/5 p-3">
               <img src="/image/line-chatbot-qr.png" alt="QR Code สำหรับ LINE Chatbot" className="h-auto w-full rounded-xl bg-white" />
             </div>
-            <button type="button" onClick={() => setShowLineQr(false)} className="mt-6 w-full rounded-xl bg-[#7A0019] py-3 font-bold text-white transition hover:bg-[#5C0013]">เสร็จสิ้น</button>
+            <button type="button" onClick={() => setShowLineQr(false)} className="mt-6 w-full rounded-xl bg-[#701D10] py-3 font-bold text-white transition hover:bg-[#093341]">เสร็จสิ้น</button>
           </div>
         </div>
       )}

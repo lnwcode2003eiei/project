@@ -45,11 +45,6 @@ function AdminMenu() {
       icon: "lucide:graduation-cap",
     },
     ...(isSuperAdmin ? [{
-      name: "แนะนำคณะ",
-      path: "/admin/recommend",
-      icon: "lucide:building-2",
-    }] : []),
-    ...(isSuperAdmin ? [{
       name: "User",
       path: "/admin/users",
       icon: "lucide:user-cog",
@@ -63,10 +58,10 @@ function AdminMenu() {
       <div className="flex h-20 items-center justify-center gap-3 border-b border-gray-200 px-5 group-hover:justify-start">
         <Icon
           icon="fluent:settings-24-filled"
-          className="animate-[spin_8s_linear_infinite] text-4xl text-[#7A0019]"
+          className="animate-[spin_8s_linear_infinite] text-4xl text-[#701D10]"
           aria-label="ระบบจัดการ"
         />
-        <span className="hidden whitespace-nowrap text-xl font-bold text-[#7A0019] group-hover:block">
+        <span className="hidden whitespace-nowrap text-xl font-bold text-[#701D10] group-hover:block">
           Admin
         </span>
       </div>
@@ -89,8 +84,8 @@ function AdminMenu() {
                 to={menu.path}
                 className={`flex items-center justify-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition group-hover:justify-start ${
                   active
-                    ? "bg-[#7A0019] text-white shadow-md"
-                    : "text-gray-600 hover:bg-[#7A0019]/10 hover:text-[#7A0019]"
+                    ? "bg-[#701D10] text-white shadow-md"
+                    : "text-gray-600 hover:bg-[#701D10]/10 hover:text-[#701D10]"
                 }`}
               >
                 <Icon icon={menu.icon} className="text-lg" />
@@ -104,7 +99,7 @@ function AdminMenu() {
       {/* Admin */}
       <div className="border-t border-gray-200 p-4">
         <div className="flex items-center justify-center gap-3 rounded-xl bg-gray-50 p-3 group-hover:justify-start">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#7A0019]/10 text-[#7A0019]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#701D10]/10 text-[#701D10]">
             <Icon icon="lucide:shield-user" className="text-xl" aria-label="ผู้ดูแลระบบ" />
           </div>
 
@@ -119,7 +114,7 @@ function AdminMenu() {
       </div>
     </aside>
 
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t border-[#f1dce1] bg-white px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(122,0,25,0.08)] md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t border-[#E5E7EB] bg-white px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(112, 29, 16,0.08)] md:hidden">
       {menus.map((menu) => {
         const active = menu.path === "/admin"
           ? location.pathname === menu.path
@@ -129,7 +124,7 @@ function AdminMenu() {
             key={menu.path}
             to={menu.path}
             className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold ${
-              active ? "bg-[#7A0019] text-white" : "text-gray-600"
+              active ? "bg-[#701D10] text-white" : "text-gray-600"
             }`}
           >
             <Icon icon={menu.icon} className="text-xl" />

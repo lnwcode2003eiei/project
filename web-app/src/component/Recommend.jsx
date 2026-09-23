@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 
 function Recommend() {
   return (
-    <section id="recommend" className="relative overflow-hidden py-24 text-white lg:py-32">
+    <section id="recommend" className="relative overflow-hidden py-24 text-white lg:py-36">
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('/image/A1.jpg')" }}
       />
-      <div className="absolute inset-0 bg-black/55" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-black/55" />
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
         <div className="max-w-3xl">
@@ -36,7 +36,7 @@ function Recommend() {
               className="group mt-12 flex w-fit items-center gap-5"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-white transition duration-300 group-hover:bg-white">
-                <span className="text-2xl group-hover:text-[#7A0019]">
+                <span className="text-2xl group-hover:text-[#701D10]">
                   →
                 </span>
               </div>

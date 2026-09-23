@@ -80,7 +80,7 @@ function Register() {
 
   return (
     <div className="fixed inset-0 z-[999] flex min-h-screen items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#202020]/95 px-8 py-10 text-white shadow-2xl">
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#093341]/95 px-8 py-10 text-white shadow-2xl">
         {/* Logo */}
         <div className="mb-7">
           <img
@@ -106,7 +106,7 @@ function Register() {
             placeholder="ชื่อ"
             required={!anonymous}
             disabled={anonymous}
-            className="w-full rounded-md bg-[#303030] px-4 py-4 text-sm text-white placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-[#7A0019]"
+            className="w-full rounded-md bg-[#303030] px-4 py-4 text-sm text-white placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-[#701D10]"
           />
 
           <label className="flex cursor-pointer items-center gap-3 text-sm text-gray-200">
@@ -115,7 +115,7 @@ function Register() {
                 setAnonymous(event.target.checked);
                 if (event.target.checked) setName("");
               }}
-              className="h-5 w-5 accent-[#950020]" />
+              className="h-5 w-5 accent-[#093341]" />
             ไม่ระบุชื่อ
           </label>
 
@@ -124,7 +124,7 @@ function Register() {
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             required
-            className="w-full rounded-md bg-[#303030] px-4 py-4 text-sm text-gray-300 outline-none transition focus:ring-2 focus:ring-[#7A0019]"
+            className="w-full rounded-md bg-[#303030] px-4 py-4 text-sm text-gray-300 outline-none transition focus:ring-2 focus:ring-[#701D10]"
           >
             <option value="">เลือกสถานะ</option>
 
@@ -141,7 +141,7 @@ function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-3 w-full rounded-full bg-[#7A0019] px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-[#950020] hover:shadow-lg hover:shadow-[#7A0019]/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-3 w-full rounded-full bg-[#701D10] px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-[#093341] hover:shadow-lg hover:shadow-[#701D10]/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "กำลังบันทึก..." : "เข้าสู่เว็บไซต์"}
           </button>

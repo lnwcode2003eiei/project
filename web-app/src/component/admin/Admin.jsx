@@ -14,12 +14,6 @@ import NewsAdmin from "./NewsAdmin";
 import ProgramEditor from "./ProgramEditor";
 import ProgramsOverview from "./ProgramsOverview";
 import AdminUsers from "./AdminUsers";
-import RecommendAdmin from "./RecommendAdmin";
-import HistoryEditor from "./HistoryEditor";
-import TeacherAdmin from "./TeacherAdmin";
-import StructureAdmin from "./StructureAdmin";
-import VisionEditor from "./VisionEditor";
-import ProfileAdmin from "./ProfileAdmin";
 
 
 // ==========================================
@@ -142,7 +136,6 @@ function Admin() {
     if (location.pathname === "/admin/visitors") return "ผู้เข้าชมเว็บไซต์";
     if (location.pathname === "/admin/news") return "ข่าวสาร";
     if (location.pathname === "/admin/programs") return "หลักสูตร";
-    if (location.pathname === "/admin/recommend") return "แนะนำคณะ";
     if (location.pathname === "/admin/users") return "จัดการผู้ใช้";
     if (location.pathname.startsWith("/admin/courses/")) return "แก้ไขหลักสูตร";
     return "Admin";
@@ -208,7 +201,7 @@ function Admin() {
             {isSuperAdmin && (
               <Link
                 to="/admin/users"
-                className="hidden rounded-lg bg-[#7A0019] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#5C0013] sm:block"
+                className="hidden rounded-lg bg-[#701D10] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#093341] sm:block"
               >
                 จัดการผู้ใช้
               </Link>
@@ -300,7 +293,7 @@ function Admin() {
 
               สาขา:
 
-              <span className="ml-1 font-semibold text-[#7A0019]">
+              <span className="ml-1 font-semibold text-[#701D10]">
                 {branchName}
               </span>
 
@@ -369,38 +362,6 @@ function Admin() {
             <Route
               path="courses/:sakaPath"
               element={<ProgramEditor />}
-            />
-
-            <Route
-              path="recommend"
-              element={isSuperAdmin ? <RecommendAdmin /> : <NotFound />}
-            />
-
-            <Route
-              path="recommend/structure"
-              element={isSuperAdmin ? <StructureAdmin /> : <NotFound />}
-            />
-
-            <Route
-              path="recommend/vision"
-              element={isSuperAdmin ? <VisionEditor /> : <NotFound />}
-            />
-            <Route path="recommend/executive" element={isSuperAdmin ? <ProfileAdmin type="executive" title="ผู้บริหาร" /> : <NotFound />} />
-            <Route path="recommend/department" element={isSuperAdmin ? <ProfileAdmin type="department" title="หน่วยงาน" /> : <NotFound />} />
-
-            <Route
-              path="recommend/:slug"
-              element={isSuperAdmin ? <RecommendAdmin /> : <NotFound />}
-            />
-
-            <Route
-              path="recommend/history"
-              element={isSuperAdmin ? <HistoryEditor /> : <NotFound />}
-            />
-
-            <Route
-              path="recommend/teacher"
-              element={isSuperAdmin ? <TeacherAdmin /> : <NotFound />}
             />
 
             <Route

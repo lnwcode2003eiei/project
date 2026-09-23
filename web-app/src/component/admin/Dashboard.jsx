@@ -178,7 +178,7 @@ function Dashboard() {
       majorDegree += percent;
 
       return `${
-        item.color || "#7A0019"
+        item.color || "#701D10"
       } ${start}% ${majorDegree}%`;
     });
 
@@ -226,11 +226,11 @@ function Dashboard() {
 
   stats.splice(4, 0, { title: "ผู้ปกครอง", value: Number(dashboard.parents || 0) });
   const visitorTypes = [
-    { name: "ผู้ปกครอง", count: Number(dashboard.parents || 0), color: "#D69E24" },
+    { name: "ผู้ปกครอง", count: Number(dashboard.parents || 0), color: "#F7941D" },
     {
       name: "นักเรียน",
       count: dashboard.students,
-      color: "#7A0019",
+      color: "#701D10",
     },
 
     {
@@ -415,7 +415,7 @@ function Dashboard() {
       {loading ? (
         <div className="mb-6 rounded-xl bg-white p-12 text-center text-gray-400 shadow-sm">
 
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#7A0019] border-r-transparent align-[-0.125em]" />
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#701D10] border-r-transparent align-[-0.125em]" />
 
           <p className="mt-3 text-sm font-medium">
             กำลังโหลดข้อมูล...
@@ -547,7 +547,7 @@ function Dashboard() {
                             </span>
 
                             <div
-                              className="w-full max-w-[48px] rounded-t-lg bg-[#7A0019] transition-all duration-300 hover:bg-[#950020]"
+                              className="w-full max-w-[48px] rounded-t-lg bg-[#701D10] transition-all duration-300 hover:bg-[#093341]"
                               style={{
                                 height: `${height}px`,
                               }}
@@ -754,7 +754,7 @@ function Dashboard() {
                                 style={{
                                   backgroundColor:
                                     item.color ||
-                                    "#7A0019",
+                                    "#701D10",
                                 }}
                               />
 

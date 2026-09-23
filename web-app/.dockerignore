@@ -4,3 +4,4 @@ uploads
 .git
 .env
 npm-debug.log*
+backups

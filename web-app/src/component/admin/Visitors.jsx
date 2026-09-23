@@ -112,7 +112,7 @@ function Visitors() {
               }}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition ${
                 activeTab === "visitors"
-                  ? "bg-white text-[#7A0019] shadow-sm"
+                  ? "bg-white text-[#701D10] shadow-sm"
                   : "text-gray-500 hover:text-gray-900"
               }`}
             >
@@ -126,7 +126,7 @@ function Visitors() {
               }}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition ${
                 activeTab === "interested"
-                  ? "bg-white text-[#7A0019] shadow-sm"
+                  ? "bg-white text-[#701D10] shadow-sm"
                   : "text-gray-500 hover:text-gray-900"
               }`}
             >
@@ -146,7 +146,7 @@ function Visitors() {
 
         <button
           onClick={fetchData}
-          className="rounded-xl bg-[#7A0019] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#5C0013] active:scale-95"
+          className="rounded-xl bg-[#701D10] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#093341] active:scale-95"
         >
           ↻ รีเฟรชข้อมูล
         </button>
@@ -178,14 +178,14 @@ function Visitors() {
                     ? "ค้นหาชื่อ หรือโรงเรียน..."
                     : "ค้นหาชื่อ, โรงเรียน หรือสาขา..."
                 }
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-[#7A0019] focus:bg-white focus:ring-2 focus:ring-[#7A0019]/10"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none transition focus:border-[#701D10] focus:bg-white focus:ring-2 focus:ring-[#701D10]/10"
               />
             </div>
 
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#7A0019]"
+              className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#701D10]"
             >
               <option value="">ทุกสถานะ</option>
               <option value="นักเรียน">นักเรียน</option>
@@ -250,7 +250,7 @@ function Visitors() {
                         <td className="px-6 py-4 text-sm text-gray-400">{index + 1}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#7A0019]/10 font-bold text-[#7A0019]">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#701D10]/10 font-bold text-[#701D10]">
                               {name.charAt(0)}
                             </div>
                             <p className="font-semibold text-gray-900">{name}</p>
@@ -259,7 +259,7 @@ function Visitors() {
                         {activeTab === "interested" && (
                           <>
                             <td className="px-6 py-4 text-sm text-gray-600">{school}</td>
-                            <td className="px-6 py-4 text-sm font-semibold text-[#7A0019]">{major}</td>
+                            <td className="px-6 py-4 text-sm font-semibold text-[#701D10]">{major}</td>
                             <td className="px-6 py-4 text-sm text-gray-600">{secondMajor}</td>
                           </>
                         )}

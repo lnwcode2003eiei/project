@@ -20,8 +20,8 @@ export default function ImageFileInput({ onChange, className, selectedFiles, ref
     return () => { form?.removeEventListener("reset", clear); urls.current.forEach(URL.revokeObjectURL); };
   }, []);
   return <span className="my-2 block rounded-xl border border-gray-200 bg-white p-3 font-normal text-gray-700" data-original-class={className}>
-    <span className="relative flex min-h-12 flex-wrap items-center gap-3 rounded-lg focus-within:ring-2 focus-within:ring-[#7A0019]">
-      <span className="rounded-lg bg-[#7A0019] px-4 py-3 text-sm font-semibold text-white">เลือกรูปภาพ</span>
+    <span className="relative flex min-h-12 flex-wrap items-center gap-3 rounded-lg focus-within:ring-2 focus-within:ring-[#701D10]">
+      <span className="rounded-lg bg-[#701D10] px-4 py-3 text-sm font-semibold text-white">เลือกรูปภาพ</span>
       <span className="min-w-0 break-all text-sm">{visibleSelection.length ? visibleSelection.map(file => file.name).join(", ") : "เลือกรูปภาพเพื่อแสดง"}</span>
       <input {...props} ref={element => { inputRef.current = element; if (typeof forwardedRef === "function") forwardedRef(element); else if (forwardedRef) forwardedRef.current = element; }} type="file" aria-label="เลือกรูปภาพเพื่อแสดง" className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed" onChange={event => {
         onChange?.(event);

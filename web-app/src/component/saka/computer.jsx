@@ -77,7 +77,7 @@ function Computer() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#7A0019]" />
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-[#701D10]" />
 
           <p className="mt-4 text-sm text-gray-500">
             กำลังโหลดข้อมูลสาขา...
@@ -108,7 +108,7 @@ function Computer() {
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="mt-6 rounded-xl bg-[#7A0019] px-6 py-3 font-semibold text-white transition hover:bg-[#5C0013]"
+            className="mt-6 rounded-xl bg-[#701D10] px-6 py-3 font-semibold text-white transition hover:bg-[#093341]"
           >
             ลองใหม่
           </button>
@@ -173,7 +173,7 @@ function getImageUrl(imagePath) {
 
 function HeaderSection({ course }) {
   return (
-    <section style={courseHeroStyle("computer")} className="course-generated-hero relative overflow-hidden bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-20 text-white shadow-lg">
+    <section style={courseHeroStyle("computer")} className="course-generated-hero relative overflow-hidden bg-gradient-to-br from-[#701D10] via-[#701D10] to-[#093341] px-6 py-20 text-white shadow-lg">
       <div className="mx-auto max-w-7xl">
 
         <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-red-200 backdrop-blur-md">
@@ -209,7 +209,7 @@ function AboutSection({ course }) {
         {/* Image */}
         <div className="group relative lg:col-span-6">
 
-          <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#7A0019] to-red-400 opacity-30 blur transition duration-500 group-hover:opacity-60" />
+          <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#701D10] to-red-400 opacity-30 blur transition duration-500 group-hover:opacity-60" />
 
           <div className="relative overflow-hidden rounded-3xl bg-white shadow-2xl">
 
@@ -231,9 +231,9 @@ function AboutSection({ course }) {
         {/* Text */}
         <div className="space-y-6 lg:col-span-6">
 
-          <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-[#7A0019]">
+          <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-[#701D10]">
 
-            <span className="h-2 w-2 rounded-full bg-[#7A0019]" />
+            <span className="h-2 w-2 rounded-full bg-[#701D10]" />
 
             About The Program
 
@@ -271,7 +271,7 @@ function HighlightsSection({ course }) {
 
         <div className="mb-14 text-center">
 
-          <span className="text-xs font-bold uppercase tracking-widest text-[#7A0019]">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#701D10]">
             Program Highlights
           </span>
 
@@ -313,7 +313,7 @@ function HighlightsSection({ course }) {
                 </div>
 
                 {/* หัวข้อ */}
-                <h3 className="text-center text-xl font-bold text-gray-900 transition-colors group-hover:text-[#7A0019] md:text-2xl">
+                <h3 className="text-center text-xl font-bold text-gray-900 transition-colors group-hover:text-[#701D10] md:text-2xl">
                   {item.title ||
                     "จุดเด่น"}
                 </h3>
@@ -355,7 +355,7 @@ function StudyPlanSection({
 
         <div className="mb-12 text-center">
 
-          <span className="text-xs font-bold uppercase tracking-widest text-[#7A0019]">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#701D10]">
             Curriculum Structure
           </span>
 
@@ -403,7 +403,7 @@ function StudyPlanSection({
                       key={groupIndex}
                     >
 
-                      <tr className="border-b border-red-900 bg-[#7A0019] font-bold text-white">
+                      <tr className="border-b border-red-900 bg-[#701D10] font-bold text-white">
 
                         <td className="px-6 py-3.5 text-base md:text-lg">
                           {group.category}
@@ -499,7 +499,7 @@ function SkillsSection({ course }) {
 
           <div className="space-y-4 lg:col-span-5">
 
-            <span className="text-xs font-bold uppercase tracking-widest text-[#7A0019]">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#701D10]">
               What You Will Learn
             </span>
 
@@ -528,7 +528,7 @@ function SkillsSection({ course }) {
                     className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-colors hover:border-red-200"
                   >
 
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-[#7A0019]">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-[#701D10]">
 
                       <svg
                         className="h-5 w-5"
@@ -666,7 +666,7 @@ function FooterCTA({ course }) {
 
         <div>
 
-          <a href="/apply?major=comp-eng" className="inline-block rounded-xl bg-[#7A0019] px-8 py-4 font-semibold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#580012] hover:shadow-xl">
+          <a href="/apply?major=comp-eng" className="inline-block rounded-xl bg-[#701D10] px-8 py-4 font-semibold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#093341] hover:shadow-xl">
             สนใจเข้าศึกษา
           </a>
 

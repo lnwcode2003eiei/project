@@ -11,7 +11,7 @@ export default function LearningAtmosphere({ course }) {
     : [];
 
   return (
-    <section className="bg-[#171717]">
+    <section className="bg-[#093341]">
       <div>
         {items.length > 0 ? (
           <Swiper modules={[Navigation, Pagination]} navigation pagination={{ clickable: true }} className="learning-atmosphere-swiper">
@@ -21,7 +21,7 @@ export default function LearningAtmosphere({ course }) {
                 {item.image ? (
                   <img src={apiUrl(item.image)} alt={item.title || "บรรยากาศการเรียนการสอน"} className="absolute inset-0 h-full w-full object-cover" />
                 ) : (
-                  <div className="absolute inset-0 bg-[#7A0019]" />
+                  <div className="absolute inset-0 bg-[#701D10]" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/20 to-transparent" />
                 <div className="relative z-10 max-w-2xl">

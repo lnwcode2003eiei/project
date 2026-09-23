@@ -8,11 +8,11 @@ import { courseHeroStyle } from "../../config/courseHeroes";
 function EditableSection({ children, onEdit }) {
   return (
     <div className="group relative">
-      <div className="pointer-events-none absolute inset-0 z-10 rounded-3xl border-2 border-dashed border-[#7A0019] opacity-0 transition duration-200 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 z-10 rounded-3xl border-2 border-dashed border-[#701D10] opacity-0 transition duration-200 group-hover:opacity-100" />
       <button
         type="button"
         onClick={onEdit}
-        className="absolute right-5 top-5 z-20 rounded-xl bg-[#7A0019] px-4 py-2 text-sm font-semibold text-white opacity-0 shadow-lg transition duration-200 group-hover:opacity-100 hover:bg-[#5C0013]"
+        className="absolute right-5 top-5 z-20 rounded-xl bg-[#701D10] px-4 py-2 text-sm font-semibold text-white opacity-0 shadow-lg transition duration-200 group-hover:opacity-100 hover:bg-[#093341]"
       >
         แก้ไข
       </button>
@@ -1044,7 +1044,7 @@ function ProgramEditor() {
       <div className="mb-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#7A0019]">
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#701D10]">
               Branch Editor
             </p>
 
@@ -1055,7 +1055,7 @@ function ProgramEditor() {
             <p className="mt-2 text-sm text-gray-500">
               กำลังแก้ไขสาขา:
 
-              <span className="ml-2 font-bold text-[#7A0019]">
+              <span className="ml-2 font-bold text-[#701D10]">
                 {sakaPath}
               </span>
             </p>
@@ -1075,8 +1075,8 @@ function ProgramEditor() {
       {/* Notice */}
       {/* ================================= */}
 
-      <div className="mb-6 rounded-2xl border border-[#7A0019]/10 bg-[#7A0019]/5 px-5 py-4">
-        <p className="text-sm font-semibold text-[#7A0019]">
+      <div className="mb-6 rounded-2xl border border-[#701D10]/10 bg-[#701D10]/5 px-5 py-4">
+        <p className="text-sm font-semibold text-[#701D10]">
           โหมดแก้ไขหน้าเว็บไซต์
         </p>
 
@@ -1094,7 +1094,7 @@ function ProgramEditor() {
           setEditing("hero")
         }
       >
-        <section style={courseHeroStyle(sakaPath)} className="course-generated-hero relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#7A0019] via-[#8B001E] to-[#580012] px-6 py-16 text-white shadow-xl md:px-10 md:py-20">
+        <section style={courseHeroStyle(sakaPath)} className="course-generated-hero relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#701D10] via-[#701D10] to-[#093341] px-6 py-16 text-white shadow-xl md:px-10 md:py-20">
           <div className="mx-auto max-w-7xl">
             <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-red-200 backdrop-blur-md">
               {form.english_title ||
@@ -1146,7 +1146,7 @@ function ProgramEditor() {
             </div>
 
             <div>
-              <span className="text-sm font-bold uppercase tracking-widest text-[#7A0019]">
+              <span className="text-sm font-bold uppercase tracking-widest text-[#701D10]">
                 About The Program
               </span>
 
@@ -1180,7 +1180,7 @@ function ProgramEditor() {
       >
         <section className="mt-6 rounded-3xl bg-white px-6 py-12 shadow-sm md:px-10">
           <div className="text-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#7A0019]">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#701D10]">
               Program Highlights
             </span>
 
@@ -1293,7 +1293,7 @@ function ProgramEditor() {
                         className="p-0"
                       >
                         <div>
-                          <div className="grid grid-cols-[1fr_128px] bg-[#7A0019] font-bold text-white">
+                          <div className="grid grid-cols-[1fr_128px] bg-[#701D10] font-bold text-white">
                             <div className="px-6 py-4">
                               {
                                 group.category
@@ -1431,12 +1431,12 @@ function ProgramEditor() {
       </EditableSection>
 
       <EditableSection onEdit={() => setEditing("atmosphere")}>
-        <section className="mt-6 rounded-3xl bg-[#f8f5f5] px-6 py-10 md:px-10">
+        <section className="mt-6 rounded-3xl bg-[#FFFFFF] px-6 py-10 md:px-10">
           <h2 className="text-3xl font-bold text-gray-900">บรรยากาศการเรียนการสอน</h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {form.learning_environment.length ? form.learning_environment.map((item, index) => (
               <div key={index} className="overflow-hidden rounded-2xl bg-white shadow-sm">
-                {item.image ? <img src={getImageUrl(item.image)} alt={item.title || "บรรยากาศ"} className="h-40 w-full object-cover" /> : <div className="flex h-40 items-center justify-center bg-[#7A0019] text-sm text-white">ไม่มีรูปภาพ</div>}
+                {item.image ? <img src={getImageUrl(item.image)} alt={item.title || "บรรยากาศ"} className="h-40 w-full object-cover" /> : <div className="flex h-40 items-center justify-center bg-[#701D10] text-sm text-white">ไม่มีรูปภาพ</div>}
                 <p className="p-4 font-semibold text-gray-800">{item.title || "กิจกรรมการเรียนรู้"}</p>
               </div>
             )) : <p className="text-gray-500">กด “แก้ไข” เพื่อเพิ่มรูปภาพ</p>}
@@ -1453,7 +1453,7 @@ function ProgramEditor() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="rounded-xl bg-[#7A0019] px-8 py-4 font-bold text-white shadow-lg transition hover:bg-[#5C0013] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl bg-[#701D10] px-8 py-4 font-bold text-white shadow-lg transition hover:bg-[#093341] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving
             ? "กำลังบันทึก..."
@@ -1642,7 +1642,7 @@ function ProgramEditor() {
                     onChange={
                       handleImageChange
                     }
-                    className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-[#7A0019] file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-[#5C0013]"
+                    className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-[#701D10] file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-[#093341]"
                   />
 
                   <p className="mt-2 text-xs text-gray-400">
@@ -1692,7 +1692,7 @@ function ProgramEditor() {
                     onClick={
                       addHighlight
                     }
-                    className="rounded-xl bg-[#7A0019] px-4 py-2 text-sm font-semibold text-white"
+                    className="rounded-xl bg-[#701D10] px-4 py-2 text-sm font-semibold text-white"
                   >
                     เพิ่มจุดเด่น
                   </button>
@@ -1724,7 +1724,7 @@ function ProgramEditor() {
                                 e,
                               )
                             }
-                            className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-[#7A0019] file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-[#5C0013]"
+                            className="w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-[#701D10] file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-[#093341]"
                           />
 
                           <p className="mt-2 text-xs text-gray-400">
@@ -1850,15 +1850,15 @@ function ProgramEditor() {
               <div className="mt-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex rounded-xl bg-slate-100 p-1">
-                    <button type="button" onClick={() => setCurriculumPlan("curriculum")} className={`rounded-lg px-4 py-2 text-sm font-bold ${curriculumPlan === "curriculum" ? "bg-[#7A0019] text-white shadow" : "text-slate-600"}`}>หลักสูตร 4 ปี</button>
-                    <button type="button" onClick={() => setCurriculumPlan("curriculum_transfer")} className={`rounded-lg px-4 py-2 text-sm font-bold ${curriculumPlan === "curriculum_transfer" ? "bg-[#7A0019] text-white shadow" : "text-slate-600"}`}>หลักสูตรเทียบโอน</button>
+                    <button type="button" onClick={() => setCurriculumPlan("curriculum")} className={`rounded-lg px-4 py-2 text-sm font-bold ${curriculumPlan === "curriculum" ? "bg-[#701D10] text-white shadow" : "text-slate-600"}`}>หลักสูตร 4 ปี</button>
+                    <button type="button" onClick={() => setCurriculumPlan("curriculum_transfer")} className={`rounded-lg px-4 py-2 text-sm font-bold ${curriculumPlan === "curriculum_transfer" ? "bg-[#701D10] text-white shadow" : "text-slate-600"}`}>หลักสูตรเทียบโอน</button>
                   </div>
                   <button
                     type="button"
                     onClick={
                       addCurriculum
                     }
-                    className="rounded-xl bg-[#7A0019] px-4 py-2 text-sm font-semibold text-white"
+                    className="rounded-xl bg-[#701D10] px-4 py-2 text-sm font-semibold text-white"
                   >
                     + เพิ่มหมวดวิชา
                   </button>
@@ -2047,7 +2047,7 @@ function ProgramEditor() {
                   <button
                     type="button"
                     onClick={addSkill}
-                    className="rounded-xl bg-[#7A0019] px-4 py-2 text-sm font-semibold text-white"
+                    className="rounded-xl bg-[#701D10] px-4 py-2 text-sm font-semibold text-white"
                   >
                     เพิ่มทักษะ
                   </button>
@@ -2107,7 +2107,7 @@ function ProgramEditor() {
                   <button
                     type="button"
                     onClick={addCareer}
-                    className="rounded-xl bg-[#7A0019] px-4 py-2 text-sm font-semibold text-white"
+                    className="rounded-xl bg-[#701D10] px-4 py-2 text-sm font-semibold text-white"
                   >
                     เพิ่มอาชีพ
                   </button>
@@ -2124,7 +2124,7 @@ function ProgramEditor() {
                         className="grid gap-3 rounded-2xl border border-gray-200 p-3 md:grid-cols-[130px_1fr_auto]"
                       >
 
-                        <label className="flex min-h-12 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-50 text-xs font-semibold text-gray-500 hover:border-[#7A0019] hover:text-[#7A0019]">
+                        <label className="flex min-h-12 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-50 text-xs font-semibold text-gray-500 hover:border-[#701D10] hover:text-[#701D10]">
                           {careerImagePreviews[index] || career.image ? (
                             <img
                               src={careerImagePreviews[index] || getImageUrl(career.image)}
@@ -2193,7 +2193,7 @@ function ProgramEditor() {
             {editing === "atmosphere" && (
               <div className="mt-6">
                 <div className="flex justify-end">
-                  <button type="button" onClick={addAtmosphere} className="rounded-xl bg-[#7A0019] px-4 py-2 font-semibold text-white">เพิ่มรูปภาพ</button>
+                  <button type="button" onClick={addAtmosphere} className="rounded-xl bg-[#701D10] px-4 py-2 font-semibold text-white">เพิ่มรูปภาพ</button>
                 </div>
                 <div className="mt-4 space-y-4">
                   {form.learning_environment.map((item, index) => (
@@ -2238,7 +2238,7 @@ function ProgramEditor() {
                   handleSave
                 }
                 disabled={saving}
-                className="rounded-xl bg-[#7A0019] px-6 py-3 font-bold text-white hover:bg-[#5C0013] disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-[#701D10] px-6 py-3 font-bold text-white hover:bg-[#093341] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving
                   ? "กำลังบันทึก..."

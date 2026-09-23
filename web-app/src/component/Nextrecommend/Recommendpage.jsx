@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 
 function Recommendpage() {
   const cards = [
@@ -7,42 +6,42 @@ function Recommendpage() {
       description:
         "ศึกษาความเป็นมาและพัฒนาการของคณะ ตั้งแต่อดีตจนถึงปัจจุบัน",
       image: "/image/A1.jpg",
-      link: "/History",
+      link: "http://industrial.uru.ac.th/history.html",
     },
     {
       title: "วิสัยทัศน์ พันธกิจ กลยุทธ์",
       description:
         "แนวทางการดำเนินงานและเป้าหมายในการพัฒนาคณะให้มีคุณภาพ",
       image: "/image/A2.jpg",
-      link: "/Vision",
+      link: "http://industrial.uru.ac.th/philosophy.html",
     },
     {
       title: "โครงสร้างการบริหาร",
       description:
         "ข้อมูลโครงสร้างการบริหารและหน่วยงานต่าง ๆ ภายในคณะ",
       image: "/image/A3.jpg",
-      link: "/Structure",
+      link: "http://industrial.uru.ac.th/board6.html",
     },
     {
       title: "ผู้บริหาร",
       description:
         "ข้อมูลผู้บริหารและบุคลากรที่มีส่วนสำคัญในการบริหารงานของคณะ",
       image: "/image/A4.jpg",
-      link: "/Executive",
+      link: "http://industrial.uru.ac.th/board2.html",
     },
     {
       title: "คณาจารย์ / นักวิจัย",
       description:
         "พบกับคณาจารย์และนักวิจัยผู้เชี่ยวชาญในด้านต่าง ๆ",
       image: "/image/A5.jpg",
-      link: "/Teacher",
+      link: "http://industrial.uru.ac.th/board5.html",
     },
     {
       title: "หน่วยงาน",
       description:
         "ข้อมูลหน่วยงานและส่วนงานต่าง ๆ ภายในคณะ",
       image: "/image/A6.jpg",
-      link: "/Department",
+      link: "http://industrial.uru.ac.th/board4.html",
     },
   ];
 
@@ -82,7 +81,10 @@ function Recommendpage() {
 
           {cards.map((card, index) => (
 
-            <div
+            <a
+              href={card.link}
+              target="_blank"
+              rel="noopener noreferrer"
               key={index}
               className="overflow-hidden rounded-2xl border border-white/10 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
             >
@@ -93,6 +95,7 @@ function Recommendpage() {
                 <img
                   src={card.image}
                   alt={card.title}
+                  onError={event => { event.currentTarget.onerror = null; event.currentTarget.src = "/image/A1.jpg"; }}
                   className="w-full h-full object-cover hover:scale-105 transition duration-500"
                 />
 
@@ -110,9 +113,8 @@ function Recommendpage() {
                 </p>
 
                 {/* ดูรายละเอียด */}
-                <Link
-                  to={card.link}
-                  className="group flex w-fit items-center gap-3 text-sm font-bold text-[#7A0019]"
+                <span
+                  className="group flex w-fit items-center gap-3 text-sm font-bold text-[#701D10]"
                 >
                   <span>
                     ดูรายละเอียด
@@ -121,11 +123,11 @@ function Recommendpage() {
                   <span className="text-lg group-hover:translate-x-2 transition">
                     →
                   </span>
-                </Link>
+                </span>
 
               </div>
 
-            </div>
+            </a>
 
           ))}
 

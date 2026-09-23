@@ -75,8 +75,8 @@ function Header() {
     <header
       className={`fixed left-0 top-0 z-50 w-full transition-all duration-300 ${
         scrolled
-          ? "border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur-xl"
-          : "bg-transparent"
+          ? "border-b border-white/15 bg-[#701D10] shadow-sm"
+          : "border-b border-transparent bg-transparent"
       }`}
     >
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
@@ -102,7 +102,7 @@ function Header() {
           <nav
             className={`hidden items-center gap-1 rounded-full px-2 py-2 backdrop-blur-md transition-all duration-300 lg:flex ${
               scrolled
-                ? "border border-gray-200 bg-gray-100/80"
+                ? "border border-white/20 bg-white/10"
                 : "border border-white/20 bg-white/10"
             }`}
           >
@@ -116,11 +116,11 @@ function Header() {
                   className={`relative rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
                     active
                       ? scrolled
-                        ? "bg-white text-[#7A0019] shadow-sm"
-                        : "bg-white text-[#7A0019]"
+                        ? "bg-white text-[#701D10] shadow-sm"
+                        : "bg-white text-[#701D10]"
                       : scrolled
-                        ? "text-gray-700 hover:bg-white hover:text-[#7A0019]"
-                        : "text-white hover:bg-white hover:text-[#7A0019]"
+                        ? "text-white hover:bg-white hover:text-[#701D10]"
+                        : "text-white hover:bg-white hover:text-[#701D10]"
                   }`}
                 >
                   {menu.name}
@@ -133,11 +133,11 @@ function Header() {
               className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
                 contactActive
                   ? scrolled
-                    ? "bg-white text-[#7A0019] shadow-sm"
-                    : "bg-white text-[#7A0019]"
+                    ? "bg-white text-[#701D10] shadow-sm"
+                    : "bg-white text-[#701D10]"
                   : scrolled
-                    ? "text-gray-700 hover:bg-white hover:text-[#7A0019]"
-                    : "text-white hover:bg-white hover:text-[#7A0019]"
+                    ? "text-white hover:bg-white hover:text-[#701D10]"
+                    : "text-white hover:bg-white hover:text-[#701D10]"
               }`}
             >
               ติดต่อ
@@ -151,7 +151,7 @@ function Header() {
           <div className="hidden items-center gap-3 lg:flex">
             <Link
               to="/apply"
-              className="rounded-full bg-[#7A0019] px-6 py-3 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:bg-[#5C0013] hover:shadow-xl active:scale-95"
+              className="rounded-full bg-[#F7941D] px-6 py-3 text-sm font-bold text-black shadow-lg transition-all duration-300 hover:bg-white hover:shadow-xl active:scale-95"
             >
               สาขาที่สนใจ
             </Link>
@@ -166,7 +166,7 @@ function Header() {
             onClick={() => setMenuOpen(!menuOpen)}
             className={`flex h-11 w-11 items-center justify-center rounded-full transition lg:hidden ${
               scrolled
-                ? "bg-gray-100 text-gray-800"
+                ? "bg-white/10 text-white"
                 : "bg-white/10 text-white backdrop-blur-md"
             }`}
             aria-label="เปิดเมนู"
@@ -183,8 +183,8 @@ function Header() {
           <div
             className={`mb-4 overflow-hidden rounded-2xl border p-4 shadow-xl backdrop-blur-xl lg:hidden ${
               scrolled
-                ? "border-gray-200 bg-white/95"
-                : "border-white/20 bg-black/70"
+                ? "border-white/20 bg-[#701D10]"
+                : "border-white/20 bg-[#701D10]"
             }`}
           >
             <nav className="flex flex-col gap-2">
@@ -198,9 +198,9 @@ function Header() {
                     onClick={() => setMenuOpen(false)}
                     className={`relative rounded-xl px-4 py-3 text-sm font-semibold transition ${
                       active
-                        ? "bg-white text-[#7A0019] shadow-sm"
+                        ? "bg-white text-[#701D10] shadow-sm"
                         : scrolled
-                          ? "text-gray-700 hover:bg-gray-100 hover:text-[#7A0019]"
+                          ? "text-white hover:bg-white hover:text-[#701D10]"
                           : "text-white hover:bg-white/10"
                     }`}
                   >
@@ -214,9 +214,9 @@ function Header() {
                 onClick={() => setMenuOpen(false)}
                 className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
                   contactActive
-                    ? "bg-white text-[#7A0019] shadow-sm"
+                    ? "bg-white text-[#701D10] shadow-sm"
                     : scrolled
-                      ? "text-gray-700 hover:bg-gray-100 hover:text-[#7A0019]"
+                      ? "text-white hover:bg-white hover:text-[#701D10]"
                       : "text-white hover:bg-white/10"
                 }`}
               >
@@ -228,7 +228,7 @@ function Header() {
               <Link
                 to="/apply"
                 onClick={() => setMenuOpen(false)}
-                className="rounded-xl bg-[#7A0019] px-4 py-3 text-center text-sm font-bold text-white transition hover:bg-[#5C0013]"
+                className="rounded-xl bg-[#F7941D] px-4 py-3 text-center text-sm font-bold text-black transition hover:bg-white"
               >
                 สนใจเข้าศึกษา
               </Link>

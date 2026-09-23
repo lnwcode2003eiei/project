@@ -2,22 +2,17 @@ function Hero() {
   return (
     <section id="home" className="relative min-h-svh w-full overflow-hidden">
 
-      {/* Background Video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
+      {/* Decorative generated background; keep the original video asset for rollback. */}
+      <img
+        src="/image/faculty-home-hero-v2.png"
+        alt=""
+        fetchPriority="high"
+        decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
-      >
-        <source src="/video/campus.mp4" type="video/mp4" />
-      </video>
-
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40"></div>
+      />
 
       {/* Content */}
-      <div className="relative z-10 flex min-h-svh items-center justify-center px-6 pb-28 pt-32 text-center">
+      <div className="relative z-10 flex min-h-svh items-center justify-center px-6 pb-28 pt-32 text-center [text-shadow:0_2px_6px_rgb(0_0_0/90%)]">
         <div className="max-w-6xl">
 
           {/* Title */}

@@ -1,12 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Chonburi&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --color-brand-primary: #701D10;
+  --color-brand-secondary: #093341;
+  --color-brand-accent: #F7941D;
+  --color-gray-900: #000000;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #F7941D;
+  outline-offset: 3px;
+}
+
 html,
 body,
 #root {
   font-family: 'Noto Sans Thai', sans-serif;
   background: #ffffff;
-  color: #171717;
+  color: #000000;
 }
 
 .font-display {
@@ -14,7 +26,7 @@ body,
 }
 
 .course-generated-hero {
-  background-color: #580012;
+  background-color: #093341;
   background-size: cover;
   background-position: center;
 }
@@ -61,7 +73,7 @@ body,
 
 .swiper-pagination-bullet-active {
   opacity: 1;
-  background: #7A0019 !important;
+  background: #701D10 !important;
   width: 24px !important;
   border-radius: 10px !important;
 }
@@ -69,7 +81,7 @@ body,
 /* Academic programs */
 .programs-showcase {
   background:
-    radial-gradient(circle at 50% 0%, rgba(122, 0, 25, 0.08), transparent 30rem),
+    radial-gradient(circle at 50% 0%, rgba(112, 29, 16, 0.08), transparent 30rem),
     #fff;
 }
 
@@ -85,7 +97,7 @@ body,
   width: 4.5rem;
   height: 0.25rem;
   border-radius: 999px;
-  background: #7a0019;
+  background: #F7941D;
   content: "";
   transform: translateX(-50%);
 }
@@ -125,7 +137,7 @@ body,
   height: 100%;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(122, 0, 25, 0.12);
+  border: 1px solid rgba(112, 29, 16, 0.12);
   border-radius: 1.5rem;
   background: #fff;
   box-shadow: 0 0.75rem 2.25rem rgba(23, 23, 23, 0.09);
@@ -133,16 +145,18 @@ body,
 }
 
 .programs-showcase .swiper-slide > div:hover {
-  border-color: rgba(122, 0, 25, 0.45);
-  box-shadow: 0 1.25rem 2.75rem rgba(122, 0, 25, 0.18);
+  border-color: rgba(112, 29, 16, 0.45);
+  box-shadow: 0 1.25rem 2.75rem rgba(112, 29, 16, 0.18);
   transform: translateY(-0.5rem);
 }
 
-.programs-showcase .swiper-slide > div > img {
+.programs-showcase .program-poster {
   display: block;
-  height: 14rem;
-  border-bottom: 0.25rem solid #7a0019;
-  background: #f7e9ec;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: #FFFFFF;
   color: transparent;
   font-size: 0;
 }
@@ -160,7 +174,7 @@ body,
 }
 
 .programs-showcase .swiper-slide h3 {
-  color: #171717;
+  color: #000000;
   font-size: 1.35rem;
   line-height: 1.45;
 }
@@ -169,20 +183,20 @@ body,
   color: #5a4549;
 }
 
-.programs-showcase .swiper-slide p.text-\[\#7A0019\] {
-  color: #7a0019;
+.programs-showcase .swiper-slide p.text-\[\#701D10\] {
+  color: #701D10;
   font-weight: 700;
 }
 
-.programs-showcase .swiper-slide a {
+.programs-showcase .swiper-slide > div > div:last-child a {
   margin-top: auto !important;
   border-radius: 0.8rem;
-  background: #7a0019;
-  box-shadow: 0 0.45rem 1rem rgba(122, 0, 25, 0.2);
+  background: #701D10;
+  box-shadow: 0 0.45rem 1rem rgba(112, 29, 16, 0.2);
 }
 
-.programs-showcase .swiper-slide a:hover {
-  background: #500011;
+.programs-showcase .swiper-slide > div > div:last-child a:hover {
+  background: #093341;
 }
 
 @media (max-width: 640px) {
@@ -192,7 +206,7 @@ body,
 }
 
 .career-showcase {
-  color: #171717;
+  color: #000000;
 }
 
 .career-showcase .mx-auto.max-w-2xl {
@@ -201,13 +215,13 @@ body,
 }
 
 .career-showcase .mx-auto.max-w-2xl span {
-  color: #8f001e;
+  color: #701D10;
   font-weight: 800;
 }
 
 .career-showcase .mx-auto.max-w-2xl h2,
 .career-showcase__admin-heading h2 {
-  color: #171717;
+  color: #000000;
 }
 
 .career-showcase .mx-auto.max-w-2xl p {
@@ -220,7 +234,7 @@ body,
   overflow-x: auto;
   padding: 0.25rem 0 1rem;
   scroll-snap-type: x mandatory;
-  scrollbar-color: #8f001e #f4e7ea;
+  scrollbar-color: #701D10 #FFFFFF;
   scrollbar-width: thin;
 }
 
@@ -230,7 +244,7 @@ body,
 
 .career-showcase__list::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: #8f001e;
+  background: #701D10;
 }
 
 .career-showcase__card {
@@ -240,14 +254,14 @@ body,
   height: 25rem;
   overflow: hidden;
   border-radius: 1.4rem;
-  background: linear-gradient(145deg, #9a0022, #3f000e);
+  background: linear-gradient(145deg, #093341, #093341);
   box-shadow: 0 0.8rem 1.8rem rgba(43, 8, 15, 0.14);
   scroll-snap-align: start;
   transition: transform 220ms ease, box-shadow 220ms ease;
 }
 
 .career-showcase__card:hover {
-  box-shadow: 0 1.2rem 2.4rem rgba(122, 0, 25, 0.25);
+  box-shadow: 0 1.2rem 2.4rem rgba(112, 29, 16, 0.25);
   transform: translateY(-0.35rem);
 }
 
@@ -312,18 +326,18 @@ body,
 }
 
 .learning-atmosphere-swiper .swiper-pagination-bullet-active {
-  background: #9e0022;
+  background: #093341;
   opacity: 1;
 }
 
 .admin-shell {
   background: #fff !important;
-  color: #171717;
+  color: #000000;
 }
 
 .admin-shell > main > header {
-  border-color: #5c0013;
-  background: #7a0019 !important;
+  border-color: #093341;
+  background: #093341 !important;
 }
 
 .admin-shell > main > header h1,
@@ -332,13 +346,13 @@ body,
 }
 
 .admin-sidebar {
-  border-color: #f1dce1 !important;
+  border-color: #E5E7EB !important;
   background: #fff !important;
 }
 
 .admin-sidebar .border-gray-200,
 .admin-shell .border-gray-200 {
-  border-color: #f1dce1;
+  border-color: #E5E7EB;
 }
 
 .admin-shell .bg-gray-50 {
@@ -346,7 +360,7 @@ body,
 }
 
 .admin-shell .text-gray-900 {
-  color: #171717;
+  color: #000000;
 }
 
 .admin-shell .text-gray-500,
@@ -354,13 +368,6 @@ body,
   color: #707070;
 }
 
-.admin-shell .bg-red-50 {
-  background-color: #f5e7ea;
-}
-
-.admin-shell .text-red-600 {
-  color: #7a0019;
-}
 
 /* ให้ปุ่มในระบบ Admin ตอบสนองชัดเจนเมื่อชี้ กด หรือใช้งานด้วยคีย์บอร์ด */
 .admin-shell button:not(:disabled) {
@@ -377,17 +384,17 @@ body,
 .admin-shell button:not(:disabled):hover {
   filter: brightness(1.16) saturate(1.08);
   transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(122, 0, 25, 0.18);
+  box-shadow: 0 8px 18px rgba(112, 29, 16, 0.18);
 }
 
 .admin-shell button:not(:disabled):active {
   filter: brightness(0.82);
   transform: translateY(1px) scale(0.98);
-  box-shadow: 0 2px 6px rgba(122, 0, 25, 0.16);
+  box-shadow: 0 2px 6px rgba(112, 29, 16, 0.16);
 }
 
 .admin-shell button:not(:disabled):focus-visible {
-  outline: 3px solid rgba(179, 18, 58, 0.35);
+  outline: 3px solid rgba(247, 148, 29, 0.35);
   outline-offset: 3px;
 }
 

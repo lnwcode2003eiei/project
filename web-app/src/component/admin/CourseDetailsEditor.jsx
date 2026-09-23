@@ -9,7 +9,7 @@ const categories = [
   { id: "supports", label: "สิ่งสนับสนุนการเรียนการสอน", groups: ["supports"] },
   { id: "contact", label: "การติดต่อ", groups: [] },
 ];
-const fieldClass = "mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-[#7A0019] focus:outline-none focus:ring-1 focus:ring-[#7A0019]";
+const fieldClass = "mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-[#701D10] focus:outline-none focus:ring-1 focus:ring-[#701D10]";
 function Field({ label, value, onChange, multiline = false, ...props }) {
   const Tag = multiline ? "textarea" : "input";
   return <label className="block text-sm font-medium">{label}<Tag {...props} rows={multiline ? 4 : undefined} className={fieldClass} value={value || ""} onChange={event => onChange(event.target.value)} /></label>;
@@ -62,11 +62,11 @@ export default function CourseDetailsEditor({ slug }) {
   };
   return <section className="mb-8 rounded-2xl border border-rose-200 bg-white shadow-sm" aria-label="แก้ไขข้อมูลเพิ่มเติมของสาขา">
     <div className="p-5 sm:p-8">
-      <h2 className="text-xl font-bold text-[#7A0019]">แก้ไขข้อมูลเพิ่มเติมของสาขา</h2>
+      <h2 className="text-xl font-bold text-[#701D10]">แก้ไขข้อมูลเพิ่มเติมของสาขา</h2>
       <p className="mt-2 text-sm text-gray-600">เลือกหมวดที่ต้องการแก้ไข แล้วกดบันทึกข้อมูลเพิ่มเติมของสาขา</p>
       {dirty && <p className="mt-2 text-sm font-medium text-amber-800">มีการแก้ไขที่ยังไม่ได้บันทึก</p>}
       <nav aria-label="หมวดข้อมูลสาขา" className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-        {categories.map(category => <button key={category.id} type="button" disabled={saving} aria-pressed={activeCategory === category.id} onClick={() => setActiveCategory(category.id)} className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${activeCategory === category.id ? "border-[#7A0019] bg-[#7A0019] text-white" : "border-rose-200 bg-white text-[#7A0019] hover:bg-rose-50"}`}>{category.label}</button>)}
+        {categories.map(category => <button key={category.id} type="button" disabled={saving} aria-pressed={activeCategory === category.id} onClick={() => setActiveCategory(category.id)} className={`rounded-xl border px-4 py-3 text-sm font-semibold transition ${activeCategory === category.id ? "border-[#701D10] bg-[#701D10] text-white" : "border-rose-200 bg-white text-[#701D10] hover:bg-rose-50"}`}>{category.label}</button>)}
       </nav>
     </div>
     {!data ? <div className="p-5" role="status">{error || "กำลังโหลดข้อมูล..."}{error && <button type="button" className="ml-3 underline" onClick={() => setRetry(value => value + 1)}>ลองใหม่</button>}</div> : <form onSubmit={save} className="space-y-8 border-t p-5 sm:p-8">
@@ -75,7 +75,7 @@ export default function CourseDetailsEditor({ slug }) {
         {activeCategory === "philosophy" && <Field label="ปรัชญาของหลักสูตร" multiline maxLength={10000} value={data.philosophy} onChange={value => change("philosophy", value)} />}
         {activeCategory === "standards" && <Field label="คำอธิบายมาตรฐานการเรียนรู้ / TQF และ PLO" multiline maxLength={10000} value={data.standardsIntro} onChange={value => change("standardsIntro", value)} />}
         {groups.filter(([key]) => selectedCategory.groups.includes(key)).map(([key, title]) => <section key={key} className="space-y-4 rounded-xl border border-gray-200 p-4">
-          <h3 className="text-lg font-bold text-[#7A0019]">{title}</h3>
+          <h3 className="text-lg font-bold text-[#701D10]">{title}</h3>
           {data[key].map((row, index) => <div key={index} className="space-y-4 rounded-xl bg-gray-50 p-4">
             <div className="flex items-center justify-between gap-3"><span className="font-semibold">รายการที่ {index + 1}</span><button type="button" className="text-red-700 underline" onClick={() => { if (window.confirm("ลบรายการนี้? การลบจะมีผลเมื่อกดบันทึก")) change(key, data[key].filter((_, i) => i !== index)); }}>ลบรายการ</button></div>
             <Field label="ชื่อ / หัวข้อ *" required maxLength={250} value={row.title} onChange={value => changeRow(key, index, "title", value)} />
@@ -83,15 +83,15 @@ export default function CourseDetailsEditor({ slug }) {
             <div className="grid gap-4 sm:grid-cols-2"><label className="block text-sm font-medium">ไอคอน<select className={fieldClass} value={row.icon} onChange={event => changeRow(key, index, "icon", event.target.value)}>{Object.entries(detailIcons).map(([id, [label]]) => <option key={id} value={id}>{label}</option>)}</select></label>
               <Field label="ลิงก์รายละเอียด / เอกสาร (http หรือ https)" type="url" maxLength={1000} value={row.url} onChange={value => changeRow(key, index, "url", value)} /></div>
           </div>)}
-          <button type="button" disabled={data[key].length >= 40} className="rounded-lg border border-[#7A0019] px-4 py-2 font-semibold text-[#7A0019] disabled:opacity-40" onClick={() => change(key, [...data[key], { title: "", description: "", icon: "book", url: "" }])}>+ เพิ่มรายการ</button>
+          <button type="button" disabled={data[key].length >= 40} className="rounded-lg border border-[#701D10] px-4 py-2 font-semibold text-[#701D10] disabled:opacity-40" onClick={() => change(key, [...data[key], { title: "", description: "", icon: "book", url: "" }])}>+ เพิ่มรายการ</button>
         </section>)}
-        {activeCategory === "contact" && <section className="space-y-4 rounded-xl border border-gray-200 p-4"><h3 className="text-lg font-bold text-[#7A0019]">การติดต่อ</h3>
+        {activeCategory === "contact" && <section className="space-y-4 rounded-xl border border-gray-200 p-4"><h3 className="text-lg font-bold text-[#701D10]">การติดต่อ</h3>
           {[["name", "ชื่อหน่วยงาน / ผู้ติดต่อ", "text", 250], ["phone", "โทรศัพท์", "tel", 100], ["email", "อีเมล", "email", 250], ["url", "ลิงก์เว็บไซต์ / ช่องทางติดต่อ", "url", 1000], ["address", "ที่อยู่ / สถานที่ติดต่อ", "text", 2000]].map(([key, label, type, maxLength]) => <Field key={key} label={label} type={type} maxLength={maxLength} multiline={key === "address"} value={data.contact[key]} onChange={value => change("contact", { ...data.contact, [key]: value })} />)}
         </section>}
       </fieldset>
       {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-red-700">{error}</p>}
       {message && <p role="status" className="rounded-lg bg-green-50 p-3 text-green-800">{message}</p>}
-      <button type="submit" disabled={saving || !dirty} className="rounded-xl bg-[#7A0019] px-6 py-3 font-semibold text-white disabled:opacity-50">{saving ? "กำลังบันทึก..." : "บันทึกข้อมูลเพิ่มเติมของสาขา"}</button>
+      <button type="submit" disabled={saving || !dirty} className="rounded-xl bg-[#701D10] px-6 py-3 font-semibold text-white disabled:opacity-50">{saving ? "กำลังบันทึก..." : "บันทึกข้อมูลเพิ่มเติมของสาขา"}</button>
     </form>}
   </section>;
 }

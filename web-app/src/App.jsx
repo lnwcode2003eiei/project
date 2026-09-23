@@ -14,12 +14,6 @@ import Register from "./component/Register";
 import ApplyPage from "./component/ApplyPage";
 
 import Recommendpage from "./component/Nextrecommend/Recommendpage";
-import History from "./component/Nextrecommend/pagerecommend/History";
-import Vision from "./component/Nextrecommend/pagerecommend/Vision";
-import Structure from "./component/Nextrecommend/pagerecommend/Structure";
-import Executive from "./component/Nextrecommend/pagerecommend/Executive";
-import Teacher from "./component/Nextrecommend/pagerecommend/Teacher";
-import Department from "./component/Nextrecommend/pagerecommend/Department";
 
 import Computer from "./component/saka/computer";
 import Electrical from "./component/saka/electrical";
@@ -120,17 +114,17 @@ function AppContent() {
 
         <Route path="/Recommendpage" element={<Recommendpage />} />
 
-        <Route path="/History" element={<History />} />
+        <Route path="/History" element={<Navigate to="/Recommendpage" replace />} />
 
-        <Route path="/Vision" element={<Vision />} />
+        <Route path="/Vision" element={<Navigate to="/Recommendpage" replace />} />
 
-        <Route path="/Structure" element={<Structure />} />
+        <Route path="/Structure" element={<Navigate to="/Recommendpage" replace />} />
 
-        <Route path="/Executive" element={<Executive />} />
+        <Route path="/Executive" element={<Navigate to="/Recommendpage" replace />} />
 
-        <Route path="/Teacher" element={<Teacher />} />
+        <Route path="/Teacher" element={<Navigate to="/Recommendpage" replace />} />
 
-        <Route path="/Department" element={<Department />} />
+        <Route path="/Department" element={<Navigate to="/Recommendpage" replace />} />
 
         {/* ================================= */}
         {/* สาขา */}

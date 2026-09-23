@@ -3,12 +3,11 @@ import { Link } from "react-router-dom";
 
 import "swiper/css";
 
+function ProgramPoster({ src, alt }) {
+  return <img className="program-poster" src={src} alt={alt} loading="lazy" decoding="async" width="1254" height="1254" />;
+}
+
 function Slider() {
-  const useProgramPlaceholder = (event) => {
-    event.currentTarget.onerror = null;
-    event.currentTarget.removeAttribute("src");
-    event.currentTarget.classList.add("programs-showcase__image-empty");
-  };
 
   return (
     <section id="programs" className="programs-showcase w-full bg-white px-6 py-20">
@@ -19,7 +18,7 @@ function Slider() {
 
       <div className="programs-showcase__intro mx-auto max-w-7xl text-center">
 
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A0019]">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#701D10]">
           Academic Programs
         </p>
 
@@ -38,7 +37,7 @@ function Slider() {
 
         <div className="text-center">
 
-          <span className="inline-block rounded-full bg-[#7A0019] px-5 py-2 text-sm font-semibold text-white">
+          <span className="inline-block rounded-full bg-[#701D10] px-5 py-2 text-sm font-semibold text-white">
             ระดับปริญญาตรี
           </span>
 
@@ -79,12 +78,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B10.jpg"
-                alt="เทคโนโลยีไฟฟ้า"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/6.png" alt="เทคโนโลยีไฟฟ้า" />
 
               <div className="p-6">
 
@@ -92,7 +86,7 @@ function Slider() {
                   เทคโนโลยีไฟฟ้า
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Electrical Technology
                 </p>
 
@@ -103,7 +97,7 @@ function Slider() {
 
                 <Link
                   to="/electrical"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>
@@ -123,12 +117,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B1.jpg"
-                alt="เทคโนโลยีดิจิทัลเพื่อการออกแบบ"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/9.png" alt="เทคโนโลยีดิจิทัลเพื่อการออกแบบ" />
 
               <div className="p-6">
 
@@ -136,7 +125,7 @@ function Slider() {
                   เทคโนโลยีดิจิทัลเพื่อการออกแบบ
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Digital Technology for Design
                 </p>
 
@@ -147,7 +136,7 @@ function Slider() {
 
                 <Link
                   to="/digital"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>
@@ -167,12 +156,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B2.jpg"
-                alt="เทคโนโลยีอุตสาหการ"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/7.png" alt="เทคโนโลยีอุตสาหการ" />
 
               <div className="p-6">
 
@@ -180,7 +164,7 @@ function Slider() {
                   เทคโนโลยีอุตสาหการ
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Industrial Technology
                 </p>
 
@@ -191,7 +175,7 @@ function Slider() {
 
                 <Link
                   to="/industrial"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>
@@ -211,12 +195,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B3.jpg"
-                alt="เทคโนโลยีสำรวจและภูมิสารสนเทศ"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/8.png" alt="เทคโนโลยีสำรวจและภูมิสารสนเทศ" />
 
               <div className="p-6">
 
@@ -224,7 +203,7 @@ function Slider() {
                   เทคโนโลยีสำรวจและภูมิสารสนเทศ
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Surveying and Geoinformatics Technology
                 </p>
 
@@ -235,7 +214,7 @@ function Slider() {
 
                 <Link
                   to="/survey"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>
@@ -259,7 +238,7 @@ function Slider() {
 
         <div className="text-center">
 
-          <span className="inline-block rounded-full bg-[#7A0019] px-5 py-2 text-sm font-semibold text-white">
+          <span className="inline-block rounded-full bg-[#701D10] px-5 py-2 text-sm font-semibold text-white">
             ระดับปริญญาตรี
           </span>
 
@@ -296,12 +275,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B4.jpg"
-                alt="วิศวกรรมคอมพิวเตอร์"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/10.png" alt="วิศวกรรมคอมพิวเตอร์" />
 
               <div className="p-6">
 
@@ -309,7 +283,7 @@ function Slider() {
                   วิศวกรรมคอมพิวเตอร์
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Computer Engineering
                 </p>
 
@@ -320,7 +294,7 @@ function Slider() {
 
                 <Link
                   to="/computer"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>
@@ -340,12 +314,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B5.jpg"
-                alt="วิศวกรรมโลจิสติกส์"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/logistics-poster-v1.png" alt="วิศวกรรมโลจิสติกส์" />
 
               <div className="p-6">
 
@@ -353,7 +322,7 @@ function Slider() {
                   วิศวกรรมโลจิสติกส์
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Logistics Engineering
                 </p>
 
@@ -364,7 +333,7 @@ function Slider() {
 
                 <Link
                   to="/logistics"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>
@@ -384,12 +353,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B6.jpg"
-                alt="วิศวกรรมการจัดการพลังงานในงานอุตสาหกรรม"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/energy-poster-v1.png" alt="วิศวกรรมการจัดการพลังงานในงานอุตสาหกรรม" />
 
               <div className="p-6">
 
@@ -397,7 +361,7 @@ function Slider() {
                   วิศวกรรมการจัดการพลังงานในงานอุตสาหกรรม
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Energy Management Engineering
                 </p>
 
@@ -408,7 +372,7 @@ function Slider() {
 
                 <Link
                   to="/energy"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>
@@ -428,12 +392,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B9.jpg"
-                alt="วิศวกรรมบริหารงานก่อสร้าง"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/construction-poster-v1.png" alt="วิศวกรรมบริหารงานก่อสร้าง" />
 
               <div className="p-6">
 
@@ -441,7 +400,7 @@ function Slider() {
                   วิศวกรรมบริหารงานก่อสร้าง
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Construction Management Engineering
                 </p>
 
@@ -452,7 +411,7 @@ function Slider() {
 
                 <Link
                   to="/construction"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>
@@ -476,7 +435,7 @@ function Slider() {
 
         <div className="text-center">
 
-          <span className="inline-block rounded-full bg-[#7A0019] px-5 py-2 text-sm font-semibold text-white">
+          <span className="inline-block rounded-full bg-[#701D10] px-5 py-2 text-sm font-semibold text-white">
             ระดับปริญญาโท
           </span>
 
@@ -513,12 +472,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B7.jpg"
-                alt="การจัดการงานวิศวกรรม"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/management-poster-v1.png" alt="การจัดการงานวิศวกรรม" />
 
               <div className="p-6">
 
@@ -526,7 +480,7 @@ function Slider() {
                   การจัดการงานวิศวกรรม
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Engineering Management
                 </p>
 
@@ -537,7 +491,7 @@ function Slider() {
 
                 <Link
                   to="/management"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>
@@ -557,12 +511,7 @@ function Slider() {
 
             <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
 
-              <img
-                src="/image/B8.jpg"
-                alt="วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์"
-                onError={useProgramPlaceholder}
-                className="h-56 w-full object-cover"
-              />
+              <ProgramPoster src="/image/computer-ai-poster-v1.png" alt="วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์" />
 
               <div className="p-6">
 
@@ -570,7 +519,7 @@ function Slider() {
                   วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์
                 </h3>
 
-                <p className="mt-2 text-sm text-[#7A0019]">
+                <p className="mt-2 text-sm text-[#701D10]">
                   Computer Engineering and Artificial Intelligence
                 </p>
 
@@ -581,7 +530,7 @@ function Slider() {
 
                 <Link
                   to="/computerAI"
-                  className="mt-6 block rounded-xl bg-[#7A0019] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#5C0013]"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
                 >
                   ดูรายละเอียดหลักสูตร →
                 </Link>

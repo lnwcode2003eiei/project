@@ -53,11 +53,11 @@ function News() {
   };
 
   return (
-    <section id="news" className="min-h-screen bg-[#171717] px-6 py-20">
+    <section id="news" className="min-h-screen bg-[#093341] px-6 py-20">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-12 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A0019]">
+          <p className="text-base font-bold uppercase tracking-[0.15em] text-[#F7941D]">
             News & Activities
           </p>
 
@@ -65,7 +65,7 @@ function News() {
             ข่าวสารและกิจกรรม
           </h1>
 
-          <p className="mx-auto mt-4 max-w-2xl text-gray-300">
+          <p className="mx-auto mt-4 max-w-3xl text-lg leading-8 text-white">
             ติดตามข่าวสาร ประกาศ กิจกรรม และเรื่องราวที่น่าสนใจ
             จากคณะเทคโนโลยีอุตสาหกรรม
           </p>
@@ -73,7 +73,7 @@ function News() {
 
         {/* Loading */}
         {loading && (
-          <div className="flex items-center justify-center py-20 text-gray-400">
+          <div className="flex items-center justify-center py-20 text-lg text-white">
             กำลังโหลดข่าวสาร...
           </div>
         )}
@@ -81,7 +81,7 @@ function News() {
         {/* ไม่มีข่าว */}
         {!loading && news.length === 0 && (
             <div className="rounded-3xl bg-white p-16 text-center shadow-sm">
-            <p className="text-gray-400">ยังไม่มีข่าวสารในขณะนี้</p>
+            <p className="text-gray-600">ยังไม่มีข่าวสารในขณะนี้</p>
           </div>
         )}
 
@@ -99,7 +99,7 @@ function News() {
                     className="h-full w-full object-cover transition duration-500 hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center bg-gray-100 text-gray-400">
+                  <div className="flex h-full items-center justify-center bg-gray-100 text-gray-600">
                     ไม่มีรูปภาพ
                   </div>
                 )}
@@ -107,11 +107,11 @@ function News() {
 
               {/* เนื้อหาข่าวเด่น */}
               <div className="flex flex-col justify-center p-8 md:p-12">
-                <span className="w-fit rounded-full bg-[#7A0019]/10 px-4 py-2 text-xs font-semibold text-[#7A0019]">
+                <span className="w-fit rounded-full bg-[#701D10]/10 px-4 py-2 text-sm font-semibold text-[#701D10]">
                   {news[0].category}
                 </span>
 
-                <p className="mt-5 text-sm text-gray-500">
+                <p className="mt-5 text-base text-gray-700">
                   {formatDate(news[0].created_at)}
                 </p>
 
@@ -119,13 +119,13 @@ function News() {
                   {news[0].title}
                 </h2>
 
-                <p className="mt-5 leading-7 text-gray-600">
+                <p className="mt-5 text-lg leading-8 text-black">
                   {news[0].description}
                 </p>
 
                 <Link
                   to={`/news/${news[0].id}`}
-                  className="mt-8 inline-flex w-fit rounded-full bg-[#7A0019] px-6 py-3 font-semibold text-white transition hover:bg-[#5C0013] active:scale-95"
+                  className="mt-8 inline-flex w-fit rounded-full bg-[#701D10] px-6 py-3 font-semibold text-white transition hover:bg-[#093341] active:scale-95"
                 >
                   อ่านข่าวเพิ่มเติม →
                 </Link>
@@ -134,7 +134,7 @@ function News() {
 
             {/* Latest News */}
             <div className="mb-8">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#7A0019]">
+              <p className="text-base font-bold uppercase tracking-[0.15em] text-[#F7941D]">
                 Latest News
               </p>
 
@@ -142,7 +142,7 @@ function News() {
                 ข่าวล่าสุด
               </h2>
 
-              <div className="mt-3 h-1 w-16 rounded-full bg-[#7A0019]" />
+              <div className="mt-3 h-1 w-16 rounded-full bg-[#F7941D]" />
             </div>
 
             {/* News Cards */}
@@ -164,7 +164,7 @@ function News() {
                           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-gray-400">
+                        <div className="flex h-full items-center justify-center text-gray-600">
                           ไม่มีรูปภาพ
                         </div>
                       )}
@@ -172,27 +172,27 @@ function News() {
 
                     {/* Content */}
                     <div className="p-6">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="rounded-full bg-[#7A0019]/10 px-3 py-1 text-xs font-semibold text-[#7A0019]">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <span className="rounded-full bg-[#701D10]/10 px-3 py-1 text-sm font-semibold text-[#701D10]">
                           {item.category}
                         </span>
 
-                        <span className="text-xs text-gray-400">
+                        <span className="text-sm text-gray-700">
                           {formatDate(item.created_at)}
                         </span>
                       </div>
 
-                      <h3 className="mt-4 line-clamp-2 text-xl font-bold leading-relaxed text-gray-900">
+                      <h3 className="mt-4 line-clamp-2 text-2xl font-bold leading-relaxed text-black">
                         {item.title}
                       </h3>
 
-                      <p className="mt-3 line-clamp-3 text-sm leading-7 text-gray-600">
+                      <p className="mt-3 line-clamp-3 text-base leading-8 text-black">
                         {item.description}
                       </p>
 
                       <Link
                         to={`/news/${item.id}`}
-                        className="mt-5 inline-block text-sm font-semibold text-[#7A0019] transition hover:text-[#5C0013]"
+                        className="mt-5 inline-block py-2 text-base font-bold text-[#701D10] transition hover:text-black"
                       >
                         อ่านเพิ่มเติม →
                       </Link>
@@ -206,7 +206,7 @@ function News() {
             <div className="mt-14 flex justify-center">
               <Link
                 to="/news/all"
-                className="group inline-flex items-center gap-3 rounded-full border-2 border-[#7A0019] px-8 py-3 font-semibold text-[#7A0019] transition-all duration-300 hover:bg-[#7A0019] hover:text-white active:scale-95"
+                className="group inline-flex items-center gap-3 rounded-full border-2 border-[#F7941D] bg-[#F7941D] px-8 py-3 text-lg font-bold text-black transition-all duration-300 hover:border-white hover:bg-white active:scale-95"
               >
                 <span>ข่าวสารทั้งหมด</span>
 
