@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { apiUrl } from "../../config/api";
+import VisitorChart from "./VisitorChart";
 
 function Dashboard() {
   // ==========================================
@@ -38,7 +39,6 @@ function Dashboard() {
     todayVisitors: 0,
   });
 
-  const [monthlyData, setMonthlyData] = useState([]);
   const [majorInterests, setMajorInterests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -88,7 +88,6 @@ function Dashboard() {
       try {
         const [
           dashRes,
-          monthlyRes,
           majorsRes,
         ] = await Promise.all([
           fetch(
@@ -96,10 +95,6 @@ function Dashboard() {
             requestOptions,
           ),
 
-          fetch(
-            apiUrl("/api/admin/dashboard/monthly"),
-            requestOptions,
-          ),
 
           fetch(
             apiUrl("/api/admin/dashboard/majors"),
@@ -109,11 +104,9 @@ function Dashboard() {
 
         const [
           dashResult,
-          monthlyResult,
           majorsResult,
         ] = await Promise.all([
           dashRes.json(),
-          monthlyRes.json(),
           majorsRes.json(),
         ]);
 
@@ -123,11 +116,6 @@ function Dashboard() {
           );
         }
 
-        if (monthlyResult.success) {
-          setMonthlyData(
-            monthlyResult.data,
-          );
-        }
 
         if (majorsResult.success) {
           setMajorInterests(
@@ -282,57 +270,6 @@ function Dashboard() {
   // เตรียมข้อมูลกราฟรายเดือน
   // ==========================================
 
-  const months = [
-    "ม.ค.",
-    "ก.พ.",
-    "มี.ค.",
-    "เม.ย.",
-    "พ.ค.",
-    "มิ.ย.",
-    "ก.ค.",
-    "ส.ค.",
-    "ก.ย.",
-    "ต.ค.",
-    "พ.ย.",
-    "ธ.ค.",
-  ];
-
-  const chartData = months.map(
-    (monthName, index) => {
-      const monthNumber = index + 1;
-
-      const found = monthlyData.find(
-        (item) =>
-          Number(item.month) ===
-          monthNumber,
-      );
-
-      return {
-        month: monthName,
-        value: found
-          ? Number(found.total || 0)
-          : 0,
-      };
-    },
-  );
-
-  const maxValue = Math.max(
-    ...chartData.map(
-      (item) => item.value,
-    ),
-    1,
-  );
-
-  const totalMonthlyVisitors = chartData.reduce(
-    (total, item) => total + item.value,
-    0,
-  );
-  const peakMonth = chartData.reduce(
-    (currentPeak, item) =>
-      item.value > currentPeak.value ? item : currentPeak,
-    chartData[0],
-  );
-
   return (
     <div className="mx-auto max-w-[1400px]">
 
@@ -471,104 +408,7 @@ function Dashboard() {
                 Bar Chart
             ===================================== */}
 
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-
-              <div className="flex flex-col gap-5 border-b border-gray-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
-
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    สถิติผู้เข้าชมเว็บไซต์
-                  </h2>
-
-                  <p className="mt-1 text-sm text-gray-400">
-                    จำนวนผู้เข้าชมรายเดือน
-                  </p>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="rounded-xl bg-red-50 px-4 py-2">
-                    <p className="text-xs font-medium text-gray-500">รวมปีนี้</p>
-                    <p className="mt-1 text-lg font-bold text-red-600">
-                      {totalMonthlyVisitors.toLocaleString()} <span className="text-xs font-medium">ครั้ง</span>
-                    </p>
-                  </div>
-                  <div className="rounded-xl bg-gray-50 px-4 py-2">
-                    <p className="text-xs font-medium text-gray-500">สูงสุด</p>
-                    <p className="mt-1 text-lg font-bold text-gray-900">
-                      {peakMonth.value.toLocaleString()} <span className="text-xs font-medium text-gray-500">{peakMonth.month}</span>
-                    </p>
-                  </div>
-                </div>
-
-              </div>
-
-              <div className="mt-6">
-
-                <div className="relative h-[280px] w-full sm:h-[320px]">
-
-                  <div className="absolute inset-x-0 bottom-7 top-0 flex flex-col justify-between">
-
-                    {[100, 75, 50, 25, 0].map(
-                      (value) => (
-                        <div
-                          key={value}
-                          className="flex items-center"
-                        >
-
-                          <span className="w-10 text-[11px] text-gray-400">
-                            {Math.round((maxValue * value) / 100)}
-                          </span>
-
-                          <div className="h-px flex-1 border-t border-dashed border-gray-100" />
-
-                        </div>
-                      ),
-                    )}
-
-                  </div>
-
-                  <div className="absolute bottom-0 left-10 right-0 top-0 flex items-end justify-between gap-1 px-1 sm:gap-3 sm:px-2">
-
-                    {chartData.map(
-                      (item) => {
-                        const height =
-                          (item.value /
-                            maxValue) *
-                          250;
-
-                        return (
-                          <div
-                            key={item.month}
-                            className="flex h-full flex-1 flex-col items-center justify-end"
-                          >
-
-                            <span className="mb-2 text-[11px] font-semibold text-gray-500 sm:text-xs">
-                              {item.value.toLocaleString()}
-                            </span>
-
-                            <div
-                              className="w-full max-w-[48px] rounded-t-lg bg-[#701D10] transition-all duration-300 hover:bg-[#093341]"
-                              style={{
-                                height: `${height}px`,
-                              }}
-                            />
-
-                            <span className="mt-3 text-[10px] text-gray-400 sm:text-xs">
-                              {item.month}
-                            </span>
-
-                          </div>
-                        );
-                      },
-                    )}
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
+            <VisitorChart />
 
             {/* =====================================
                 Donut ประเภทผู้เข้าชม
@@ -690,11 +530,11 @@ function Dashboard() {
               <div>
 
                 <h2 className="text-xl font-bold text-gray-900">
-                  ความสนใจแต่ละสาขา
+                  {adminUser.saka_path === 'all' ? 'ความสนใจแต่ละสาขา' : 'ความสนใจในสาขาของคุณ'}
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-400">
-                  สัดส่วนความสนใจเข้าศึกษาต่อรายสาขาวิชา
+                  {adminUser.saka_path === 'all' ? 'สัดส่วนความสนใจเข้าศึกษาต่อรายสาขาวิชา (อันดับหนึ่ง)' : `${currentBranch} • นับจากสาขาที่เลือกอันดับหนึ่งเท่านั้น`}
                 </p>
 
               </div>

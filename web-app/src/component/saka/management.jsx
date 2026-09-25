@@ -562,7 +562,7 @@ function FooterCTA({ course }) {
         </p>
 
         <div>
-          <a href="/apply?major=eng-mgt-master" className="inline-block rounded-xl bg-[#701D10] px-8 py-4 font-semibold text-white shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#093341] hover:shadow-xl">
+          <a href="/apply?major=eng-mgt-master" className="inline-block rounded-xl bg-[#F7941D] px-8 py-4 font-semibold text-black shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#701D10] hover:text-white focus-visible:bg-[#701D10] focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#701D10] hover:shadow-xl">
             สนใจเข้าศึกษา
           </a>
         </div>

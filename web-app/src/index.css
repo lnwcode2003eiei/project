@@ -336,8 +336,8 @@ body,
 }
 
 .admin-shell > main > header {
-  border-color: #093341;
-  background: #093341 !important;
+  border-color: #701D10;
+  background: #701D10 !important;
 }
 
 .admin-shell > main > header h1,
@@ -370,6 +370,13 @@ body,
 
 
 /* ให้ปุ่มในระบบ Admin ตอบสนองชัดเจนเมื่อชี้ กด หรือใช้งานด้วยคีย์บอร์ด */
+.admin-shell .visitor-view-switch button:hover,
+.admin-shell .visitor-view-switch button:active {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+
 .admin-shell button:not(:disabled) {
   cursor: pointer;
   transition:

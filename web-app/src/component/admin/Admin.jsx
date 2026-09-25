@@ -331,7 +331,7 @@ function Admin() {
             <Route
               path="visitors"
               element={
-                <Visitors />
+                <Visitors canCompare={adminUser.saka_path === 'all'} />
               }
             />
 

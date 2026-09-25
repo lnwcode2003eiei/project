@@ -1,6 +1,7 @@
 FROM node:24-alpine
 
 WORKDIR /app
+RUN apk add --no-cache poppler-utils tesseract-ocr tesseract-ocr-data-tha tesseract-ocr-data-eng
 
 # ติดตั้ง dependencies
 COPY package*.json ./

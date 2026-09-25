@@ -18,6 +18,7 @@ function NewsAdmin() {
   const [editingNews, setEditingNews] = useState(null);
 
   const [loading, setLoading] = useState(false);
+  const [sendLine, setSendLine] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState("");
@@ -89,6 +90,7 @@ function NewsAdmin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
 
     if (!title || !category || !description) {
       alert("กรุณากรอกข้อมูลให้ครบ");
@@ -104,6 +106,7 @@ function NewsAdmin() {
       formData.append("title", title);
       formData.append("category", category);
       formData.append("description", description);
+      formData.append("send_line", String(sendLine));
 
       if (image) {
         formData.append("image", image);
@@ -120,7 +123,8 @@ function NewsAdmin() {
       const data = await response.json();
 
       if (data.success) {
-        setSuccessDialog(editingNews ? "แก้ไขข่าวสำเร็จ" : "เพิ่มข่าวสำเร็จ");
+        setSuccessDialog(`${editingNews ? 'แก้ไขข่าวสำเร็จ' : 'เพิ่มข่าวสำเร็จ'} — ${data.line?.message || 'ไม่มีผลยืนยันการส่ง LINE'}`);
+        setSendLine(false);
 
         // ล้างข้อมูล
         setTitle("");
@@ -152,6 +156,7 @@ function NewsAdmin() {
   };
 
   const startEdit = (item) => {
+    setSendLine(false);
     setMessage("");
     setErrorMessage("");
     setEditingNews(item);
@@ -164,6 +169,7 @@ function NewsAdmin() {
   };
 
   const cancelEdit = () => {
+    setSendLine(false);
     setEditingNews(null);
     setTitle("");
     setCategory("");
@@ -325,6 +331,13 @@ function NewsAdmin() {
           )}
 
           {/* Submit */}
+          <div className="rounded-xl border border-green-200 bg-green-50 p-4">
+            <label className="flex cursor-pointer items-center gap-3 font-semibold text-gray-900">
+              <input type="checkbox" role="switch" checked={sendLine} disabled={loading} onChange={event => setSendLine(event.target.checked)} className="h-5 w-5 accent-green-700" />
+              ส่งแจ้งเตือนไป LINE
+            </label>
+            <p className="mt-2 text-sm leading-6 text-gray-600">{sendLine ? 'เมื่อบันทึก จะเผยแพร่บนเว็บและส่งหัวข้อ รูปภาพ และลิงก์ข่าวผ่าน n8n' : 'เผยแพร่เฉพาะเว็บไซต์ ไม่ส่งแจ้งเตือนไป LINE'}{editingNews && ' • หากเปิด จะส่งข่าวนี้อีกครั้ง'}</p>
+          </div>
 
           <div className="flex justify-end gap-3">
             {editingNews && <button type="button" onClick={cancelEdit} disabled={loading} className="rounded-xl border border-gray-200 px-6 py-3 font-semibold text-gray-600 transition hover:bg-gray-50">ยกเลิก</button>}

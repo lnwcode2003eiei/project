@@ -2,6 +2,10 @@
 import express from "express";
 import cors from "cors";
 import db from "./db.js";
+import { notifyNewsLine } from './news-line.js';
+import { interestScope } from './interest-scope.js';
+import { registerVisitorStatistics, validRange } from "./visitor-statistics.js";
+import { registerComparison } from "./comparison.js";
 import { registerCourseDetails } from "./course-details.js";
 import multer from "multer";
 import path from "path";
@@ -15,6 +19,8 @@ import {
 
 const app = express();
 const PORT = 5000;
+registerVisitorStatistics(app, db, requireAdmin);
+registerComparison(app, db, requireAdmin);
 
 const adminBranches = new Set([
   "computer",
@@ -375,6 +381,9 @@ app.post("/api/visitors", (req, res) => {
 // ==========================================
 
 app.get("/api/admin/visitors", requireAdmin, (req, res) => {
+  const { start, end } = req.query;
+  const hasRange = start !== undefined || end !== undefined;
+  if (hasRange && !validRange(start, end)) return res.status(400).json({ success: false, message: "ช่วงวันที่ไม่ถูกต้อง" });
   const sql = `
     SELECT
       id,
@@ -382,10 +391,11 @@ app.get("/api/admin/visitors", requireAdmin, (req, res) => {
       status,
       created_at
     FROM visitors
+    ${hasRange ? 'WHERE created_at >= ? AND created_at < ?' : ''}
     ORDER BY created_at DESC
   `;
 
-  db.query(sql, (err, results) => {
+  db.query(sql, hasRange ? [start, end] : [], (err, results) => {
     if (err) {
       console.error("❌ ดึงข้อมูลผู้เข้าชมไม่สำเร็จ");
       console.error(err);
@@ -409,6 +419,8 @@ app.get("/api/admin/visitors", requireAdmin, (req, res) => {
 // ==========================================
 
 app.get("/api/admin/interested-students", requireAdmin, (req, res) => {
+  const scope = interestScope(req.admin);
+  if (!scope) return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์ดูข้อมูลสาขา' });
   const sql = `
     SELECT
       id,
@@ -416,13 +428,15 @@ app.get("/api/admin/interested-students", requireAdmin, (req, res) => {
       old_school AS school,
       major_name AS major,
       second_major_name AS second_major,
+      education,
       education AS status,
       created_at
     FROM applications
+    ${scope.where}
     ORDER BY created_at DESC
   `;
 
-  db.query(sql, (err, results) => {
+  db.query(sql, scope.values, (err, results) => {
     if (err) {
       console.error("❌ ดึงข้อมูลผู้สนใจเรียนไม่สำเร็จ");
       console.error(err);
@@ -437,6 +451,7 @@ app.get("/api/admin/interested-students", requireAdmin, (req, res) => {
     res.status(200).json({
       success: true,
       interested: results,
+      scope: { all: req.admin.saka_path === 'all', branchName: scope.values[0] || null },
     });
   });
 });
@@ -541,6 +556,8 @@ app.get("/api/admin/dashboard/monthly", requireAdmin, (req, res) => {
 // ==========================================
 
 app.get("/api/admin/dashboard/majors", requireAdmin, (req, res) => {
+  const scope = interestScope(req.admin);
+  if (!scope) return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์ดูข้อมูลสาขา' });
   const colors = [
     "#7A0019",
     "#5B00FF",
@@ -558,11 +575,12 @@ app.get("/api/admin/dashboard/majors", requireAdmin, (req, res) => {
       major_name AS name,
       COUNT(*) AS count
     FROM applications
+    ${scope.where}
     GROUP BY major_name
     ORDER BY count DESC
   `;
 
-  db.query(sql, (err, results) => {
+  db.query(sql, scope.values, (err, results) => {
     if (err) {
       console.error(
         "❌ ดึงสถิติความสนใจรายสาขาไม่สำเร็จ",
@@ -668,7 +686,7 @@ app.post("/api/news", requireAdmin, upload.single("image"), (req, res) => {
       imagePath,
       req.admin.sub,
     ],
-    (err, result) => {
+    async (err, result) => {
       if (err) {
         console.error("❌ เพิ่มข่าวไม่สำเร็จ");
         console.error(err);
@@ -689,11 +707,13 @@ app.post("/api/news", requireAdmin, upload.single("image"), (req, res) => {
         result.insertId,
       );
 
+      const line = await notifyNewsLine(req.body.send_line, { id: result.insertId, title, category, description, image: imagePath });
       res.status(201).json({
         success: true,
         message: "เพิ่มข่าวสำเร็จ",
         id: result.insertId,
         image: imagePath,
+        line,
       });
     },
   );
@@ -1206,7 +1226,7 @@ app.patch("/api/news/:id", requireAdmin, upload.single("image"), (req, res) => {
       db.query(
         "UPDATE news SET title = ?, category = ?, description = ?, image = ? WHERE id = ?",
         [title, category, description, imagePath, newsId],
-        (updateError) => {
+        async (updateError) => {
           if (updateError) {
             if (req.file) safeDeleteFile(req.file.path);
             console.error("❌ แก้ไขข่าวไม่สำเร็จ:", updateError.message);
@@ -1217,7 +1237,8 @@ app.patch("/api/news/:id", requireAdmin, upload.single("image"), (req, res) => {
             safeDeleteFile(`.${article.image}`);
           }
 
-          return res.json({ success: true, message: "แก้ไขข่าวแล้ว", image: imagePath });
+          const line = await notifyNewsLine(req.body.send_line, { id: newsId, title, category, description, image: imagePath });
+          return res.json({ success: true, message: "แก้ไขข่าวแล้ว", image: imagePath, line });
         },
       );
     },
