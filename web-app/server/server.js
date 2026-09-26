@@ -2,6 +2,7 @@
 import express from "express";
 import cors from "cors";
 import db from "./db.js";
+import { registerKnowledge } from './knowledge.js';
 import { notifyNewsLine } from './news-line.js';
 import { interestScope } from './interest-scope.js';
 import { registerVisitorStatistics, validRange } from "./visitor-statistics.js";
@@ -225,6 +226,7 @@ app.use(
 );
 
 app.use(express.json());
+registerKnowledge(app, db, requireAdmin);
 
 // ==========================================
 // Static Uploads

@@ -14,6 +14,7 @@ import NewsAdmin from "./NewsAdmin";
 import ProgramEditor from "./ProgramEditor";
 import ProgramsOverview from "./ProgramsOverview";
 import AdminUsers from "./AdminUsers";
+import KnowledgeAdmin from './KnowledgeAdmin';
 
 
 // ==========================================
@@ -135,6 +136,7 @@ function Admin() {
     if (location.pathname === "/admin") return "Dashboard";
     if (location.pathname === "/admin/visitors") return "ผู้เข้าชมเว็บไซต์";
     if (location.pathname === "/admin/news") return "ข่าวสาร";
+    if (location.pathname === "/admin/knowledge") return "คำถามและคำตอบ";
     if (location.pathname === "/admin/programs") return "หลักสูตร";
     if (location.pathname === "/admin/users") return "จัดการผู้ใช้";
     if (location.pathname.startsWith("/admin/courses/")) return "แก้ไขหลักสูตร";
@@ -340,6 +342,7 @@ function Admin() {
                 News
             ================================= */}
 
+            <Route path="knowledge" element={<KnowledgeAdmin />} />
             <Route
               path="news"
               element={
