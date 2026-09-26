@@ -64,6 +64,49 @@ try {
   assert.equal((await call(`/api/admin/knowledge/answers/${imported.id}/history`)).data.length, 2);
   console.log('PASS: metadata round-trip, draft import, no overwrite, repeat/rename idempotency and branch isolation');
   console.log('PASS: real MySQL create/publish/history/optimistic locking/alias linking/deduplication/branch restrictions');
+  const triagePath = '/api/integrations/line/triage', searchPath = '/api/integrations/knowledge/search';
+  const beforeTriage = (await call('/api/admin/knowledge')).questions.length;
+  for (const decision of ['smalltalk', 'clarify', 'service_error']) {
+    const res = await call(triagePath, 'POST', { eventId: decision, question: 'สวัสดีครับ', decision });
+    assert.equal(res.code, 200); assert.equal(res.queued, false); assert.equal(res.questionId, null);
+  }
+  assert.equal((await call('/api/admin/knowledge')).questions.length, beforeTriage);
+  const search = await call(searchPath, 'POST', { eventId: 'answered-event', query: base.question, branch: 'computer' });
+  assert.equal(search.code, 200); assert.ok(search.candidates.some(a => a.id === created.id));
+  assert.ok(!JSON.stringify(search).includes(base.metadata.notes));
+  assert.equal((await call('/api/admin/knowledge')).questions.length, beforeTriage);
+  const answeredBody = { eventId: 'answered-event', question: base.question, branch: 'computer', decision: 'answered', answerIds: [created.id], searchToken: search.searchToken };
+  const approved = await call(triagePath, 'POST', answeredBody);
+  assert.equal(approved.status, 'answered'); assert.equal(approved.queued, false); assert.equal(approved.approvedAnswers[0].answer, base.answer);
+  assert.equal((await call(triagePath, 'POST', answeredBody)).duplicate, true);
+  assert.equal((await call(triagePath, 'POST', { ...answeredBody, eventId: 'forged-event' })).reason, 'invalid_reference');
+  const outdated = await call(searchPath, 'POST', { eventId: 'outdated-event', query: base.question, branch: 'computer' });
+  const currentAnswer = (await call('/api/admin/knowledge')).answers.find(a => a.id === created.id);
+  assert.equal((await call(`/api/admin/knowledge/answers/${created.id}`, 'PUT', { ...currentAnswer, status: 'disabled' })).code, 200);
+  assert.equal((await call(triagePath, 'POST', { ...answeredBody, eventId: 'outdated-event', searchToken: outdated.searchToken })).reason, 'invalid_reference');
+  const review = { eventId: 'review-1', question: 'ค่าเทอมคอมพิวเตอร์ปีหน้า', summary: 'ค่าเทอมคอมพิวเตอร์ ปี 2571', branch: 'computer', category: 'ค่าใช้จ่าย', decision: 'review', reason: 'not_found', detail: 'ไม่พบปีการศึกษาที่ถาม' };
+  const queued = await call(triagePath, 'POST', review);
+  assert.equal(queued.queued, true);
+  const concurrent = await Promise.all(Array.from({ length: 3 }, () => call(triagePath, 'POST', { ...review, eventId: 'review-concurrent' })));
+  assert.ok(concurrent.every(r => r.code === 200), JSON.stringify(concurrent));
+  assert.equal(concurrent.filter(r => !r.duplicate).length, 1);
+  const repeated = await call(triagePath, 'POST', { ...review, eventId: 'review-2' });
+  assert.equal(repeated.questionId, queued.questionId);
+  const adminQueue = await call('/api/admin/knowledge', 'GET', undefined, 2);
+  const item = adminQueue.questions.find(q => q.id === queued.questionId);
+  assert.equal(item.occurrences, 3); assert.equal(item.triage.summary, review.summary); assert.equal(item.question, review.question);
+  const similarReview = await call(triagePath, 'POST', { ...review, eventId: 'review-3', question: 'อยากทราบค่าเทอมคอมพิวเตอร์ปีหน้า' });
+  assert.notEqual(similarReview.questionId, queued.questionId);
+  assert.ok((await call(`/api/admin/knowledge/questions/${queued.questionId}/similar`)).data.some(row => row.id === similarReview.questionId));
+  const central = await call(triagePath, 'POST', { ...review, eventId: 'unassigned-review', branch: null });
+  assert.equal((await call(`/api/admin/knowledge/questions/${central.questionId}/similar`, 'GET', undefined, 2)).code, 403);
+  assert.equal((await call('/api/admin/knowledge', 'GET', undefined, 2)).questions.some(q => q.id === central.questionId), false);
+  assert.equal((await call(triagePath, 'POST', { ...review, eventId: 'invalid-reason', reason: 'made-up' })).code, 400);
+  assert.equal((await call(searchPath, 'POST', { query: 'test', eventId: 'test', branch: 'all' })).code, 400);
+  for (const path of [searchPath, triagePath]) {
+    assert.equal((await fetch(origin + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).status, 401);
+  }
+  console.log('PASS: search privacy, triage decisions, proof validation, revoked answers, concurrent redelivery, exact grouping and scoped suggestions');
 } finally {
   await new Promise(resolve => server.close(resolve));
   for (const table of tables) {

@@ -1,4 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { registerKnowledgeTriage, reviewReasons, suggestQuestions } from './knowledge-triage.js';
 
 export const branches = { all: 'ข้อมูลส่วนกลาง', unassigned: 'ยังไม่ระบุสาขา', computer: 'วิศวกรรมคอมพิวเตอร์', 'computer-ai': 'วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์', construction: 'วิศวกรรมบริหารงานก่อสร้าง', digital: 'เทคโนโลยีดิจิทัลเพื่อการออกแบบ', electrical: 'เทคโนโลยีไฟฟ้า', energy: 'วิศวกรรมการจัดการพลังงานในงานอุตสาหกรรม', industrial: 'เทคโนโลยีอุตสาหการ', logistics: 'วิศวกรรมโลจิสติกส์', management: 'การจัดการงานวิศวกรรม', survey: 'เทคโนโลยีสำรวจและภูมิสารสนเทศ' };
 export const categories = ['ทั่วไป', 'หลักสูตร', 'คุณสมบัติผู้เรียน', 'ค่าใช้จ่าย', 'อาชีพหลังเรียนจบ', 'การติดต่อ', 'ข่าวสาร', 'การรับสมัคร', 'สาขาวิชา', 'ติดต่อ', 'ข้อมูลคณะ', 'คุณสมบัติ', 'เอกสาร'];
@@ -40,6 +41,8 @@ export async function ensureKnowledgeSchema(pool) {
     ]) await pool.query(sql);
     try { await pool.query('ALTER TABLE knowledge_answers ADD COLUMN metadata JSON NULL'); }
     catch (error) { if (error.code !== 'ER_DUP_FIELDNAME') throw error; }
+    try { await pool.query('ALTER TABLE knowledge_questions ADD COLUMN triage JSON NULL'); }
+    catch (error) { if (error.code !== 'ER_DUP_FIELDNAME') throw error; }
 }
 export function registerKnowledge(app, db, requireAdmin) {
   const pool = db.promise();
@@ -56,17 +59,23 @@ export function registerKnowledge(app, db, requireAdmin) {
   };
   const allowed = (user, branch) => { if (user.saka_path !== 'all' && user.saka_path !== branch) throw fail(403, 'ไม่มีสิทธิ์เข้าถึงข้อมูลสาขานี้'); };
   const tx = async fn => {
-    const connection = await pool.getConnection();
-    try { await connection.beginTransaction(); const value = await fn(connection); await connection.commit(); return value; }
-    catch (error) { await connection.rollback(); throw error; } finally { connection.release(); }
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const connection = await pool.getConnection();
+      try { await connection.beginTransaction(); const value = await fn(connection); await connection.commit(); return value; }
+      catch (error) {
+        await connection.rollback();
+        if (error.code !== 'ER_LOCK_DEADLOCK' || attempt === 2) throw error;
+      } finally { connection.release(); }
+    }
   };
+  registerKnowledgeTriage(app, { pool, ensure, route, tx, integrationAuth, branches, categories });
   app.get('/api/admin/knowledge', requireAdmin, route(async (req, res) => {
     const user = await admin(req);
     const scope = user.saka_path === 'all' ? '' : ' WHERE branch = ?';
     const args = scope ? [user.saka_path] : [];
     const [answers] = await pool.query(`SELECT * FROM knowledge_answers${scope} ORDER BY updated_at DESC LIMIT 1000`, args);
     const [questions] = await pool.query(`SELECT * FROM knowledge_questions${scope} ORDER BY last_seen DESC LIMIT 1000`, args);
-    res.json({ success: true, answers: answers.map(row => ({ ...row, aliases: parse(row.aliases), metadata: parse(row.metadata) || {} })), questions, branches, categories, scope: user.saka_path, canEdit: Number(user.can_edit) === 1, limit: 1000 });
+    res.json({ success: true, answers: answers.map(row => ({ ...row, aliases: parse(row.aliases), metadata: parse(row.metadata) || {} })), questions: questions.map(row => ({ ...row, triage: parse(row.triage) || null })), branches, categories, reviewReasons, scope: user.saka_path, canEdit: Number(user.can_edit) === 1, limit: 1000 });
   }));
   app.post('/api/admin/knowledge/answers', requireAdmin, route(async (req, res) => {
     const user = await admin(req, true), value = validateAnswer(req.body); allowed(user, value.branch);
@@ -74,6 +83,13 @@ export function registerKnowledge(app, db, requireAdmin) {
       const [created] = await c.query('INSERT INTO knowledge_answers (branch,category,question,aliases,answer,metadata,status,updated_by) VALUES (?,?,?,?,?,?,?,?)', [value.branch, value.category, value.question, JSON.stringify(value.aliases), value.answer, JSON.stringify(value.metadata), value.status, user.id]);
       await c.query('INSERT INTO knowledge_history (answer_id,snapshot,changed_by) VALUES (?,?,?)', [created.insertId, JSON.stringify({ ...value, version: 1 }), user.id]); return created.insertId;
     }); res.status(201).json({ success: true, id });
+  }));
+  app.get('/api/admin/knowledge/questions/:id/similar', requireAdmin, route(async (req, res) => {
+    const user = await admin(req);
+    const [[question]] = await pool.query('SELECT * FROM knowledge_questions WHERE id=?', [req.params.id]);
+    if (!question) throw fail(404, 'ไม่พบคำถาม'); allowed(user, question.branch);
+    const [others] = await pool.query("SELECT id,question,branch,status,triage FROM knowledge_questions WHERE branch=? AND status='pending' ORDER BY last_seen DESC LIMIT 1000", [question.branch]);
+    res.json({ success: true, data: suggestQuestions(question, others) });
   }));
   app.put('/api/admin/knowledge/answers/:id', requireAdmin, route(async (req, res) => {
     const user = await admin(req, true), value = validateAnswer(req.body); allowed(user, value.branch);
@@ -111,10 +127,14 @@ export function registerKnowledge(app, db, requireAdmin) {
           if (aliases.length >= 30) throw fail(400, 'คำตอบนี้มีคำถามใกล้เคียงครบ 30 ข้อแล้ว');
           aliases.push(old.question);
           await c.query('UPDATE knowledge_answers SET aliases=?,version=version+1,updated_by=? WHERE id=?', [JSON.stringify(aliases), user.id, answer.id]);
-          await c.query('INSERT INTO knowledge_history (answer_id,snapshot,changed_by) VALUES (?,?,?)', [answer.id, JSON.stringify({ ...answer, aliases, version: answer.version + 1 }), user.id]);
+          await c.query('INSERT INTO knowledge_history (answer_id,snapshot,changed_by) VALUES (?,?,?)', [answer.id, JSON.stringify({ ...answer, aliases, metadata: parse(answer.metadata) || {}, version: answer.version + 1 }), user.id]);
         }
       }
-      await c.query('UPDATE knowledge_questions SET branch=?,category=?,status=?,answer_id=?,version=version+1 WHERE id=?', [branch, category, status, status === 'resolved' ? answerId : null, old.id]);
+      const triage = parse(old.triage);
+      const fingerprint = hash(triage ? `triage\n${branch}\n${normalize(old.question)}\n${normalize(triage.summary)}` : `${branch}\n${normalize(old.question)}`);
+      try {
+        await c.query('UPDATE knowledge_questions SET branch=?,category=?,status=?,answer_id=?,fingerprint=?,version=version+1 WHERE id=?', [branch, category, status, status === 'resolved' ? answerId : null, fingerprint, old.id]);
+      } catch (error) { if (error.code === 'ER_DUP_ENTRY') throw fail(409, 'มีคำถามนี้ในสาขาปลายทางแล้ว กรุณาตรวจรายการก่อนจัดสาขา'); throw error; }
     }); res.json({ success: true });
   }));
   app.post('/api/integrations/line/questions', route(async (req, res) => {

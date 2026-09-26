@@ -1,5 +1,7 @@
 # คำถาม LINE และคลังคำตอบ MySQL
 
+> รุ่นคัดกรอง AI: ใช้คู่มือ `knowledge-ai-triage.md` สำหรับ Search Tool และ Triage API ใหม่ เนื้อหาการเชื่อม `/api/integrations/line/questions` ด้านล่างเป็น workflow รุ่นเดิมที่ยังรองรับไว้ อย่าเรียกทั้งเก่าและใหม่กับ event เดียวกัน
+
 หน้า /admin/knowledge แสดงคำถามและคลังคำตอบล่าสุดอย่างละ 1000 รายการ พร้อมค้นหา/กรองสถานะ
 Super Admin ดูทุกสาขาและจัดคำถามไม่ระบุสาขา; Admin สาขาอ่านเฉพาะสาขาตนเองและแก้ได้เมื่อ can_edit=1
 ตรวจสิทธิ์ปัจจุบันใน users ทุก request ไม่เชื่อสิทธิ์จาก localStorage
