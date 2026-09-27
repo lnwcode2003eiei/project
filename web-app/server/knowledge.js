@@ -12,7 +12,7 @@ const text = (value, max, required = true) => {
   return value.trim();
 };
 export function validateAnswer(input) {
-  const { branch, category, status } = input;
+  const { branch, category = 'ทั่วไป', status = 'published' } = input;
   if (!Object.hasOwn(branches, branch) || branch === 'unassigned' || !categories.includes(category) || !['draft', 'published', 'disabled'].includes(status)) throw fail(400, 'สาขา ประเภท หรือสถานะไม่ถูกต้อง');
   if (!Array.isArray(input.aliases) || input.aliases.length > 30) throw fail(400, 'คำถามใกล้เคียงได้ไม่เกิน 30 ข้อ');
   const metadata = input.metadata || {};
@@ -69,6 +69,22 @@ export function registerKnowledge(app, db, requireAdmin) {
     }
   };
   registerKnowledgeTriage(app, { pool, ensure, route, tx, integrationAuth, branches, categories });
+  const attachQuestions = async (c, user, value, sources = []) => {
+    if (!Array.isArray(sources) || sources.length > 30 || sources.some(q => !Number.isSafeInteger(q.id) || q.id < 1 || !Number.isSafeInteger(q.version) || q.version < 1) || new Set(sources.map(q => q.id)).size !== sources.length) throw fail(400, 'รายการคำถามต้นทางไม่ถูกต้อง');
+    if (!sources.length) return [];
+    if (value.status !== 'published') throw fail(400, 'ต้องบันทึกข้อมูลพร้อมใช้งานก่อนเชื่อมคำถาม');
+    const [rows] = await c.query(`SELECT * FROM knowledge_questions WHERE id IN (${sources.map(() => '?').join(',')}) ORDER BY id FOR UPDATE`, sources.map(q => q.id));
+    if (rows.length !== sources.length) throw fail(404, 'ไม่พบคำถามต้นทาง');
+    for (const row of rows) {
+      allowed(user, row.branch);
+      if (row.version !== sources.find(q => q.id === row.id).version || row.status !== 'pending') throw fail(409, 'คำถามต้นทางเปลี่ยนแล้ว กรุณาโหลดใหม่');
+      if (row.branch !== value.branch && row.branch !== 'unassigned' && value.branch !== 'all') throw fail(400, 'คำถามต้นทางเป็นคนละสาขา');
+    }
+    return rows;
+  };
+  const resolveQuestions = async (c, sources, id) => {
+    for (const row of sources) await c.query("UPDATE knowledge_questions SET status='resolved',answer_id=?,version=version+1 WHERE id=?", [id, row.id]);
+  };
   app.get('/api/admin/knowledge', requireAdmin, route(async (req, res) => {
     const user = await admin(req);
     const scope = user.saka_path === 'all' ? '' : ' WHERE branch = ?';
@@ -80,8 +96,10 @@ export function registerKnowledge(app, db, requireAdmin) {
   app.post('/api/admin/knowledge/answers', requireAdmin, route(async (req, res) => {
     const user = await admin(req, true), value = validateAnswer(req.body); allowed(user, value.branch);
     const id = await tx(async c => {
+      const sources = await attachQuestions(c, user, value, req.body.sourceQuestions);
       const [created] = await c.query('INSERT INTO knowledge_answers (branch,category,question,aliases,answer,metadata,status,updated_by) VALUES (?,?,?,?,?,?,?,?)', [value.branch, value.category, value.question, JSON.stringify(value.aliases), value.answer, JSON.stringify(value.metadata), value.status, user.id]);
-      await c.query('INSERT INTO knowledge_history (answer_id,snapshot,changed_by) VALUES (?,?,?)', [created.insertId, JSON.stringify({ ...value, version: 1 }), user.id]); return created.insertId;
+      await c.query('INSERT INTO knowledge_history (answer_id,snapshot,changed_by) VALUES (?,?,?)', [created.insertId, JSON.stringify({ ...value, version: 1 }), user.id]);
+      await resolveQuestions(c, sources, created.insertId); return created.insertId;
     }); res.status(201).json({ success: true, id });
   }));
   app.get('/api/admin/knowledge/questions/:id/similar', requireAdmin, route(async (req, res) => {
@@ -98,9 +116,22 @@ export function registerKnowledge(app, db, requireAdmin) {
       if (!old) throw fail(404, 'ไม่พบคำตอบ'); allowed(user, old.branch);
       if (old.version !== req.body.version) throw fail(409, 'มีผู้แก้ไขข้อมูลแล้ว กรุณาโหลดใหม่');
       if (old.branch !== value.branch) throw fail(400, 'เปลี่ยนสาขาคำตอบเดิมไม่ได้ กรุณาสร้างรายการใหม่');
+      const sources = await attachQuestions(c, user, value, req.body.sourceQuestions);
       await c.query('UPDATE knowledge_answers SET category=?,question=?,aliases=?,answer=?,metadata=?,status=?,version=version+1,updated_by=? WHERE id=?', [value.category, value.question, JSON.stringify(value.aliases), value.answer, JSON.stringify(value.metadata), value.status, user.id, old.id]);
       await c.query('INSERT INTO knowledge_history (answer_id,snapshot,changed_by) VALUES (?,?,?)', [old.id, JSON.stringify({ ...value, version: old.version + 1 }), user.id]);
       if (value.status !== 'published') await c.query("UPDATE knowledge_questions SET status='pending',answer_id=NULL,version=version+1 WHERE answer_id=?", [old.id]);
+      await resolveQuestions(c, sources, old.id);
+    }); res.json({ success: true });
+  }));
+  app.delete('/api/admin/knowledge/answers/:id', requireAdmin, route(async (req, res) => {
+    const user = await admin(req, true);
+    await tx(async c => {
+      const [[old]] = await c.query('SELECT * FROM knowledge_answers WHERE id = ? FOR UPDATE', [req.params.id]);
+      if (!old) throw fail(404, 'ไม่พบข้อมูล'); allowed(user, old.branch);
+      if (old.version !== req.body?.version) throw fail(409, 'มีผู้แก้ไขข้อมูลแล้ว กรุณาโหลดใหม่ก่อนลบ');
+      await c.query("UPDATE knowledge_answers SET status='disabled',version=version+1,updated_by=? WHERE id=?", [user.id, old.id]);
+      await c.query('INSERT INTO knowledge_history (answer_id,snapshot,changed_by) VALUES (?,?,?)', [old.id, JSON.stringify({ ...old, aliases: parse(old.aliases), metadata: parse(old.metadata) || {}, status: 'disabled', version: old.version + 1, action: 'delete' }), user.id]);
+      await c.query("UPDATE knowledge_questions SET status='pending',answer_id=NULL,version=version+1 WHERE answer_id=?", [old.id]);
     }); res.json({ success: true });
   }));
   app.get('/api/admin/knowledge/answers/:id/history', requireAdmin, route(async (req, res) => {

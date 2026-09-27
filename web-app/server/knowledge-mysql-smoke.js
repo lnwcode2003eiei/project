@@ -107,6 +107,23 @@ try {
     assert.equal((await fetch(origin + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).status, 401);
   }
   console.log('PASS: search privacy, triage decisions, proof validation, revoked answers, concurrent redelivery, exact grouping and scoped suggestions');
+  const immediate = { branch: 'computer', category: 'ทั่วไป', question: 'สมัครสอบถามข้อมูลใหม่', answer: 'ข้อมูลใหม่พร้อมตอบทันที', aliases: ['ขอข้อมูลใหม่'], sourceQuestions: [{ id: queued.questionId, version: item.version }, { id: similarReview.questionId, version: 1 }] };
+  const savedTopic = await call('/api/admin/knowledge/answers', 'POST', immediate, 2);
+  assert.equal(savedTopic.code, 201);
+  const currentTopics = await call('/api/admin/knowledge', 'GET', undefined, 2);
+  const savedRow = currentTopics.answers.find(a => a.id === savedTopic.id);
+  assert.equal(savedRow.status, 'published');
+  assert.ok(currentTopics.questions.filter(q => [queued.questionId, similarReview.questionId].includes(q.id)).every(q => q.answer_id === savedTopic.id && q.status === 'resolved'));
+  assert.equal((await call(searchPath, 'POST', { eventId: 'new-topic-event', query: 'ขอข้อมูลใหม่', branch: 'computer' })).candidates[0].id, savedTopic.id);
+  assert.equal((await call('/api/admin/knowledge/answers', 'POST', { ...immediate, sourceQuestions: [{ id: central.questionId, version: 1 }] }, 2)).code, 403);
+  assert.equal((await call('/api/admin/knowledge/answers', 'POST', immediate, 2)).code, 409);
+  assert.equal((await call(`/api/admin/knowledge/answers/${savedTopic.id}`, 'DELETE', { version: 999 }, 2)).code, 409);
+  assert.equal((await call(`/api/admin/knowledge/answers/${savedTopic.id}`, 'DELETE', { version: 1 }, 3)).code, 403);
+  assert.equal((await call(`/api/admin/knowledge/answers/${duplicate.id}`, 'DELETE', { version: 1 }, 2)).code, 403);
+  assert.equal((await call(`/api/admin/knowledge/answers/${savedTopic.id}`, 'DELETE', { version: 1 }, 2)).code, 200);
+  assert.ok(!(await call(searchPath, 'POST', { eventId: 'deleted-topic-event', query: 'ขอข้อมูลใหม่', branch: 'computer' })).candidates.some(a => a.id === savedTopic.id));
+  assert.equal((await call(`/api/admin/knowledge/answers/${savedTopic.id}/history`, 'GET', undefined, 2)).data[0].snapshot.action, 'delete');
+  console.log('PASS: immediate saves, atomic question linking, scope/readonly/conflict checks and removal from AI retrieval');
 } finally {
   await new Promise(resolve => server.close(resolve));
   for (const table of tables) {

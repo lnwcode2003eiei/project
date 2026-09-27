@@ -79,19 +79,21 @@ function Register() {
   }
 
   return (
-    <div className="fixed inset-0 z-[999] flex min-h-screen items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#093341]/95 px-8 py-10 text-white shadow-2xl">
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-stone-100 px-4 py-5"
+    >
+      <div className="max-h-[calc(100dvh-2.5rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-yellow-200 border-t-8 border-t-yellow-400 bg-white px-6 py-8 text-stone-800 shadow-2xl sm:px-8">
         {/* Logo */}
         <div className="mb-7">
           <img
             src="/image/logo.png"
             alt="Logo"
-            className="mb-6 h-12 w-auto object-contain"
+            className="mb-6 h-auto w-full rounded-xl bg-[#991B1B] px-4 py-4 object-contain"
           />
 
-          <h1 className="text-3xl font-bold">เข้าสู่เว็บไซต์</h1>
+          <h1 className="text-3xl font-bold text-black">เข้าสู่เว็บไซต์</h1>
 
-          <p className="mt-3 text-sm leading-6 text-gray-300">
+          <p className="mt-3 text-sm leading-6 text-stone-600">
             กรุณากรอกข้อมูลเพื่อเข้าสู่เว็บไซต์ คณะเทคโนโลยีอุตสาหกรรม
           </p>
         </div>
@@ -103,19 +105,21 @@ function Register() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="ชื่อ"
+            placeholder="ชื่อ-นามสกุล"
+            autoComplete="name"
             required={!anonymous}
             disabled={anonymous}
-            className="w-full rounded-md bg-[#303030] px-4 py-4 text-sm text-white placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-[#701D10]"
+            aria-label="ชื่อ-นามสกุล"
+            className="w-full rounded-xl border border-yellow-300 bg-white px-4 py-4 text-sm text-black placeholder-black outline-none transition focus:border-red-700 focus:ring-2 focus:ring-yellow-400 disabled:cursor-not-allowed disabled:border-stone-200"
           />
 
-          <label className="flex cursor-pointer items-center gap-3 text-sm text-gray-200">
+          <label className="flex cursor-pointer items-center gap-3 text-sm text-stone-700">
             <input type="checkbox" checked={anonymous}
               onChange={(event) => {
                 setAnonymous(event.target.checked);
                 if (event.target.checked) setName("");
               }}
-              className="h-5 w-5 accent-[#093341]" />
+              className="h-5 w-5 accent-[#B91C1C]" />
             ไม่ระบุชื่อ
           </label>
 
@@ -124,7 +128,8 @@ function Register() {
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             required
-            className="w-full rounded-md bg-[#303030] px-4 py-4 text-sm text-gray-300 outline-none transition focus:ring-2 focus:ring-[#701D10]"
+            aria-label="สถานะผู้เข้าชม"
+            className="w-full rounded-xl border border-yellow-300 bg-white px-4 py-4 text-sm text-black outline-none transition focus:border-red-700 focus:ring-2 focus:ring-yellow-400"
           >
             <option value="">เลือกสถานะ</option>
 
@@ -141,15 +146,15 @@ function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-3 w-full rounded-full bg-[#701D10] px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-[#093341] hover:shadow-lg hover:shadow-[#701D10]/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-3 w-full rounded-full bg-[#B91C1C] px-6 py-4 text-sm font-bold text-white shadow-md shadow-red-900/15 transition-all duration-300 hover:bg-[#991B1B] hover:shadow-lg focus-visible:outline-yellow-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "กำลังบันทึก..." : "เข้าสู่เว็บไซต์"}
           </button>
         </form>
 
         {/* Footer */}
-        <div className="mt-7 border-t border-white/10 pt-5">
-          <p className="text-xs leading-5 text-gray-400">
+        <div className="mt-7 border-t border-yellow-200 pt-5">
+          <p className="text-xs leading-5 text-stone-500">
             ข้อมูลของคุณจะถูกบันทึกลงในระบบ
             เพื่อใช้สำหรับการเข้าเยี่ยมชมเว็บไซต์
           </p>

@@ -1,49 +1,143 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiUrl } from '../../config/api';
+import { groupQuestions } from './knowledge-topics';
 
-const statusNames = { pending: 'รอตอบ', resolved: 'มีคำตอบแล้ว', ignored: 'ไม่เกี่ยวข้อง', draft: 'ฉบับร่าง', published: 'เผยแพร่', disabled: 'ปิดใช้งาน' };
-const fresh = branch => ({ branch: branch === 'all' ? 'all' : branch, category: 'ทั่วไป', question: '', aliases: [], answer: '', metadata: { keywords: [], academicYear: '', source: '', notes: '' }, status: 'draft' });
-const field = 'w-full rounded-xl border border-gray-200 bg-white p-3 text-sm text-black';
+const field = 'mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-[#701D10] focus:ring-2 focus:ring-orange-100';
+const primary = 'rounded-xl bg-[#701D10] px-5 py-3 text-sm font-semibold text-white hover:bg-[#8b2b1b] disabled:opacity-50';
+const secondary = 'rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50';
+const fresh = branch => ({ branch, category: 'ทั่วไป', question: '', answer: '', aliases: [], metadata: { keywords: [], academicYear: '', source: '', notes: '' }, sourceQuestions: [] });
 async function request(path = '', options = {}) {
-  const res = await fetch(apiUrl(`/api/admin/knowledge${path}`), { ...options, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}`, ...options.headers } });
-  const body = await res.json();
-  if (!res.ok || !body.success) throw new Error(body.message || 'โหลดข้อมูลไม่สำเร็จ');
+  const response = await fetch(apiUrl('/api/admin/knowledge' + path), {
+    ...options, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token'), ...options.headers },
+  });
+  const body = await response.json();
+  if (!response.ok || !body.success) throw new Error(body.message || 'ดำเนินการไม่สำเร็จ กรุณาลองใหม่');
   return body;
 }
+
+function Editor({ initial, data, busy, error, onSave, onClose }) {
+  const [form, setForm] = useState(initial);
+  const dialog = useRef(null);
+  useEffect(() => { dialog.current.showModal(); }, []);
+  const set = (key, value) => setForm(previous => ({ ...previous, [key]: value }));
+  const setMeta = (key, value) => setForm(previous => ({ ...previous, metadata: { ...previous.metadata, [key]: value } }));
+  return <dialog ref={dialog} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }} aria-labelledby="knowledge-editor-title" className="m-auto max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-2xl bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-900/40">
+    <form onSubmit={event => { event.preventDefault(); onSave(form); }}>
+      <header className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+        <div><h2 id="knowledge-editor-title" className="text-xl font-bold">{form.id ? 'แก้ไขข้อมูลให้ AI' : 'เพิ่มข้อมูลให้ AI'}</h2><p className="mt-1 text-sm text-slate-500">บันทึกแล้ว AI ใช้ข้อมูลนี้ตอบได้ทันที</p></div>
+        <button type="button" disabled={busy} onClick={onClose} aria-label="ปิดหน้าต่าง" className={secondary}>ปิด</button>
+      </header>
+      <fieldset disabled={busy} className="space-y-5 px-6 py-5">
+        {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        <label className="block text-sm font-semibold">แนวคำถาม<input autoFocus required maxLength={1000} className={field} value={form.question} onChange={e => set('question', e.target.value)} placeholder="เช่น วิธีสมัครเรียน หรือค่าเทอมวิศวกรรมคอมพิวเตอร์" /></label>
+        <label className="block text-sm font-semibold">ข้อมูลคำตอบสำหรับ AI<textarea required maxLength={10000} rows={7} className={field + ' leading-7'} value={form.answer} onChange={e => set('answer', e.target.value)} placeholder="ใส่ข้อมูลที่ถูกต้อง พร้อมเงื่อนไขหรือรายละเอียดที่จำเป็น" /></label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="text-sm font-medium">ข้อมูลสำหรับ<select disabled={Boolean(form.id) || data.scope !== 'all'} className={field} value={form.branch} onChange={e => set('branch', e.target.value)}>{Object.entries(data.branches).filter(([key]) => key !== 'unassigned' && (data.scope === 'all' || key === data.scope)).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
+          <label className="text-sm font-medium">ปีการศึกษา (ถ้ามี)<input maxLength={20} className={field} value={form.metadata?.academicYear || ''} onChange={e => setMeta('academicYear', e.target.value)} placeholder="เช่น 2570" /></label>
+        </div>
+        <details open={form.sourceQuestions?.length > 0 ? true : undefined} className="rounded-xl border border-slate-200 p-4">
+          <summary className="cursor-pointer text-sm font-semibold">คำถามใกล้เคียงในแนวเดียวกัน ({form.aliases.filter(a => a.trim()).length})</summary>
+          <p className="mt-3 text-xs leading-6 text-slate-500">รวมคำถามหลายรูปแบบให้ใช้คำตอบเดียวกัน ไม่ต้องเพิ่มหลายแถว • อย่ารวมคนละสาขา ปี หรือวุฒิผู้สมัคร</p>
+          <label className="block text-sm"><span className="sr-only">คำถามใกล้เคียง</span><textarea rows={4} className={field} value={form.aliases.join('\n')} onChange={e => set('aliases', e.target.value.split('\n'))} placeholder="หนึ่งคำถามต่อบรรทัด สูงสุด 30 คำถาม" /></label>
+        </details>
+        <details className="rounded-xl border border-slate-200 p-4">
+          <summary className="cursor-pointer text-sm font-semibold">รายละเอียดเพิ่มเติม (ไม่บังคับ)</summary>
+          <div className="mt-4 space-y-4">
+            <label className="block text-sm">ประเภท<select className={field} value={form.category} onChange={e => set('category', e.target.value)}>{data.categories.map(category => <option key={category}>{category}</option>)}</select></label>
+            <label className="block text-sm">แหล่งอ้างอิง<input type="url" maxLength={2000} className={field} value={form.metadata?.source || ''} onChange={e => setMeta('source', e.target.value)} placeholder="https://..." /></label>
+            <label className="block text-sm">คำค้นเพิ่มเติม<input className={field} value={(form.metadata?.keywords || []).join(',')} onChange={e => setMeta('keywords', e.target.value.split(','))} placeholder="คั่นแต่ละคำด้วย ," /></label>
+            <label className="block text-sm">หมายเหตุภายใน (ไม่ส่งให้ AI)<textarea rows={2} maxLength={10000} className={field} value={form.metadata?.notes || ''} onChange={e => setMeta('notes', e.target.value)} /></label>
+          </div>
+        </details>
+        <p className="text-xs leading-6 text-slate-500">ตรวจข้อมูลก่อนบันทึก ไม่ใส่รหัสผ่านหรือข้อมูลส่วนบุคคล • ระบบไม่ส่งข้อความย้อนหลังไป LINE</p>
+      </fieldset>
+      <footer className="sticky bottom-0 flex justify-end gap-3 border-t border-slate-100 bg-white px-6 py-4">
+        <button type="button" disabled={busy} onClick={onClose} className={secondary}>ยกเลิก</button>
+        <button disabled={busy} className={primary}>{busy ? 'กำลังบันทึก…' : 'บันทึกข้อมูล'}</button>
+      </footer>
+    </form>
+  </dialog>;
+}
+
 export default function KnowledgeAdmin() {
-  const [data, setData] = useState(null), [tab, setTab] = useState('questions'), [search, setSearch] = useState(''), [status, setStatus] = useState('pending'), [reason, setReason] = useState(''), [similar, setSimilar] = useState(null);
+  const [data, setData] = useState(null), [search, setSearch] = useState(''), [branch, setBranch] = useState('');
   const [error, setError] = useState(''), [notice, setNotice] = useState(''), [busy, setBusy] = useState(false), [loading, setLoading] = useState(true);
-  const [form, setForm] = useState(null), [question, setQuestion] = useState(null), [history, setHistory] = useState(null);
-  const load = useCallback(async () => { setLoading(true); try { setData(await request()); } catch (e) { setError(e.message); } finally { setLoading(false); } }, []);
+  const [form, setForm] = useState(null), [editorError, setEditorError] = useState(''), [selected, setSelected] = useState([]);
+  const load = useCallback(async () => {
+    setLoading(true); setError('');
+    try { setData(await request()); setSelected([]); }
+    catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }, []);
   useEffect(() => { const timer = setTimeout(load, 0); return () => clearTimeout(timer); }, [load]);
-  const save = async (path, method, body) => {
+  const open = value => { setEditorError(''); setForm(value); };
+  const save = async value => {
     if (busy) return;
-    setBusy(true); setError(''); setNotice('');
-    try { await request(path, { method, body: JSON.stringify(body.aliases ? { ...body, aliases: body.aliases.map(a => a.trim()).filter(Boolean), metadata: { ...body.metadata, keywords: (body.metadata?.keywords || []).map(k => k.trim()).filter(Boolean) } } : body) }); setForm(null); setQuestion(null); setNotice('บันทึกแล้ว ไม่ได้ส่งข้อความย้อนหลังไป LINE'); await load(); }
-    catch (e) { setError(e.message); } finally { setBusy(false); }
+    setBusy(true); setEditorError(''); setNotice('');
+    const body = { ...value, status: 'published', aliases: [...new Set(value.aliases.map(a => a.trim()).filter(Boolean))], metadata: { ...value.metadata, keywords: [...new Set((value.metadata?.keywords || []).map(k => k.trim()).filter(Boolean))] } };
+    try {
+      await request(value.id ? '/answers/' + value.id : '/answers', { method: value.id ? 'PUT' : 'POST', body: JSON.stringify(body) });
+      setForm(null); setNotice('บันทึกแล้ว AI ใช้ข้อมูลนี้ตอบได้ทันที'); await load();
+    } catch (e) { setEditorError(e.message); }
+    finally { setBusy(false); }
   };
-  const findSimilar = async id => { setError(''); setSimilar(null); try { setSimilar((await request(`/questions/${id}/similar`)).data); } catch (e) { setError(e.message); } };
-  const openHistory = async id => { setError(''); try { setHistory((await request(`/answers/${id}/history`)).data); } catch (e) { setError(e.message); } };
-  const branchOptions = data ? Object.entries(data.branches).filter(([key]) => data.scope === 'all' || key === data.scope) : [];
-  const rows = data ? data[tab].filter(row => (!status || row.status === status) && (!reason || row.triage?.reason === reason) && `${row.question} ${row.triage?.summary || ''} ${row.triage?.detail || ''} ${row.category} ${data.branches[row.branch]} ${row.answer || ''} ${(row.metadata?.keywords || []).join(' ')} ${row.metadata?.academicYear || ''}`.toLowerCase().includes(search.toLowerCase())) : [];
-  return <div className="mx-auto max-w-7xl space-y-6 text-black">
-    <header className="rounded-2xl bg-[#701D10] p-6 text-white"><h1 className="text-2xl font-bold">คำถามและคำตอบ</h1><p className="mt-2 text-sm leading-6">ดูเฉพาะคำถามที่ต้องให้ผู้ดูแลช่วยตอบ และจัดการคลังคำตอบที่อนุมัติ</p></header>
-    {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-800">{error}</p>}
-    {notice && <p role="status" className="rounded-xl bg-green-50 p-4 text-green-800">{notice}</p>}
-    {loading && <p role="status">กำลังโหลดข้อมูล…</p>}
+  const remove = async row => {
+    if (busy || !window.confirm('ลบแนวคำถาม “' + row.question + '” ใช่ไหม? AI จะไม่ใช้ข้อมูลนี้ในการค้นครั้งถัดไป')) return;
+    setBusy(true); setError(''); setNotice('');
+    try { await request('/answers/' + row.id, { method: 'DELETE', body: JSON.stringify({ version: row.version }) }); setNotice('ลบออกจากข้อมูลที่ AI ใช้งานแล้ว'); await load(); }
+    catch (e) { setError(e.message); }
+    finally { setBusy(false); }
+  };
+  const topics = useMemo(() => data?.answers.filter(row => row.status !== 'disabled') || [], [data]);
+  const suggestions = useMemo(() => groupQuestions(data?.questions || []), [data]);
+  const rows = topics.filter(row => (!branch || row.branch === branch) && [row.question, row.answer, row.aliases.join(' '), row.metadata?.academicYear || ''].join(' ').toLowerCase().includes(search.toLowerCase()));
+  const addFromQuestions = () => {
+    const sourceRows = suggestions.filter(group => selected.includes(group.key)).flatMap(group => group.rows);
+    if (!sourceRows.length) return;
+    if (new Set(sourceRows.map(row => row.branch)).size !== 1) { setError('เลือกคำถามในสาขาเดียวกันก่อนรวมเป็นแนวเดียว'); return; }
+    if (sourceRows.length > 30) { setError('รวมได้ครั้งละไม่เกิน 30 รายการ'); return; }
+    const first = sourceRows[0], targetBranch = first.branch === 'unassigned' ? data.scope : first.branch;
+    open({ ...fresh(targetBranch), question: first.triage?.summary || first.question, category: first.category,
+      aliases: [...new Set(sourceRows.map(row => row.triage?.summary || row.question))],
+      sourceQuestions: sourceRows.map(({ id, version }) => ({ id, version })) });
+  };
+  return <div className="mx-auto max-w-6xl space-y-5 text-slate-900">
+    <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-6">
+      <div><h1 className="text-2xl font-bold">ข้อมูลให้ AI</h1><p className="mt-2 text-sm text-slate-500">เพิ่มข้อมูลที่ถูกต้อง แล้วให้ AI ช่วยตอบคำถามแทนคุณ</p></div>
+      {data?.canEdit && <button disabled={busy} className={primary} onClick={() => open(fresh(data.scope))}>+ เพิ่มข้อมูลให้ AI</button>}
+    </header>
+    {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</p>}
+    {notice && <p role="status" className="rounded-xl bg-green-50 p-4 text-sm text-green-800">{notice}</p>}
+    {loading && <p role="status" className="text-sm text-slate-500">กำลังโหลดข้อมูล…</p>}
     {data && <>
-      <div className="grid gap-4 sm:grid-cols-3">{[['คำถามรอตอบ', data.questions.filter(q => q.status === 'pending').length], ['คำตอบเผยแพร่', data.answers.filter(a => a.status === 'published').length], ['คำตอบฉบับร่าง', data.answers.filter(a => a.status === 'draft').length]].map(([label, count]) => <div key={label} className="rounded-2xl border border-gray-200 bg-white p-5"><p className="text-sm text-gray-600">{label}</p><strong className="mt-2 block text-3xl text-[#701D10]">{count}</strong></div>)}</div>
-      <p className="text-sm text-gray-600">ขอบเขต: {data.scope === 'all' ? 'ทุกสาขาและคำถามยังไม่ระบุสาขา' : data.branches[data.scope]} • แสดงล่าสุดไม่เกิน {data.limit} รายการต่อส่วน • {data.canEdit ? 'แก้ไขได้' : 'อ่านอย่างเดียว'}</p>
-      <div className="flex flex-wrap items-center gap-3">{[['questions', 'คำถามที่ต้องตรวจสอบ'], ['answers', 'คลังคำตอบ']].map(([key, label]) => <button key={key} aria-pressed={tab === key} onClick={() => { setTab(key); setStatus(key === 'questions' ? 'pending' : ''); setReason(''); }} className={`rounded-xl px-5 py-3 font-semibold ${tab === key ? 'bg-[#701D10] text-white' : 'border border-gray-200 bg-white text-black'}`}>{label}</button>)}
-        {data.canEdit && <button className="rounded-xl bg-[#F7941D] px-5 py-3 font-semibold text-black" onClick={() => { setForm(fresh(data.scope)); setQuestion(null); setHistory(null); }}>+ เพิ่มคำตอบ</button>}
-        <button disabled={loading} onClick={load} className="rounded-xl border p-3">รีเฟรช</button>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-[1fr_220px]"><input aria-label="ค้นหาคำถาม" value={search} onChange={e => setSearch(e.target.value)} className={field} placeholder="ค้นหาคำถาม คำตอบ ประเภท หรือสาขา…" /><select aria-label="สถานะ" className={field} value={status} onChange={e => setStatus(e.target.value)}><option value="">ทุกสถานะ</option>{(tab === 'questions' ? ['pending', 'resolved', 'ignored'] : ['draft', 'published', 'disabled']).map(s => <option key={s} value={s}>{statusNames[s]}</option>)}</select></div>
-      {tab === 'questions' && <div className="space-y-2"><p className="text-sm text-gray-600">คิวใหม่รับเฉพาะรายการที่ workflow คัดกรองแล้ว • คำถามเดิมยังอยู่ ไม่ลบอัตโนมัติ • สรุปและประเภทจาก AI ต้องตรวจสอบก่อนใช้</p><select aria-label="เหตุผลส่งต่อ" className={field} value={reason} onChange={e => setReason(e.target.value)}><option value="">ทุกเหตุผลส่งต่อ</option>{Object.entries(data.reviewReasons || {}).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></div>}
-      <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white"><table className="w-full min-w-[800px] text-left text-sm"><thead className="bg-gray-50"><tr>{['คำถาม', 'ประเภท / สาขา', tab === 'questions' ? 'ครั้ง / ล่าสุด' : 'เวอร์ชัน / แก้ไขล่าสุด', 'สถานะ', 'จัดการ'].map(t => <th className="p-4" key={t}>{t}</th>)}</tr></thead><tbody>{rows.map(row => <tr className="border-t border-gray-100" key={row.id}><td className="max-w-sm whitespace-pre-wrap break-words p-4 font-medium">{row.triage?.summary || row.question}{tab === 'questions' && <><span className="mt-2 block text-xs text-orange-800">{data.reviewReasons?.[row.triage?.reason] || 'รายการจากระบบเดิม'}</span><details className="mt-2 text-xs font-normal text-gray-600"><summary className="cursor-pointer">ข้อความต้นฉบับ</summary><p className="mt-2">{row.question}</p></details></>}</td><td className="p-4">{row.category}<span className="mt-1 block text-gray-500">{data.branches[row.branch]}</span></td><td className="p-4">{tab === 'questions' ? `${row.occurrences} ครั้ง` : `v${row.version}`}<span className="block text-xs text-gray-500">{new Date(row.last_seen || row.updated_at).toLocaleString('th-TH')}</span></td><td className="p-4"><span className="rounded-full bg-orange-50 px-3 py-1 text-[#701D10]">{statusNames[row.status]}</span></td><td className="p-4"><div className="flex gap-2">{data.canEdit && <button className="rounded-lg border px-3 py-2" onClick={() => { setHistory(null); if (tab === 'questions') { setSimilar(null); setQuestion({ ...row, answerId: row.answer_id || '' }); setForm(null); } else { setForm({ ...row }); setQuestion(null); } }}>จัดการ</button>}{tab === 'answers' && <button className="rounded-lg border px-3 py-2" onClick={() => openHistory(row.id)}>ประวัติ</button>}</div></td></tr>)}{!rows.length && <tr><td colSpan={5} className="p-12 text-center text-gray-500">ยังไม่มีรายการที่ตรงกับตัวกรอง</td></tr>}</tbody></table></div>
-      {question && <section className="rounded-2xl border bg-white p-6"><h2 className="text-xl font-bold">จัดการคำถาม #{question.id}</h2><p className="my-4 whitespace-pre-wrap font-medium">{question.triage?.summary || question.question}</p>{question.triage && <div className="mb-4 space-y-2 rounded-xl bg-orange-50 p-4"><p>เหตุผล: {data.reviewReasons?.[question.triage.reason] || question.triage.reason}</p><p className="whitespace-pre-wrap">{question.triage.detail}</p><p className="text-sm">สรุปและเหตุผลจาก AI อาจคลาดเคลื่อน โปรดตรวจข้อความต้นฉบับ</p></div>}<details className="mb-4"><summary className="cursor-pointer">ข้อความต้นฉบับ</summary><p className="whitespace-pre-wrap py-3">{question.question}</p></details><button type="button" onClick={() => findSimilar(question.id)} className="mb-3 rounded-lg border px-3 py-2">ดูคำถามที่อาจซ้ำ</button>{similar && <div className="mb-4 rounded-xl bg-gray-50 p-4"><p className="text-sm text-gray-600">ข้อเสนอแนะเท่านั้น ไม่รวมรายการอัตโนมัติ (ตรวจรายการรอตอบล่าสุดไม่เกิน 1,000 รายการในสาขาเดียวกัน)</p>{similar.length ? similar.map(item => <p key={item.id} className="mt-2">#{item.id} — {item.summary}</p>) : <p className="mt-2">ไม่พบรายการใกล้เคียง</p>}</div>}<div className="grid gap-4 sm:grid-cols-2"><label>สาขา<select className={field} value={question.branch} onChange={e => setQuestion({ ...question, branch: e.target.value, answerId: '', status: 'pending' })}>{branchOptions.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label><label>ประเภท<select className={field} value={question.category} onChange={e => setQuestion({ ...question, category: e.target.value })}>{data.categories.map(c => <option key={c}>{c}</option>)}</select></label><label>สถานะ<select className={field} value={question.status} onChange={e => setQuestion({ ...question, status: e.target.value })}>{['pending', 'resolved', 'ignored'].map(s => <option key={s} value={s}>{statusNames[s]}</option>)}</select></label>{question.status === 'resolved' && <label>เชื่อมคำตอบที่เผยแพร่<select className={field} value={question.answerId} onChange={e => setQuestion({ ...question, answerId: Number(e.target.value) })}><option value="">เลือกคำตอบ</option>{data.answers.filter(a => a.status === 'published' && (a.branch === question.branch || a.branch === 'all')).map(a => <option value={a.id} key={a.id}>{a.question}</option>)}</select></label>}</div><p className="my-3 text-sm text-gray-600">เมื่อเชื่อมคำตอบ ระบบเพิ่มข้อความนี้เป็นคำถามใกล้เคียงเพื่อใช้ตอบครั้งถัดไป</p><div className="flex flex-wrap gap-3"><button disabled={busy || (question.status === 'resolved' && !question.answerId)} className="rounded-xl bg-[#701D10] p-3 text-white disabled:opacity-50" onClick={() => save(`/questions/${question.id}`, 'PATCH', question)}>บันทึกการจัดหมวด</button><button disabled={busy} className="rounded-xl border p-3" onClick={() => { setForm({ ...fresh(data.scope), branch: question.branch === 'unassigned' ? (data.scope === 'all' ? 'all' : data.scope) : question.branch, category: question.category, question: question.triage?.summary || question.question }); setQuestion(null); }}>สร้างคำตอบจากคำถามนี้</button><button disabled={busy} onClick={() => setQuestion(null)}>ปิด</button></div></section>}
-      {form && <form onSubmit={e => { e.preventDefault(); save(form.id ? `/answers/${form.id}` : '/answers', form.id ? 'PUT' : 'POST', form); }} className="space-y-4 rounded-2xl border bg-white p-6"><h2 className="text-xl font-bold">{form.id ? 'แก้ไขคำตอบ' : 'เพิ่มคำตอบ'}</h2><div className="grid gap-4 sm:grid-cols-2"><label>สาขา<select disabled={Boolean(form.id) || data.scope !== 'all'} className={field} value={form.branch} onChange={e => setForm({ ...form, branch: e.target.value })}>{branchOptions.filter(([key]) => key !== 'unassigned').map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label><label>ประเภท<select className={field} value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{data.categories.map(c => <option key={c}>{c}</option>)}</select></label></div><label className="block">คำถามหลัก<input required maxLength={1000} className={field} value={form.question} onChange={e => setForm({ ...form, question: e.target.value })} /></label><label className="block">คำถามใกล้เคียง (หนึ่งข้อต่อบรรทัด สูงสุด 30 ข้อ)<textarea rows={3} className={field} value={form.aliases.join('\n')} onChange={e => setForm({ ...form, aliases: e.target.value.split('\n') })} /></label><label className="block">คำตอบที่อนุมัติ<textarea required={form.status === 'published'} maxLength={10000} rows={7} className={field} value={form.answer} onChange={e => setForm({ ...form, answer: e.target.value })} /></label><div className="grid gap-4 sm:grid-cols-2"><label>ปีการศึกษา<input maxLength={20} className={field} value={form.metadata?.academicYear || ''} onChange={e => setForm({ ...form, metadata: { ...form.metadata, academicYear: e.target.value } })} /></label><label>แหล่งอ้างอิง<input type="url" maxLength={2000} placeholder="https://..." className={field} value={form.metadata?.source || ''} onChange={e => setForm({ ...form, metadata: { ...form.metadata, source: e.target.value } })} /></label></div><label className="block">คีย์เวิร์ด (คั่นด้วยเครื่องหมาย , สูงสุด 50 คำ)<textarea rows={2} className={field} value={(form.metadata?.keywords || []).join(',')} onChange={e => setForm({ ...form, metadata: { ...form.metadata, keywords: e.target.value.split(',') } })} /></label><p className="text-sm text-gray-600">คีย์เวิร์ดช่วยค้นในหน้าผู้ดูแลและ Tool ค้นคำตอบใหม่ ผลค้นเป็นตัวเลือกให้ AI ตรวจ ไม่ใช่การรับรองคำตอบ</p><label className="block">หมายเหตุสำหรับผู้ดูแล (ไม่ส่งให้บอต)<textarea rows={4} maxLength={10000} className={field} value={form.metadata?.notes || ''} onChange={e => setForm({ ...form, metadata: { ...form.metadata, notes: e.target.value } })} /></label><label className="block">สถานะ<select className={field} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>{['draft', 'published', 'disabled'].map(s => <option key={s} value={s}>{statusNames[s]}</option>)}</select></label><p className="text-sm text-gray-600">เผยแพร่เฉพาะข้อมูลสาธารณะ ห้ามใส่รหัสผ่านหรือข้อมูลส่วนบุคคล • Tool ใหม่ค้นคำถามหลัก คำถามใกล้เคียงและคีย์เวิร์ด • API เดิมยังจับคู่แบบตรงตัว</p><button disabled={busy} className="rounded-xl bg-[#701D10] px-5 py-3 text-white disabled:opacity-50">{busy ? 'กำลังบันทึก…' : 'บันทึกคำตอบ'}</button><button type="button" disabled={busy} onClick={() => setForm(null)} className="ml-3 rounded-xl border px-5 py-3">ยกเลิก</button></form>}
-      {history && <section className="rounded-2xl border bg-white p-6"><div className="flex justify-between"><h2 className="text-xl font-bold">ประวัติคำตอบ (ล่าสุด 100 ครั้ง)</h2><button onClick={() => setHistory(null)}>ปิด</button></div>{history.map(row => <details key={row.id} className="border-b py-4"><summary className="cursor-pointer">v{row.snapshot.version} • {row.changed_by === 0 ? 'ระบบนำเข้าข้อมูล' : row.editor || `ผู้ดูแล #${row.changed_by}`} • {new Date(row.created_at).toLocaleString('th-TH')}</summary><p className="mt-3 font-semibold">{row.snapshot.question}</p><p>{statusNames[row.snapshot.status]} • {row.snapshot.category}</p><p className="whitespace-pre-wrap py-3">{row.snapshot.answer || '(ไม่มีคำตอบ)'}</p><p className="text-sm">ปีการศึกษา: {row.snapshot.metadata?.academicYear || '—'} • แหล่งอ้างอิง: {row.snapshot.metadata?.source || '—'}</p><p className="text-sm">คีย์เวิร์ด: {(row.snapshot.metadata?.keywords || []).join(', ') || '—'}</p><p className="whitespace-pre-wrap text-sm text-gray-500">{row.snapshot.metadata?.notes}</p><p className="text-sm text-gray-500">คำถามใกล้เคียง: {row.snapshot.aliases.join(' / ')}</p></details>)}</section>}
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 p-4">
+          <input aria-label="ค้นหาข้อมูลให้ AI" className={field + ' !mt-0 min-w-48 flex-1'} placeholder="ค้นหาแนวคำถามหรือคำตอบ…" value={search} onChange={e => setSearch(e.target.value)} />
+          {data.scope === 'all' && <select aria-label="กรองสาขา" className={field + ' !mt-0 sm:!w-56'} value={branch} onChange={e => setBranch(e.target.value)}><option value="">ทุกสาขา</option>{Object.entries(data.branches).filter(([key]) => key !== 'unassigned').map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>}
+          <button disabled={loading || busy} onClick={load} className={secondary}>รีเฟรช</button>
+        </div>
+        <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-left text-sm">
+          <thead className="bg-slate-50 text-slate-600"><tr><th className="w-[30%] px-5 py-4 font-medium">แนวคำถาม</th><th className="px-5 py-4 font-medium">ข้อมูลคำตอบสำหรับ AI</th><th className="w-40 px-5 py-4 font-medium">จัดการ</th></tr></thead>
+          <tbody>{rows.map(row => <tr key={row.id} className="border-t border-slate-100 align-top hover:bg-orange-50/20">
+            <td className="break-words px-5 py-5"><p className="font-semibold leading-6">{row.question}</p><p className="mt-2 text-xs text-slate-500">{data.branches[row.branch]}{row.metadata?.academicYear ? ' · ปี ' + row.metadata.academicYear : ''}</p>{row.aliases.length > 0 && <details className="mt-3 text-xs text-slate-500"><summary className="cursor-pointer">คำถามในแนวนี้อีก {row.aliases.length} แบบ</summary><ul className="mt-2 list-disc space-y-2 pl-4">{row.aliases.map((alias, i) => <li key={i}>{alias}</li>)}</ul></details>}</td>
+            <td className="max-w-lg break-words px-5 py-5"><p className="line-clamp-3 whitespace-pre-wrap leading-7">{row.answer || 'ยังไม่ได้เพิ่มข้อมูลคำตอบ'}</p>{row.answer.length > 160 && <details className="mt-2"><summary className="cursor-pointer text-xs font-medium text-[#701D10]">อ่านทั้งหมด</summary><p className="mt-2 whitespace-pre-wrap leading-7">{row.answer}</p></details>}</td>
+            <td className="px-5 py-5">{data.canEdit ? <div className="flex gap-3"><button disabled={busy} className="font-medium text-[#701D10] hover:underline disabled:opacity-50" onClick={() => open({ ...row, sourceQuestions: [] })}>แก้ไข</button><button disabled={busy} className="text-slate-500 hover:text-red-700 hover:underline disabled:opacity-50" onClick={() => remove(row)}>ลบ</button></div> : <span className="text-xs text-slate-400">ดูข้อมูล</span>}</td>
+          </tr>)}{!rows.length && <tr><td colSpan={3} className="px-6 py-14 text-center"><p className="font-semibold">{topics.length ? 'ไม่พบข้อมูลที่ค้นหา' : 'เริ่มเพิ่มข้อมูลให้ AI'}</p><p className="mt-2 text-sm text-slate-500">{topics.length ? 'ลองเปลี่ยนคำค้นหรือเลือกสาขาอื่น' : 'เพิ่มแนวคำถามและคำตอบครั้งเดียว เพื่อให้ AI ใช้ตอบคำถามหลายรูปแบบ'}</p></td></tr>}</tbody>
+        </table></div>
+        <footer className="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">{rows.length} แนวคำถาม · แสดงข้อมูลล่าสุดไม่เกิน {data.limit} รายการ{data.scope !== 'all' ? ' · ' + data.branches[data.scope] : ''}</footer>
+      </section>
+      <details className="rounded-2xl border border-slate-200 bg-white p-5">
+        <summary className="cursor-pointer text-sm font-semibold">คำถามที่ควรเพิ่มข้อมูล <span className="ml-2 rounded-full bg-orange-50 px-2.5 py-1 text-xs text-[#701D10]">{suggestions.length}</span></summary>
+        <p className="my-4 text-sm leading-6 text-slate-500">เรื่องที่ AI ยังไม่มีข้อมูลเพียงพอ เลือกคำถามที่ใช้คำตอบเดียวกันเพื่อเพิ่มเป็นแนวเดียว • คำถามต่างสาขา ปี หรือคุณสมบัติควรแยกกัน</p>
+        {!suggestions.length ? <p className="py-4 text-sm text-slate-400">ยังไม่มีคำถามที่ต้องเพิ่มข้อมูล</p> : <>
+          {data.canEdit && <button disabled={busy || !selected.length} onClick={addFromQuestions} className={primary + ' mb-4'}>เพิ่มข้อมูลจากคำถามที่เลือก ({selected.length})</button>}
+          <div className="max-h-96 divide-y divide-slate-100 overflow-y-auto">{suggestions.map(group => <div key={group.key} className="flex items-start gap-3 py-4">
+            {data.canEdit && <input type="checkbox" disabled={busy} aria-label={'เลือก ' + group.title} checked={selected.includes(group.key)} onChange={e => setSelected(previous => e.target.checked ? [...previous, group.key] : previous.filter(key => key !== group.key))} className="mt-1 h-4 w-4 accent-[#701D10]" />}
+            <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">{group.title}</p><p className="mt-1 text-xs text-slate-500">{data.branches[group.branch]} · ถาม {group.occurrences} ครั้ง</p><details className="mt-2 text-xs text-slate-500"><summary className="cursor-pointer">ดูข้อความที่ผู้ใช้ถาม</summary><ul className="mt-2 list-disc space-y-2 pl-4">{group.rows.map(row => <li className="whitespace-pre-wrap break-words" key={row.id}>{row.question}</li>)}</ul></details></div>
+          </div>)}</div>
+        </>}
+      </details>
     </>}
+    {form && <Editor initial={form} data={data} busy={busy} error={editorError} onSave={save} onClose={() => setForm(null)} />}
   </div>;
 }

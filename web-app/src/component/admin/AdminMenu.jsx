@@ -23,7 +23,7 @@ function AdminMenu() {
     "Admin";
 
   const menus = [
-    { name: 'คำถามและคำตอบ', path: '/admin/knowledge', icon: 'lucide:messages-square' },
+    { name: 'ข้อมูลให้ AI', path: '/admin/knowledge', icon: 'lucide:messages-square' },
     {
       name: "Dashboard",
       path: "/admin",
