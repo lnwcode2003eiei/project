@@ -63,6 +63,7 @@ export default function KnowledgeAdmin() {
   const [data, setData] = useState(null), [search, setSearch] = useState(''), [branch, setBranch] = useState('');
   const [error, setError] = useState(''), [notice, setNotice] = useState(''), [busy, setBusy] = useState(false), [loading, setLoading] = useState(true);
   const [form, setForm] = useState(null), [editorError, setEditorError] = useState(''), [selected, setSelected] = useState([]);
+  const [showRemoved, setShowRemoved] = useState(false);
   const load = useCallback(async () => {
     setLoading(true); setError('');
     try { setData(await request()); setSelected([]); }
@@ -89,7 +90,22 @@ export default function KnowledgeAdmin() {
     finally { setBusy(false); }
   };
   const topics = useMemo(() => data?.answers.filter(row => row.status !== 'disabled') || [], [data]);
-  const suggestions = useMemo(() => groupQuestions(data?.questions || []), [data]);
+  const suggestions = useMemo(() => groupQuestions((data?.questions || []).filter(row => row.status === (showRemoved ? 'ignored' : 'pending')).map(row => ({ ...row, status: 'pending' }))), [data, showRemoved]);
+  const changeQuestionGroup = async group => {
+    if (busy || !window.confirm(`${showRemoved ? 'กู้คืน' : 'ลบออกจากรายการ'} “${group.title}” รวม ${group.rows.length} รายการ?${showRemoved ? '' : ' สามารถกู้คืนได้ในรายการที่ลบ'}`)) return;
+    setBusy(true); setError(''); setNotice('');
+    let completed = 0, failure = '';
+    try {
+      for (const row of group.rows) {
+        await request('/questions/' + row.id, { method: 'PATCH', body: JSON.stringify({ branch: row.branch, category: row.category, version: row.version, status: showRemoved ? 'pending' : 'ignored' }) });
+        completed++;
+      }
+    } catch (e) { failure = e.message; }
+    await load();
+    setNotice(`${showRemoved ? 'กู้คืน' : 'ลบออกจากรายการ'}แล้ว ${completed} รายการ`);
+    if (failure) setError('ดำเนินการได้บางส่วน: ' + failure);
+    setBusy(false);
+  };
   const rows = topics.filter(row => (!branch || row.branch === branch) && [row.question, row.answer, row.aliases.join(' '), row.metadata?.academicYear || ''].join(' ').toLowerCase().includes(search.toLowerCase()));
   const addFromQuestions = () => {
     const sourceRows = suggestions.filter(group => selected.includes(group.key)).flatMap(group => group.rows);
@@ -129,11 +145,13 @@ export default function KnowledgeAdmin() {
       <details className="rounded-2xl border border-slate-200 bg-white p-5">
         <summary className="cursor-pointer text-sm font-semibold">คำถามที่ควรเพิ่มข้อมูล <span className="ml-2 rounded-full bg-orange-50 px-2.5 py-1 text-xs text-[#701D10]">{suggestions.length}</span></summary>
         <p className="my-4 text-sm leading-6 text-slate-500">เรื่องที่ AI ยังไม่มีข้อมูลเพียงพอ เลือกคำถามที่ใช้คำตอบเดียวกันเพื่อเพิ่มเป็นแนวเดียว • คำถามต่างสาขา ปี หรือคุณสมบัติควรแยกกัน</p>
+        <button className={secondary + ' mb-4'} disabled={busy} onClick={() => { setShowRemoved(v => !v); setSelected([]); }}>{showRemoved ? 'กลับไปคำถามที่ควรเพิ่มข้อมูล' : 'ดูรายการที่ลบ / กู้คืน'}</button>
         {!suggestions.length ? <p className="py-4 text-sm text-slate-400">ยังไม่มีคำถามที่ต้องเพิ่มข้อมูล</p> : <>
-          {data.canEdit && <button disabled={busy || !selected.length} onClick={addFromQuestions} className={primary + ' mb-4'}>เพิ่มข้อมูลจากคำถามที่เลือก ({selected.length})</button>}
+          {data.canEdit && !showRemoved && <button disabled={busy || !selected.length} onClick={addFromQuestions} className={primary + ' mb-4'}>เพิ่มข้อมูลจากคำถามที่เลือก ({selected.length})</button>}
           <div className="max-h-96 divide-y divide-slate-100 overflow-y-auto">{suggestions.map(group => <div key={group.key} className="flex items-start gap-3 py-4">
-            {data.canEdit && <input type="checkbox" disabled={busy} aria-label={'เลือก ' + group.title} checked={selected.includes(group.key)} onChange={e => setSelected(previous => e.target.checked ? [...previous, group.key] : previous.filter(key => key !== group.key))} className="mt-1 h-4 w-4 accent-[#701D10]" />}
+            {data.canEdit && !showRemoved && <input type="checkbox" disabled={busy} aria-label={'เลือก ' + group.title} checked={selected.includes(group.key)} onChange={e => setSelected(previous => e.target.checked ? [...previous, group.key] : previous.filter(key => key !== group.key))} className="mt-1 h-4 w-4 accent-[#701D10]" />}
             <div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">{group.title}</p><p className="mt-1 text-xs text-slate-500">{data.branches[group.branch]} · ถาม {group.occurrences} ครั้ง</p><details className="mt-2 text-xs text-slate-500"><summary className="cursor-pointer">ดูข้อความที่ผู้ใช้ถาม</summary><ul className="mt-2 list-disc space-y-2 pl-4">{group.rows.map(row => <li className="whitespace-pre-wrap break-words" key={row.id}>{row.question}</li>)}</ul></details></div>
+            {data.canEdit && <button disabled={busy} className="shrink-0 text-sm text-red-700 hover:underline disabled:opacity-50" onClick={() => changeQuestionGroup(group)}>{showRemoved ? 'กู้คืน' : 'ลบ'}</button>}
           </div>)}</div>
         </>}
       </details>

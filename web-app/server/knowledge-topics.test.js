@@ -9,6 +9,16 @@ test('saving without a status enables an answer immediately, but existing explic
   assert.equal(validateAnswer({ ...input, status: 'draft' }).status, 'draft');
   assert.throws(() => validateAnswer({ ...input, answer: '' }));
 });
+
+test('interest variants group despite different search outcomes but preserve years and intent', () => {
+  const base = { status: 'pending', branch: 'unassigned', category: 'ทั่วไป', occurrences: 1, question: 'อยากเรียนวิศวะคอม', triage: { summary: 'ผู้ใช้สนใจวิศวกรรมคอมพิวเตอร์ แต่ยังไม่พบข้อมูล' } };
+  const similar = { ...base, question: 'สนใจเรียนวิศวกรรมคอมพิวเตอร์ครับ', triage: { summary: 'ผู้ใช้สนใจสาขาวิศวกรรมคอมพิวเตอร์ พบเพจแต่ข้อมูลไม่ครบ' } };
+  assert.equal(groupQuestions([base, similar]).length, 1);
+  assert.equal(groupQuestions([base, similar])[0].rows.length, 2);
+  assert.equal(groupQuestions([base, { ...similar, question: 'วิศวกรรมคอมพิวเตอร์เรียนอะไร' }]).length, 2);
+  assert.equal(groupQuestions([base, { ...similar, triage: { summary: 'สนใจเรียนปี 2570' } }]).length, 2);
+  assert.equal(groupQuestions([base, { ...similar, branch: 'computer' }]).length, 2);
+});
 test('question display groups polite variants, retains all originals and separates context', () => {
   assert.equal(topicKey('สมัครต้องเตรียมหลักฐานอะไรบ้างครับ'), topicKey('สมัครต้องใช้เอกสารอะไรค่ะ'));
   const base = { status: 'pending', branch: 'computer', category: 'ทั่วไป', occurrences: 2, question: 'สมัครต้องเตรียมหลักฐานอะไรบ้างครับ' };
