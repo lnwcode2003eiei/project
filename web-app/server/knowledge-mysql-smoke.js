@@ -77,7 +77,9 @@ try {
   assert.equal((await call('/api/admin/knowledge')).questions.length, beforeTriage);
   const answeredBody = { eventId: 'answered-event', question: base.question, branch: 'computer', decision: 'answered', answerIds: [created.id], searchToken: search.searchToken };
   const approved = await call(triagePath, 'POST', answeredBody);
-  assert.equal(approved.status, 'answered'); assert.equal(approved.queued, false); assert.equal(approved.approvedAnswers[0].answer, base.answer);
+  assert.equal(approved.status, 'answered'); assert.equal(approved.queued, false); assert.equal(approved.approvedAnswers[0].answer, `${base.answer}\n\nข้อมูลเพิ่มเติม: ${base.metadata.source}`);
+  assert.equal(approved.approvedAnswers[0].source, base.metadata.source);
+  assert.ok(!JSON.stringify(approved).includes(base.metadata.notes));
   assert.equal((await call(triagePath, 'POST', answeredBody)).duplicate, true);
   assert.equal((await call(triagePath, 'POST', { ...answeredBody, eventId: 'forged-event' })).reason, 'invalid_reference');
   const outdated = await call(searchPath, 'POST', { eventId: 'outdated-event', query: base.question, branch: 'computer' });

@@ -1,6 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rankAnswers, signSearch, verifySearch, suggestQuestions } from './knowledge-triage.js';
+import { rankAnswers, signSearch, verifySearch, suggestQuestions, approvedReply } from './knowledge-triage.js';
+
+test('approved replies append public source without duplicating it or leaking metadata', () => {
+  const row = { id: 7, answer: 'ติดต่อเพจสาขาครับ', metadata: { source: 'https://www.facebook.com/example', notes: 'PRIVATE' } };
+  const result = approvedReply(row);
+  assert.equal(result.answer, `${row.answer}\n\nข้อมูลเพิ่มเติม: ${row.metadata.source}`);
+  assert.equal(result.source, row.metadata.source);
+  assert.ok(!JSON.stringify(result).includes('PRIVATE'));
+  assert.equal(approvedReply({ ...row, answer: result.answer }).answer, result.answer);
+  assert.deepEqual(approvedReply({ ...row, metadata: JSON.stringify(row.metadata) }), result);
+  for (const source of ['', 'javascript:alert(1)', 'not a URL', 'https://user:pass@example.com']) {
+    assert.equal(approvedReply({ ...row, metadata: { source } }).answer, row.answer);
+  }
+  assert.equal(approvedReply({ ...row, metadata: null }).answer, row.answer);
+});
 
 const answer = { id: 1, version: 2, branch: 'all', category: 'การรับสมัคร', question: 'สมัครที่ไหน', aliases: ['สมัครตรงไหน'], answer: 'สมัครผ่านเว็บมหาวิทยาลัย', status: 'published', metadata: { keywords: ['สมัคร', 'เว็บไซต์สมัคร'], notes: 'PRIVATE', source: 'https://example.com/', academicYear: '2570' } };
 test('retrieval ranks aliases/keywords, excludes drafts/wrong branch, never exports internal notes', () => {

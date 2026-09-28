@@ -8,6 +8,19 @@ const segmenter = new Intl.Segmenter('th', { granularity: 'word' });
 const stopWords = new Set(['ครับ', 'ค่ะ', 'คะ', 'ไหม', 'อะไร', 'ที่', 'ของ', 'มี', 'เป็น', 'ได้', 'อยาก', 'ทราบ', 'ขอ', 'ให้', 'และ']);
 const words = value => new Set([...segmenter.segment(norm(value))].filter(v => v.isWordLike && v.segment.length > 1 && !stopWords.has(v.segment)).map(v => v.segment));
 
+// Keep the existing n8n mapping (approvedAnswers[].answer) compatible.
+export function approvedReply(row) {
+  const metadata = parse(row.metadata) || {};
+  let source = typeof metadata.source === 'string' ? metadata.source.trim() : '';
+  try {
+    const url = new URL(source);
+    if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) source = '';
+  } catch { source = ''; }
+  const answer = source && !row.answer.includes(source)
+    ? `${row.answer}\n\nข้อมูลเพิ่มเติม: ${source}` : row.answer;
+  return { id: row.id, answer, source };
+}
+
 // Lexical retrieval only: scores rank candidates, never certify factual relevance.
 export function rankAnswers(rows, query, branch = null) {
   const q = norm(query), queryWords = words(q);
@@ -96,8 +109,8 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
       if (decision === 'answered') {
         const proof = verifySearch(req.body.searchToken, process.env.N8N_KNOWLEDGE_TOKEN, eventHash, branch);
         if (proof && ids.length && ids.every(id => proof.candidates.some(candidate => candidate.id === id))) {
-          const [current] = await c.query(`SELECT id,version,branch,answer FROM knowledge_answers WHERE status='published' AND id IN (${ids.map(() => '?').join(',')}) FOR SHARE`, ids);
-          approvedAnswers = current.filter(row => (!branch || row.branch === branch || row.branch === 'all') && proof.candidates.some(ref => ref.id === row.id && ref.version === row.version)).map(row => ({ id: row.id, answer: row.answer }));
+          const [current] = await c.query(`SELECT id,version,branch,answer,metadata FROM knowledge_answers WHERE status='published' AND id IN (${ids.map(() => '?').join(',')}) FOR SHARE`, ids);
+          approvedAnswers = current.filter(row => (!branch || row.branch === branch || row.branch === 'all') && proof.candidates.some(ref => ref.id === row.id && ref.version === row.version)).map(approvedReply);
         }
         if (approvedAnswers.length !== ids.length || !ids.length) { status = 'review'; reason = 'invalid_reference'; approvedAnswers = []; }
       }
