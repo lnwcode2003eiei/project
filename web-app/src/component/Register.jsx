@@ -80,7 +80,7 @@ function Register() {
 
   return (
     <div
-      className="fixed inset-0 z-[999] flex items-center justify-center bg-stone-100 px-4 py-5"
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 px-4 py-5"
     >
       <div className="max-h-[calc(100dvh-2.5rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-yellow-200 border-t-8 border-t-yellow-400 bg-white px-6 py-8 text-stone-800 shadow-2xl sm:px-8">
         {/* Logo */}
