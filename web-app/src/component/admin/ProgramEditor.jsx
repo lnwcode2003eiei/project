@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { apiUrl } from "../../config/api";
 import CourseDetailsEditor from "./CourseDetailsEditor";
+import CurriculumPdfEditor from "./CurriculumPdfEditor";
 import { courseHeroStyle } from "../../config/courseHeroes";
 
 function EditableSection({ children, onEdit }) {
@@ -1036,7 +1037,6 @@ function ProgramEditor() {
 
   return (
     <div className="mx-auto max-w-7xl pb-24">
-      {sakaPath && <CourseDetailsEditor key={sakaPath} slug={sakaPath} />}
       {/* ================================= */}
       {/* Header */}
       {/* ================================= */}
@@ -1250,6 +1250,8 @@ function ProgramEditor() {
       {/* CURRICULUM */}
       {/* ================================= */}
 
+      {sakaPath && <CurriculumPdfEditor key={'pdf-' + sakaPath} slug={sakaPath} />}
+      <details className="my-6 rounded-xl border border-gray-200 p-4"><summary className="cursor-pointer font-semibold">ข้อมูลตารางหลักสูตรเดิม / หลักสูตรเทียบโอน (เก็บไว้ ไม่ถูกลบ)</summary>
       <EditableSection
         onEdit={() =>
           { setCurriculumPlan("curriculum"); setEditing("curriculum"); }
@@ -1347,6 +1349,7 @@ function ProgramEditor() {
       </EditableSection>
 
       {/* ================================= */}
+      </details>
       {/* SKILLS */}
       {/* ================================= */}
 
@@ -1457,11 +1460,12 @@ function ProgramEditor() {
         >
           {saving
             ? "กำลังบันทึก..."
-            : "บันทึกทั้งหมด"}
+            : "บันทึกเนื้อหาหลักสูตรเดิม"}
         </button>
       </div>
 
       {/* ================================= */}
+      {sakaPath && <CourseDetailsEditor key={sakaPath} slug={sakaPath} />}
       {/* MODAL */}
       {/* ================================= */}
 

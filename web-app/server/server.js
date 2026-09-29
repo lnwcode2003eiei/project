@@ -8,6 +8,7 @@ import { interestScope } from './interest-scope.js';
 import { registerVisitorStatistics, validRange } from "./visitor-statistics.js";
 import { registerComparison } from "./comparison.js";
 import { registerCourseDetails } from "./course-details.js";
+import { registerCurriculumPdf } from "./curriculum-pdf.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -288,6 +289,7 @@ const checkAdminEditPermission = (req, sakaPath, callback) => {
 // ==========================================
 
 registerCourseDetails(app, db, requireAdmin, checkAdminEditPermission);
+registerCurriculumPdf(app, db, requireAdmin, checkAdminEditPermission);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

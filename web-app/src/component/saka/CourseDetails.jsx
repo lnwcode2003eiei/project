@@ -69,12 +69,16 @@ export default function CourseDetails({ slug }) {
     </Section>
     <Section id="course-supports" title="สิ่งสนับสนุนการเรียนการสอน"><Cards rows={data.supports} /></Section>
     <Section id="course-contact" title="การติดต่อ">
-      {Object.values(contact).some(Boolean) ? <address className="space-y-3 rounded-2xl bg-rose-50 p-7 not-italic leading-8">
-        {contact.name && <p className="text-xl font-semibold">{contact.name}</p>}
-        {contact.address && <p className="whitespace-pre-line">{contact.address}</p>}
-        {contact.phone && <p>โทรศัพท์: {contact.phone}</p>}
-        {contact.email && <p>อีเมล: <a className="underline" href={`mailto:${contact.email}`}>{contact.email}</a></p>}
-        {safeUrl(contact.url) && <a className="inline-block font-semibold text-[#701D10] underline" href={safeUrl(contact.url)} target="_blank" rel="noopener noreferrer">ช่องทางติดต่อเพิ่มเติม ↗</a>}
+      {(safeUrl(contact.url) || contact.email || contact.phone) ? <address className="space-y-4 rounded-2xl border border-rose-100 bg-white p-6 text-left not-italic shadow-sm sm:p-8">
+        {safeUrl(contact.url) && <a className="flex items-start gap-4 rounded-xl p-3 text-[#701D10] transition hover:bg-rose-50" href={safeUrl(contact.url)} target="_blank" rel="noopener noreferrer">
+          <Icon icon="mdi:facebook" aria-hidden="true" className="h-7 w-7 shrink-0" /><span className="min-w-0"><span className="block font-semibold">Facebook</span><span className="block break-all text-sm leading-6 underline underline-offset-4">{contact.url}</span><span className="sr-only"> (เปิดหน้าต่างใหม่)</span></span>
+        </a>}
+        {contact.email && <a className="flex items-start gap-4 rounded-xl p-3 text-[#701D10] transition hover:bg-rose-50" href={`mailto:${contact.email}`}>
+          <Icon icon="mdi:email-outline" aria-hidden="true" className="h-7 w-7 shrink-0" /><span className="min-w-0"><span className="block font-semibold">อีเมล</span><span className="block break-all text-sm leading-6 underline underline-offset-4">{contact.email}</span></span>
+        </a>}
+        {contact.phone && <a className="flex items-start gap-4 rounded-xl p-3 text-[#701D10] transition hover:bg-rose-50" href={`tel:${contact.phone.replace(/[^+0-9,;#*]/g, '')}`}>
+          <Icon icon="mdi:phone-outline" aria-hidden="true" className="h-7 w-7 shrink-0" /><span className="min-w-0"><span className="block font-semibold">เบอร์ติดต่อ</span><span className="block break-words text-sm leading-6 underline underline-offset-4">{contact.phone}</span></span>
+        </a>}
       </address> : <p className="text-gray-500">อยู่ระหว่างจัดเตรียมข้อมูลติดต่อ</p>}
     </Section>
   </div>;

@@ -4,6 +4,7 @@ import { courseHeroStyle } from "../../config/courseHeroes";
 import LearningAtmosphere from "./LearningAtmosphere";
 import CurriculumSwitcher from "./CurriculumSwitcher";
 import CourseDetails, { CourseSectionNav } from "./CourseDetails";
+import CurriculumPdf from "./CurriculumPdf";
 
 function ComputerAI() {
   const [course, setCourse] = useState(null);
@@ -130,7 +131,7 @@ function ComputerAI() {
       <HighlightsSection course={course} />
 
       {/* Curriculum */}
-      <div id="course-curriculum" className="scroll-mt-44"><StudyPlanSection course={course} totalCredits={totalCredits} /></div>
+      <div id="course-curriculum" className="scroll-mt-44"><CurriculumPdf slug="computerAI"><StudyPlanSection course={course} totalCredits={totalCredits} /></CurriculumPdf></div>
 
       {/* Skills */}
       <SkillsSection course={course} />

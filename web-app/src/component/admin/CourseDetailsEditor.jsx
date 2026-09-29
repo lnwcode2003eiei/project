@@ -86,7 +86,8 @@ export default function CourseDetailsEditor({ slug }) {
           <button type="button" disabled={data[key].length >= 40} className="rounded-lg border border-[#701D10] px-4 py-2 font-semibold text-[#701D10] disabled:opacity-40" onClick={() => change(key, [...data[key], { title: "", description: "", icon: "book", url: "" }])}>+ เพิ่มรายการ</button>
         </section>)}
         {activeCategory === "contact" && <section className="space-y-4 rounded-xl border border-gray-200 p-4"><h3 className="text-lg font-bold text-[#701D10]">การติดต่อ</h3>
-          {[["name", "ชื่อหน่วยงาน / ผู้ติดต่อ", "text", 250], ["phone", "โทรศัพท์", "tel", 100], ["email", "อีเมล", "email", 250], ["url", "ลิงก์เว็บไซต์ / ช่องทางติดต่อ", "url", 1000], ["address", "ที่อยู่ / สถานที่ติดต่อ", "text", 2000]].map(([key, label, type, maxLength]) => <Field key={key} label={label} type={type} maxLength={maxLength} multiline={key === "address"} value={data.contact[key]} onChange={value => change("contact", { ...data.contact, [key]: value })} />)}
+          <p className="text-sm text-gray-600">กรอกเฉพาะช่องทางที่ต้องการแสดง หน้าเว็บไซต์จะแสดงไอคอนพร้อมข้อความและลิงก์ติดต่อ ช่องที่เว้นว่างจะไม่แสดง</p>
+          {[["url", "Facebook (ลิงก์เพจ)", "url", 1000, "https://www.facebook.com/ชื่อเพจ"], ["email", "อีเมล", "email", 250, "example@uru.ac.th"], ["phone", "เบอร์ติดต่อ", "tel", 100, "055-xxxxxx"]].map(([key, label, type, maxLength, placeholder]) => <Field key={key} label={label} type={type} maxLength={maxLength} placeholder={placeholder} value={data.contact[key]} onChange={value => change("contact", { ...data.contact, [key]: value })} />)}
         </section>}
       </fieldset>
       {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-red-700">{error}</p>}

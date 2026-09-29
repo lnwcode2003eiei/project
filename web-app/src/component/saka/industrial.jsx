@@ -5,6 +5,7 @@ import { courseHeroStyle } from "../../config/courseHeroes";
 import LearningAtmosphere from "./LearningAtmosphere";
 import CurriculumSwitcher from "./CurriculumSwitcher";
 import CourseDetails, { CourseSectionNav } from "./CourseDetails";
+import CurriculumPdf from "./CurriculumPdf";
 
 function Industrial() {
   const [course, setCourse] = useState(null);
@@ -124,7 +125,7 @@ function Industrial() {
       <CourseSectionNav />
       <AboutSection course={course} />
       <HighlightsSection course={course} />
-      <div id="course-curriculum" className="scroll-mt-44"><StudyPlanSection course={course} totalCredits={totalCredits} /></div>
+      <div id="course-curriculum" className="scroll-mt-44"><CurriculumPdf slug="industrial"><StudyPlanSection course={course} totalCredits={totalCredits} /></CurriculumPdf></div>
       <SkillsSection course={course} />
       <LearningAtmosphere course={course} />
       <CareersSection course={course} />
