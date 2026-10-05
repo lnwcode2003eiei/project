@@ -17,7 +17,8 @@ export function rankDocuments(rows, query) {
 }
 
 export function registerKnowledgeDocuments(app, { pool, ensure, route, admin, allowed, branches, requireAdmin }) {
-  const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024, files: 1, fields: 3, parts: 5 } }).single('pdf');
+  // Knowledge PDFs are administrator-managed. Do not impose an arbitrary upload-size cap.
+  const upload = multer({ storage: multer.memoryStorage(), limits: { files: 1, fields: 3, parts: 5 } }).single('pdf');
   const documentBranch = (user, requested) => {
     const branch = user.saka_path === 'all' ? requested : user.saka_path;
     if (!Object.hasOwn(branches, branch) || branch === 'unassigned') { const error = new Error('สาขาไม่ถูกต้อง'); error.status = 400; throw error; }
@@ -36,7 +37,7 @@ export function registerKnowledgeDocuments(app, { pool, ensure, route, admin, al
     const branch = documentBranch(user, req.body.branch);
     const type = req.body.type;
     if (!documentTypes.includes(type) || typeof req.body.title !== 'string' || !req.body.title.trim() || req.body.title.trim().length > 250) { const error = new Error('กรอกชื่อเอกสารและประเภทให้ถูกต้อง'); error.status = 400; throw error; }
-    if (!req.file || req.file.mimetype !== 'application/pdf' || req.file.buffer.subarray(0, 5).toString() !== '%PDF-') { const error = new Error('กรุณาเลือกไฟล์ PDF ขนาดไม่เกิน 10 MB'); error.status = 400; throw error; }
+    if (!req.file || req.file.mimetype !== 'application/pdf' || req.file.buffer.subarray(0, 5).toString() !== '%PDF-') { const error = new Error('กรุณาเลือกไฟล์ PDF ที่ถูกต้อง'); error.status = 400; throw error; }
     let parsed;
     try { parsed = await readCurriculumPdf(req.file.buffer); }
     catch { const error = new Error('อ่าน PDF ไม่สำเร็จ: ต้องเป็นไฟล์ไม่เข้ารหัส ไม่เกิน 300 หน้า และมีข้อความที่อ่านได้'); error.status = 400; throw error; }

@@ -4,7 +4,8 @@ import { readComparisonPdf } from './comparison-pdf.js';
 import { extractNames, compareNames } from './comparison-data.js';
 
 export function registerComparison(app, db, requireAdmin, readPdf = readComparisonPdf) {
-  const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024, files: 1, fields: 1, parts: 3 } }).single('pdf');
+  // Admin uploads are not constrained by an arbitrary file-size cap.
+  const upload = multer({ storage: multer.memoryStorage(), limits: { files: 1, fields: 1, parts: 3 } }).single('pdf');
   const query = (sql, params = []) => new Promise((resolve, reject) => db.query(sql, params, (err, rows) => err ? reject(err) : resolve(rows)));
   let ready;
   const ensure = () => ready ??= query('CREATE TABLE IF NOT EXISTS comparison_reports (id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, academic_year SMALLINT NOT NULL, filename VARCHAR(250) NOT NULL, content JSON NOT NULL, uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)').catch(e => { ready = null; throw e; });
@@ -47,7 +48,7 @@ export function registerComparison(app, db, requireAdmin, readPdf = readComparis
       const disconnected = () => { if (!res.writableEnded) controller.abort(); };
       res.on('close', disconnected);
       try {
-        if (error) return res.status(400).json({ success: false, message: 'อัปโหลด PDF ครั้งละ 1 ไฟล์ ขนาดไม่เกิน 10 MB' });
+        if (error) return res.status(400).json({ success: false, message: 'อัปโหลด PDF ได้ครั้งละ 1 ไฟล์' });
         const suppliedYear = req.body?.academicYear;
         if (suppliedYear !== undefined && (!/^\d{4}$/.test(suppliedYear) || Number(suppliedYear) < 2500 || Number(suppliedYear) > 2700)) return res.status(400).json({ success: false, message: 'ปีการศึกษาไม่ถูกต้อง' });
         if (req.admin.can_edit !== undefined && Number(req.admin.can_edit) !== 1) return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์บันทึกผลอัปโหลด' });
