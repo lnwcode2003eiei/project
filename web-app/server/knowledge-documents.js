@@ -4,9 +4,14 @@ import { readCurriculumPdf } from './curriculum-pdf.js';
 import { normalizeUploadFilename } from './upload-filename.js';
 
 export const documentTypes = ['หลักสูตร', 'การรับสมัคร', 'ค่าใช้จ่าย', 'ข่าวสาร', 'เอกสารอื่น'];
+const thaiSegmenter = new Intl.Segmenter('th', { granularity: 'word' });
+const searchStopWords = new Set(['มี', 'อะไร', 'บ้าง', 'ไหม', 'ครับ', 'ค่ะ', 'คะ', 'ขอ', 'อยาก', 'ทราบ', 'ข้อมูล', 'ของ', 'ที่', 'และ']);
+const searchTerms = value => [...new Set([...thaiSegmenter.segment(String(value || '').normalize('NFC').toLocaleLowerCase('th-TH'))]
+  .filter(part => part.isWordLike && part.segment.length > 1 && !searchStopWords.has(part.segment))
+  .map(part => part.segment))];
 
 export function rankDocuments(rows, query) {
-  const terms = String(query || '').normalize('NFC').toLocaleLowerCase('th-TH').split(/\s+/).filter(term => term.length > 1);
+  const terms = searchTerms(query);
   return rows.map(row => {
     const text = row.extracted_text.normalize('NFC');
     const searchableText = text.toLocaleLowerCase('th-TH');
@@ -14,7 +19,11 @@ export function rankDocuments(rows, query) {
     const hits = terms.filter(term => searchableMeta.includes(term) || searchableText.includes(term)).length;
     // Return several passages from the actual PDF text. A title match should
     // not force the AI to see only the first page of a long document.
-    const anchors = [...new Set(terms.map(term => searchableText.indexOf(term)).filter(index => index >= 0))].slice(0, 3);
+    const positions = [...new Set(terms.map(term => searchableText.indexOf(term)).filter(index => index >= 0))].sort((a, b) => a - b);
+    const anchors = positions.reduce((selected, position) => {
+      if (selected.length < 3 && selected.every(existing => Math.abs(existing - position) >= 1200)) selected.push(position);
+      return selected;
+    }, []);
     const passages = anchors.map(at => text.slice(Math.max(0, at - 500), at + 1800).replace(/\s+/g, ' ').trim()).filter(Boolean);
     const excerpt = (passages.length ? passages : [text.slice(0, 1800).replace(/\s+/g, ' ').trim()]).join('\n\n…\n\n');
     return { id: row.id, branch: row.branch, type: row.type, title: row.title, filename: row.filename, updatedAt: row.updated_at, score: terms.length ? Math.round(hits / terms.length * 100) : 0, excerpt: excerpt.replace(/\s+/g, ' ').trim() };

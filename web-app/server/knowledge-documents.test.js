@@ -17,3 +17,9 @@ test('document search returns passages around terms found later in a long PDF', 
   assert.match(result.excerpt, /คุณสมบัติผู้สมัคร/);
   assert.match(result.excerpt, /วันสมัครเรียน/);
 });
+
+test('document search segments a Thai question written without spaces', () => {
+  const results = rankDocuments([{ id: 'apply', branch: 'all', type: 'การรับสมัคร', title: 'ประกาศเปิดรับสมัคร', filename: 'apply.pdf', extracted_text: 'คณะเปิดรับสมัครสาขาวิศวกรรมคอมพิวเตอร์และเทคโนโลยีไฟฟ้า', updated_at: '2026-10-05' }], 'มีสาขาอะไรเปิดบ้าง');
+  assert.equal(results.length, 1);
+  assert.match(results[0].excerpt, /วิศวกรรมคอมพิวเตอร์/);
+});

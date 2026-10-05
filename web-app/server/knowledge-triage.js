@@ -86,9 +86,22 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
     const rows = await publishedRows(pool, branch), truncated = rows.length > 2000;
     const candidates = rankAnswers(rows.slice(0, 2000), query, branch);
     const [documents] = await pool.query(`SELECT id,branch,type,title,filename,extracted_text,updated_at FROM knowledge_documents WHERE branch IN (?,?) ORDER BY updated_at DESC LIMIT 250`, [branch, 'all']);
+    const [documentedBranchRows] = await pool.query("SELECT DISTINCT branch FROM knowledge_documents WHERE branch NOT IN ('all','unassigned') ORDER BY branch");
+    const documentedBranches = documentedBranchRows
+      .filter(row => Object.hasOwn(branches, row.branch))
+      .map(row => ({ code: row.branch, name: branches[row.branch] }));
     const documentCandidates = rankDocuments(documents, query);
     const searchToken = signSearch({ eventHash: hash(eventId), branch, expires: Date.now() + 10 * 60 * 1000, candidates: candidates.map(({ id, version }) => ({ id, version })) }, process.env.N8N_KNOWLEDGE_TOKEN);
-    res.json({ success: true, candidates, documents: documentCandidates, searchToken, truncated, requiresEvaluation: true });
+    res.json({
+      success: true,
+      organization: { faculty: 'คณะเทคโนโลยีอุตสาหกรรม', university: 'มหาวิทยาลัยราชภัฏอุตรดิตถ์' },
+      documentedBranches,
+      candidates,
+      documents: documentCandidates,
+      searchToken,
+      truncated,
+      requiresEvaluation: true,
+    });
   }));
 
   app.post('/api/integrations/line/triage', route(async (req, res) => {
