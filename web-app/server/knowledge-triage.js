@@ -127,7 +127,9 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
         questionId = inbox.id;
       }
       const response = { status, queued: status === 'review', questionId, duplicate: false, reason: status === 'review' ? reason : null, approvedAnswers, message: status === 'review' ? 'ตอนนี้ยังไม่พบข้อมูลที่เพียงพอสำหรับตอบคำถามนี้ครับ' : status === 'service_error' ? 'ระบบค้นหาข้อมูลขัดข้องชั่วคราว กรุณาลองใหม่ภายหลังครับ' : null };
-      // No raw question/user identity/reply token stored for smalltalk, answered, clarify or service_error.
+      // Store message text for the private Admin dashboard only; never store LINE user/reply identifiers.
+      await c.query('INSERT IGNORE INTO knowledge_line_messages (event_hash,message,branch,category,decision,summary) VALUES (?,?,?,?,?,?)', [eventHash, question, branch || 'unassigned', category, status, summary]);
+      // Never store LINE user identity, reply token, or any other LINE event metadata.
       await c.query('UPDATE knowledge_events SET question_id=?,result=? WHERE event_hash=?', [questionId, JSON.stringify(response), eventHash]);
       return response;
     });

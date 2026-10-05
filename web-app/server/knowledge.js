@@ -39,6 +39,7 @@ export async function ensureKnowledgeSchema(pool) {
       `CREATE TABLE IF NOT EXISTS knowledge_history (id INT AUTO_INCREMENT PRIMARY KEY, answer_id INT NOT NULL, snapshot JSON NOT NULL, changed_by INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(answer_id)) ENGINE=InnoDB CHARACTER SET utf8mb4`,
       `CREATE TABLE IF NOT EXISTS knowledge_questions (id INT AUTO_INCREMENT PRIMARY KEY, fingerprint CHAR(64) NOT NULL UNIQUE, question VARCHAR(1000) NOT NULL, branch VARCHAR(50) NOT NULL, category VARCHAR(80) NOT NULL DEFAULT 'ทั่วไป', status VARCHAR(20) NOT NULL DEFAULT 'pending', answer_id INT NULL, occurrences INT NOT NULL DEFAULT 1, version INT NOT NULL DEFAULT 1, last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(branch,status)) ENGINE=InnoDB CHARACTER SET utf8mb4`,
       `CREATE TABLE IF NOT EXISTS knowledge_events (event_hash CHAR(64) PRIMARY KEY, question_id INT NULL, result JSON NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB CHARACTER SET utf8mb4`,
+      `CREATE TABLE IF NOT EXISTS knowledge_line_messages (id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, event_hash CHAR(64) NOT NULL UNIQUE, message VARCHAR(1000) NOT NULL, branch VARCHAR(50) NOT NULL, category VARCHAR(80) NOT NULL, decision VARCHAR(30) NOT NULL, summary VARCHAR(1000) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(branch,created_at), INDEX(category,created_at)) ENGINE=InnoDB CHARACTER SET utf8mb4`,
       `CREATE TABLE IF NOT EXISTS knowledge_documents (id CHAR(36) PRIMARY KEY, branch VARCHAR(50) NOT NULL, type VARCHAR(80) NOT NULL, title VARCHAR(250) NOT NULL, filename VARCHAR(250) NOT NULL, data LONGBLOB NOT NULL, extracted_text MEDIUMTEXT NOT NULL, pages SMALLINT UNSIGNED NOT NULL, text_truncated TINYINT(1) NOT NULL DEFAULT 0, updated_by INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX(branch,updated_at)) ENGINE=InnoDB CHARACTER SET utf8mb4`,
     ]) await pool.query(sql);
     try { await pool.query('ALTER TABLE knowledge_answers ADD COLUMN metadata JSON NULL'); }
@@ -95,6 +96,22 @@ export function registerKnowledge(app, db, requireAdmin) {
     const [answers] = await pool.query(`SELECT * FROM knowledge_answers${scope} ORDER BY updated_at DESC LIMIT 1000`, args);
     const [questions] = await pool.query(`SELECT * FROM knowledge_questions${scope} ORDER BY last_seen DESC LIMIT 1000`, args);
     res.json({ success: true, answers: answers.map(row => ({ ...row, aliases: parse(row.aliases), metadata: parse(row.metadata) || {} })), questions: questions.map(row => ({ ...row, triage: parse(row.triage) || null })), branches, categories, reviewReasons, scope: user.saka_path, canEdit: Number(user.can_edit) === 1, limit: 1000 });
+  }));
+  app.get('/api/admin/knowledge/messages', requireAdmin, route(async (req, res) => {
+    const user = await admin(req);
+    const scope = user.saka_path === 'all' ? '' : ' WHERE branch=?';
+    const [messages] = await pool.query(`SELECT id,message,branch,category,decision,summary,created_at FROM knowledge_line_messages${scope} ORDER BY id DESC LIMIT 500`, user.saka_path === 'all' ? [] : [user.saka_path]);
+    // Include the prior LINE-question inbox as a read-only fallback, so the
+    // dashboard remains useful immediately after upgrading.
+    let legacy = [];
+    if (!messages.length) {
+      const [questions] = await pool.query(`SELECT id,question,branch,category,status,triage,last_seen FROM knowledge_questions${scope} ORDER BY last_seen DESC LIMIT 500`, user.saka_path === 'all' ? [] : [user.saka_path]);
+      legacy = questions.map(row => {
+        const triage = parse(row.triage) || {};
+        return { id: `legacy-${row.id}`, message: row.question, branch: row.branch, category: row.category, decision: row.status === 'resolved' ? 'answered' : row.status === 'ignored' ? 'smalltalk' : 'review', summary: triage.summary || row.question, created_at: row.last_seen };
+      });
+    }
+    res.json({ success: true, messages: messages.length ? messages : legacy, legacy: !messages.length && legacy.length > 0, branches, scope: user.saka_path });
   }));
   app.post('/api/admin/knowledge/answers', requireAdmin, route(async (req, res) => {
     const user = await admin(req, true), value = validateAnswer(req.body); allowed(user, value.branch);
