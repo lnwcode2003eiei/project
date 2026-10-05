@@ -44,7 +44,7 @@ export function registerComparison(app, db, requireAdmin, readPdf = readComparis
     busy = true;
     upload(req, res, async error => {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 150000);
+      const timer = setTimeout(() => controller.abort(), 1800000);
       const disconnected = () => { if (!res.writableEnded) controller.abort(); };
       res.on('close', disconnected);
       try {
@@ -56,7 +56,6 @@ export function registerComparison(app, db, requireAdmin, readPdf = readComparis
         if (!req.file || req.file.mimetype !== 'application/pdf' || req.file.buffer.subarray(0, 5).toString() !== '%PDF-') return res.status(400).json({ success: false, message: 'กรุณาเลือกไฟล์ PDF ที่ถูกต้อง' });
         const pages = await readPdf(req.file.buffer, controller.signal);
         const extracted = extractNames(pages);
-        if (extracted.rows.length + extracted.unresolved.length > 5000) return res.status(422).json({ success: false, message: 'รองรับไม่เกิน 5,000 รายการต่อไฟล์ กรุณาแบ่งไฟล์' });
         const readRows = sql => new Promise((resolve, reject) => db.query(sql, (err, rows) => err ? reject(err) : resolve(rows)));
         const [visitors, interested] = await Promise.all([readRows('SELECT name FROM visitors'), readRows('SELECT fullname AS name FROM applications')]);
         if (controller.signal.aborted) throw new Error('timeout');
@@ -65,7 +64,7 @@ export function registerComparison(app, db, requireAdmin, readPdf = readComparis
         catch { return res.status(500).json({ success: false, message: 'อ่านไฟล์แล้วแต่บันทึกผลไม่สำเร็จ กรุณาลองใหม่' }); }
         res.json({ success: true, data });
       } catch (err) {
-        const known = ['รองรับ PDF ไม่เกิน 30 หน้า', 'กรุณาใช้ PDF ที่ไม่มีรหัสผ่าน', 'รองรับหน้าสแกนไม่เกิน 10 หน้า กรุณาแบ่งไฟล์'];
+        const known = ['ไม่พบหน้าที่อ่านได้ใน PDF', 'กรุณาใช้ PDF ที่ไม่มีรหัสผ่าน'];
         if (!res.destroyed) res.status(422).json({ success: false, message: known.includes(err.message) ? err.message : 'ไม่สามารถอ่าน PDF ได้ ไฟล์อาจเสียหาย มีรหัสผ่าน หรือใช้เวลานานเกินกำหนด กรุณาลองไฟล์เล็กลง' });
       } finally {
         clearTimeout(timer); res.off('close', disconnected); busy = false;

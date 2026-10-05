@@ -22,7 +22,9 @@ test('PDF rows are conservative candidates and manual fields are bounded', () =>
   assert.deepEqual(extractRows(''), []);
   const value = { title: 'หลักสูตร', year: '2570', rows: [{ code: '', name: 'หมวดวิชา', credits: '30' }] };
   assert.deepEqual(validateCurriculum(value), value);
-  for (const data of [null, {}, { ...value, rows: Array(501).fill(value.rows[0]) }, { ...value, rows: [{ code: '', name: '', credits: '' }] }, { ...value, rows: [{ code: '', name: 'test', credits: 'javascript:bad' }] }]) assert.throws(() => validateCurriculum(data));
+  assert.equal(validateCurriculum({ ...value, rows: Array(501).fill(value.rows[0]) }).rows.length, 501);
+  assert.equal(extractRows(Array(601).fill('หมวดวิชา  30').join('\n')).length, 601);
+  for (const data of [null, {}, { ...value, rows: [{ code: '', name: '', credits: '' }] }, { ...value, rows: [{ code: '', name: 'test', credits: 'javascript:bad' }] }]) assert.throws(() => validateCurriculum(data));
 });
 
 test('upload is private until reviewed publication; auth, branch scope, signature and version enforced', async () => {

@@ -13,18 +13,19 @@ export async function readComparisonPdf(buffer, signal) {
     await writeFile(file, buffer, { mode: 0o600 });
     const { stdout: info } = await run('pdfinfo', [file]);
     const count = Number(/^Pages:\s+(\d+)/m.exec(info)?.[1]);
-    if (!count || count > 30) throw new Error('รองรับ PDF ไม่เกิน 30 หน้า');
+    if (!Number.isSafeInteger(count) || count < 1) throw new Error('ไม่พบหน้าที่อ่านได้ใน PDF');
     if (/^Encrypted:\s+yes/m.test(info)) throw new Error('กรุณาใช้ PDF ที่ไม่มีรหัสผ่าน');
-    const pages = []; let scans = 0;
+    const pages = [];
     for (let number = 1; number <= count; number++) {
       const { stdout } = await run('pdftotext', ['-f', String(number), '-l', String(number), '-layout', '-enc', 'UTF-8', file, '-']);
       let text = stdout, ocr = false;
       if ((text.match(/[\p{L}]/gu) || []).length < 30) {
-        if (++scans > 10) throw new Error('รองรับหน้าสแกนไม่เกิน 10 หน้า กรุณาแบ่งไฟล์');
         const prefix = path.join(dir, `page-${number}`);
         await run('pdftoppm', ['-f', String(number), '-l', String(number), '-singlefile', '-scale-to', '2200', '-png', file, prefix]);
         await run('tesseract', [`${prefix}.png`, prefix, '-l', 'tha+eng', '--psm', '6']);
         text = await readFile(`${prefix}.txt`, 'utf8'); ocr = true;
+        await rm(`${prefix}.png`, { force: true });
+        await rm(`${prefix}.txt`, { force: true });
       }
       pages.push({ number, text, ocr });
     }

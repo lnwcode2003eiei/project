@@ -54,7 +54,7 @@ export function registerKnowledgeDocuments(app, { pool, ensure, route, admin, al
     if (!req.file || req.file.mimetype !== 'application/pdf' || req.file.buffer.subarray(0, 5).toString() !== '%PDF-') { const error = new Error('กรุณาเลือกไฟล์ PDF ที่ถูกต้อง'); error.status = 400; throw error; }
     let parsed;
     try { parsed = await readCurriculumPdf(req.file.buffer); }
-    catch { const error = new Error('อ่าน PDF ไม่สำเร็จ: ต้องเป็นไฟล์ไม่เข้ารหัส ไม่เกิน 300 หน้า และมีข้อความที่อ่านได้'); error.status = 400; throw error; }
+    catch { const error = new Error('อ่าน PDF ไม่สำเร็จ: ต้องเป็นไฟล์ไม่เข้ารหัส และมีข้อความที่อ่านได้'); error.status = 400; throw error; }
     const text = parsed.text.trim();
     if (!text) { const error = new Error('ไม่พบข้อความใน PDF กรุณาใช้ไฟล์ที่เลือกอ่านข้อความได้'); error.status = 400; throw error; }
     const id = randomUUID(), filename = normalizeUploadFilename(req.file.originalname).slice(0, 250);
