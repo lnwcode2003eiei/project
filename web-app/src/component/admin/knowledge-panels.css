@@ -1,0 +1,66 @@
+.knowledge-panel {
+  --knowledge-red: #701d10;
+  border: 1px solid #e5e9ef;
+  border-radius: 24px;
+  padding: clamp(20px, 3vw, 32px);
+  box-shadow: 0 6px 24px #182b4410;
+  color: #243349;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.knowledge-panel h2 { font-size: 22px; letter-spacing: -.025em; line-height: 1.5; }
+.knowledge-panel h3 { color: #243349; font-size: 16px; }
+.knowledge-panel header { padding-bottom: 8px; }
+.knowledge-panel button { cursor: pointer; transition: background-color .18s, box-shadow .18s; }
+.knowledge-panel button:disabled { cursor: not-allowed; }
+.knowledge-panel :is(input, select) {
+  min-height: 46px;
+  border: 1px solid #dce2e9;
+  border-radius: 12px;
+  background-color: white;
+  color: #243349;
+  font-size: 14px;
+}
+.knowledge-panel :is(input, select):focus-visible { outline: 3px solid #701d1025; border-color: #a34b3b; outline-offset: 1px; }
+.knowledge-panel form { padding: 24px; gap: 20px; background: #f7f8fa; border: 1px solid #edf0f3; border-radius: 18px; }
+.knowledge-panel form label { color: #46556b; font-weight: 600; }
+.knowledge-panel input[type=file] { min-height: 50px; }
+.knowledge-panel form button { min-height: 46px; box-shadow: 0 4px 10px #701d1018; }
+.knowledge-panel form button:not(:disabled):hover { background: #922c1c; }
+.knowledge-panel table { border-collapse: separate; border-spacing: 0; }
+.knowledge-panel thead { background: #f4f6f8; }
+.knowledge-panel th { padding: 15px 16px; font-size: 13px; font-weight: 600; color: #586a81; white-space: nowrap; }
+.knowledge-panel th:first-child { border-radius: 12px 0 0 12px; }
+.knowledge-panel th:last-child { border-radius: 0 12px 12px 0; }
+.knowledge-panel td { padding: 18px 16px; border-bottom: 1px solid #edf0f4; vertical-align: top; line-height: 1.7; }
+.knowledge-panel td:first-child { min-width: 230px; }
+.knowledge-panel td strong { font-size: 14px; font-weight: 600; }
+.knowledge-panel td p { margin-top: 6px; font-size: 12px; color: #78879a; }
+.knowledge-panel tbody tr:hover { background: #fcf9f8; }
+.knowledge-panel tbody tr:last-child td { border-bottom: 0; }
+.knowledge-panel td:last-child { white-space: nowrap; }
+.knowledge-panel td button { border: 1px solid #f0d7d1; border-radius: 9px; padding: 5px 12px; background: #fff7f5; font-weight: 600; }
+.knowledge-panel td button:hover { background: #fbe7e1; }
+.knowledge-panel .border-t, .knowledge-panel .border-b, .knowledge-panel .border-y { border-color: #e8edf2; }
+.knowledge-line > .flex.flex-wrap { padding: 20px; background: #f7f8fa; border: 1px solid #edf0f3; border-radius: 16px; gap: 18px; align-items: end; }
+.knowledge-line > .flex.flex-wrap label { display: flex; flex-direction: column; gap: 8px; color: #65748a; }
+.knowledge-line > .flex.flex-wrap :is(input,select) { margin-left: 0; min-width: 130px; }
+.knowledge-line header button { color: #701d10; background: #fff7f5; border: 1px solid #efd7d0; min-height: 42px; }
+.knowledge-line > .grid > button, .knowledge-faq > .grid > button { border: 1px solid #eedfd9; border-radius: 16px; padding: 22px; min-height: 130px; }
+.knowledge-line > .grid > button:hover, .knowledge-faq > .grid > button:hover { box-shadow: 0 5px 16px #701d1015; }
+.knowledge-line > .overflow-x-auto:not(.border-t) { padding: 16px 12px; border: 1px solid #edf0f3; border-radius: 18px; background: #fcfdff; }
+.knowledge-faq > .grid:last-of-type > div { padding: 22px; background: #f8fafc; border: 1px solid #edf0f3; border-radius: 18px; }
+.knowledge-faq ol { display: grid; gap: 9px; margin-top: 16px; }
+.knowledge-faq li { border: 0; }
+.knowledge-faq li button { align-items: center; padding: 13px; border: 1px solid #edf0f3; border-radius: 12px; background: white; }
+.knowledge-faq li button:hover { border-color: #d8ada1; background: #fff9f6; }
+.knowledge-faq li button > span:first-child { display: grid; place-items: center; width: 30px; height: 30px; flex-shrink: 0; border-radius: 9px; color: #701d10; background: #f7eae5; }
+.knowledge-faq li button > span:last-child { white-space: nowrap; color: #701d10; font-weight: 600; }
+@media (max-width: 640px) {
+  .knowledge-panel { padding: 18px; border-radius: 18px; }
+  .knowledge-panel h2 { font-size: 19px; }
+  .knowledge-panel form { padding: 16px; }
+  .knowledge-line > .flex.flex-wrap label { width: 100%; }
+  .knowledge-line > .flex.flex-wrap :is(input,select) { width: 100%; }
+  .knowledge-faq > .grid:last-of-type > div { padding: 16px; }
+}

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiUrl } from '../../config/api';
+import './knowledge-panels.css';
 
 const headers = () => ({ Authorization: 'Bearer ' + localStorage.getItem('token') });
 export default function KnowledgeDocuments() {
@@ -23,7 +24,7 @@ export default function KnowledgeDocuments() {
   };
   if (!data) return <section className="rounded-2xl border bg-white p-6 text-sm text-slate-500">กำลังโหลดคลังเอกสาร AI…</section>;
   const editable = data.canEdit, label = key => data.branches[key] || key;
-  return <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6">
+  return <section className="knowledge-panel knowledge-documents space-y-5 rounded-2xl border border-slate-200 bg-white p-6">
     <header><h2 className="text-xl font-bold text-[#701D10]">เอกสาร PDF สำหรับ AI</h2><p className="mt-2 text-sm leading-6 text-slate-500">อัปโหลดเอกสารหลักสูตรหรือข้อมูลสาขา ระบบอ่านข้อความจาก PDF เพื่อให้ N8N ค้นหาเฉพาะสาขาที่เกี่ยวข้อง ข้อมูลส่วนกลางใช้สำหรับค่าเทอม วันสมัคร และประกาศร่วมกัน</p></header>
     {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}{notice && <p role="status" className="rounded-xl bg-green-50 p-3 text-sm text-green-800">{notice}</p>}
     {editable && <form onSubmit={upload} className="grid gap-3 rounded-xl bg-slate-50 p-4 md:grid-cols-2">
