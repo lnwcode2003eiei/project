@@ -8,10 +8,15 @@ export const documentTypes = ['หลักสูตร', 'การรับส
 export function rankDocuments(rows, query) {
   const terms = String(query || '').normalize('NFC').toLocaleLowerCase('th-TH').split(/\s+/).filter(term => term.length > 1);
   return rows.map(row => {
-    const haystack = `${row.title}\n${row.filename}\n${row.extracted_text}`.normalize('NFC').toLocaleLowerCase('th-TH');
-    const hits = terms.filter(term => haystack.includes(term)).length;
-    const at = terms.length ? Math.min(...terms.map(term => haystack.indexOf(term)).filter(index => index >= 0)) : -1;
-    const excerpt = at >= 0 ? row.extracted_text.slice(Math.max(0, at - 350), at + 1250) : row.extracted_text.slice(0, 1200);
+    const text = row.extracted_text.normalize('NFC');
+    const searchableText = text.toLocaleLowerCase('th-TH');
+    const searchableMeta = `${row.title}\n${row.filename}`.normalize('NFC').toLocaleLowerCase('th-TH');
+    const hits = terms.filter(term => searchableMeta.includes(term) || searchableText.includes(term)).length;
+    // Return several passages from the actual PDF text. A title match should
+    // not force the AI to see only the first page of a long document.
+    const anchors = [...new Set(terms.map(term => searchableText.indexOf(term)).filter(index => index >= 0))].slice(0, 3);
+    const passages = anchors.map(at => text.slice(Math.max(0, at - 500), at + 1800).replace(/\s+/g, ' ').trim()).filter(Boolean);
+    const excerpt = (passages.length ? passages : [text.slice(0, 1800).replace(/\s+/g, ' ').trim()]).join('\n\n…\n\n');
     return { id: row.id, branch: row.branch, type: row.type, title: row.title, filename: row.filename, updatedAt: row.updated_at, score: terms.length ? Math.round(hits / terms.length * 100) : 0, excerpt: excerpt.replace(/\s+/g, ' ').trim() };
   }).filter(row => row.score >= 20 && row.excerpt).sort((a, b) => b.score - a.score || b.id - a.id).slice(0, 5);
 }

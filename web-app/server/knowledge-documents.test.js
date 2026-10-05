@@ -10,3 +10,10 @@ test('document search ranks matching text and never exposes document bytes', () 
   assert.match(results[0].excerpt, /ระบบไฟฟ้า/);
   assert.equal(Object.hasOwn(results[0], 'data'), false);
 });
+
+test('document search returns passages around terms found later in a long PDF', () => {
+  const longText = `${'หน้าแรก '.repeat(500)}คุณสมบัติผู้สมัครต้องสำเร็จการศึกษาระดับมัธยมศึกษาตอนปลาย ${'รายละเอียด '.repeat(500)}วันสมัครเรียนอยู่ในช่วงเดือนมกราคม`;
+  const [result] = rankDocuments([{ id: 'late', branch: 'computer', type: 'การรับสมัคร', title: 'ประกาศรับสมัคร', filename: 'apply.pdf', extracted_text: longText, updated_at: '2026-10-05' }], 'คุณสมบัติผู้สมัคร สมัครเรียน');
+  assert.match(result.excerpt, /คุณสมบัติผู้สมัคร/);
+  assert.match(result.excerpt, /วันสมัครเรียน/);
+});

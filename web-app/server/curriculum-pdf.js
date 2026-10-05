@@ -37,7 +37,11 @@ export async function readCurriculumPdf(buffer) {
     const pages = Number(/^Pages:\s+(\d+)/m.exec(info)?.[1]);
     if (!pages || pages > 300 || /^Encrypted:\s+yes/m.test(info)) throw new Error('รองรับ PDF ไม่เข้ารหัส ไม่เกิน 300 หน้า');
     const { stdout } = await exec('pdftotext', ['-layout', '-enc', 'UTF-8', file, '-'], options);
-    return { rows: extractRows(stdout), text: stdout.slice(0, 100000), pages, truncated: stdout.length > 100000 };
+    // Keep substantially more text for the private knowledge library.  The old
+    // 100k-character cut-off routinely discarded the later sections of long
+    // curriculum PDFs (qualifications, careers, and admission details).
+    const textLimit = 2_000_000;
+    return { rows: extractRows(stdout), text: stdout.slice(0, textLimit), pages, truncated: stdout.length > textLimit };
   } finally { await rm(dir, { recursive: true, force: true }); }
 }
 
