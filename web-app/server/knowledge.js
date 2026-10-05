@@ -1,5 +1,6 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { registerKnowledgeTriage, reviewReasons, suggestQuestions } from './knowledge-triage.js';
+import { registerKnowledgeDocuments } from './knowledge-documents.js';
 
 export const branches = { all: 'ข้อมูลส่วนกลาง', unassigned: 'ยังไม่ระบุสาขา', computer: 'วิศวกรรมคอมพิวเตอร์', 'computer-ai': 'วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์', construction: 'วิศวกรรมบริหารงานก่อสร้าง', digital: 'เทคโนโลยีดิจิทัลเพื่อการออกแบบ', electrical: 'เทคโนโลยีไฟฟ้า', energy: 'วิศวกรรมการจัดการพลังงานในงานอุตสาหกรรม', industrial: 'เทคโนโลยีอุตสาหการ', logistics: 'วิศวกรรมโลจิสติกส์', management: 'การจัดการงานวิศวกรรม', survey: 'เทคโนโลยีสำรวจและภูมิสารสนเทศ' };
 export const categories = ['ทั่วไป', 'หลักสูตร', 'คุณสมบัติผู้เรียน', 'ค่าใช้จ่าย', 'อาชีพหลังเรียนจบ', 'การติดต่อ', 'ข่าวสาร', 'การรับสมัคร', 'สาขาวิชา', 'ติดต่อ', 'ข้อมูลคณะ', 'คุณสมบัติ', 'เอกสาร'];
@@ -38,6 +39,7 @@ export async function ensureKnowledgeSchema(pool) {
       `CREATE TABLE IF NOT EXISTS knowledge_history (id INT AUTO_INCREMENT PRIMARY KEY, answer_id INT NOT NULL, snapshot JSON NOT NULL, changed_by INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(answer_id)) ENGINE=InnoDB CHARACTER SET utf8mb4`,
       `CREATE TABLE IF NOT EXISTS knowledge_questions (id INT AUTO_INCREMENT PRIMARY KEY, fingerprint CHAR(64) NOT NULL UNIQUE, question VARCHAR(1000) NOT NULL, branch VARCHAR(50) NOT NULL, category VARCHAR(80) NOT NULL DEFAULT 'ทั่วไป', status VARCHAR(20) NOT NULL DEFAULT 'pending', answer_id INT NULL, occurrences INT NOT NULL DEFAULT 1, version INT NOT NULL DEFAULT 1, last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP, INDEX(branch,status)) ENGINE=InnoDB CHARACTER SET utf8mb4`,
       `CREATE TABLE IF NOT EXISTS knowledge_events (event_hash CHAR(64) PRIMARY KEY, question_id INT NULL, result JSON NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB CHARACTER SET utf8mb4`,
+      `CREATE TABLE IF NOT EXISTS knowledge_documents (id CHAR(36) PRIMARY KEY, branch VARCHAR(50) NOT NULL, type VARCHAR(80) NOT NULL, title VARCHAR(250) NOT NULL, filename VARCHAR(250) NOT NULL, data LONGBLOB NOT NULL, extracted_text MEDIUMTEXT NOT NULL, pages SMALLINT UNSIGNED NOT NULL, text_truncated TINYINT(1) NOT NULL DEFAULT 0, updated_by INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX(branch,updated_at)) ENGINE=InnoDB CHARACTER SET utf8mb4`,
     ]) await pool.query(sql);
     try { await pool.query('ALTER TABLE knowledge_answers ADD COLUMN metadata JSON NULL'); }
     catch (error) { if (error.code !== 'ER_DUP_FIELDNAME') throw error; }
@@ -69,6 +71,7 @@ export function registerKnowledge(app, db, requireAdmin) {
     }
   };
   registerKnowledgeTriage(app, { pool, ensure, route, tx, integrationAuth, branches, categories });
+  registerKnowledgeDocuments(app, { pool, ensure, route, admin, allowed, branches, requireAdmin });
   const attachQuestions = async (c, user, value, sources = []) => {
     if (!Array.isArray(sources) || sources.length > 30 || sources.some(q => !Number.isSafeInteger(q.id) || q.id < 1 || !Number.isSafeInteger(q.version) || q.version < 1) || new Set(sources.map(q => q.id)).size !== sources.length) throw fail(400, 'รายการคำถามต้นทางไม่ถูกต้อง');
     if (!sources.length) return [];

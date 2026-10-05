@@ -1,4 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
+import { rankDocuments } from './knowledge-documents.js';
 
 export const reviewReasons = { not_found: 'ไม่พบข้อมูล', incomplete: 'ข้อมูลไม่ครบ', conflicting: 'ข้อมูลขัดแย้ง', invalid_reference: 'คำตอบอ้างอิงตรวจสอบไม่ผ่าน' };
 const parse = value => typeof value === 'string' ? JSON.parse(value) : value;
@@ -84,8 +85,10 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
     await ensure();
     const rows = await publishedRows(pool, branch), truncated = rows.length > 2000;
     const candidates = rankAnswers(rows.slice(0, 2000), query, branch);
+    const [documents] = await pool.query(`SELECT id,branch,type,title,filename,extracted_text,updated_at FROM knowledge_documents WHERE branch IN (?,?) ORDER BY updated_at DESC LIMIT 250`, [branch, 'all']);
+    const documentCandidates = rankDocuments(documents, query);
     const searchToken = signSearch({ eventHash: hash(eventId), branch, expires: Date.now() + 10 * 60 * 1000, candidates: candidates.map(({ id, version }) => ({ id, version })) }, process.env.N8N_KNOWLEDGE_TOKEN);
-    res.json({ success: true, candidates, searchToken, truncated, requiresEvaluation: true });
+    res.json({ success: true, candidates, documents: documentCandidates, searchToken, truncated, requiresEvaluation: true });
   }));
 
   app.post('/api/integrations/line/triage', route(async (req, res) => {

@@ -1,0 +1,19 @@
+.delete-report-dialog { position: fixed; inset: 0; margin: auto; width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid #f0e4e0; border-radius: 24px; background: #fff; color: #241b18; box-shadow: 0 24px 80px #24100d40; }
+.delete-report-dialog::backdrop { background: #20131080; backdrop-filter: blur(4px); }
+.delete-report-content { padding: 30px; }
+.delete-report-icon { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 18px; background: #fff0ed; color: #9c291c; margin-bottom: 20px; }
+.delete-report-content h2 { font-size: 24px; font-weight: 700; margin: 0 0 6px; }
+.delete-report-subtitle, .delete-report-note { font-size: 14px; color: #736862; line-height: 1.8; }
+.delete-report-file { display: grid; gap: 6px; padding: 16px 18px; margin: 22px 0 18px; background: #faf7f5; border: 1px solid #eee6e2; border-radius: 14px; overflow-wrap: anywhere; }
+.delete-report-file span { font-size: 12px; color: #786962; }
+.delete-report-file strong { font-size: 15px; line-height: 1.7; }
+.delete-report-warning { color: #9c291c; font-size: 14px; line-height: 1.8; }
+.delete-report-actions { display: flex; gap: 12px; margin-top: 26px; padding-top: 20px; border-top: 1px solid #eee6e2; }
+.delete-report-actions button { border-radius: 12px; padding: 12px 18px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
+.delete-report-cancel { background: white; border: 1px solid #ddd4cf; color: #54433b; }
+.delete-report-cancel:hover { background: #faf7f5; }
+.delete-report-confirm { flex: 1; border: 1px solid #701d10; background: #701d10; color: white; }
+.delete-report-confirm:hover { background: #571609; }
+.delete-report-actions button:focus-visible { outline: 3px solid #dbab82; outline-offset: 3px; }
+.delete-report-actions button:disabled { opacity: .55; cursor: wait; }
+@media (max-width: 420px) { .delete-report-content { padding: 22px; } .delete-report-actions { flex-direction: column-reverse; } }

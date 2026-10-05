@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { apiUrl } from '../../config/api';
 import './comparison-dashboard.css';
+import ComparisonNames from './ComparisonNames';
+import ComparisonHistory from './ComparisonHistory';
 
 const pct = value => value === null ? '—' : `${value}%`;
 const labels = { matched: 'พบชื่อในระบบ', notFound: 'ไม่พบชื่อที่ตรงกัน', uncertain: 'ชื่อใกล้เคียง / จับคู่ไม่ได้แน่ชัด' };
 export default function ComparisonDashboard() {
   const [file, setFile] = useState(null);
+  const [revision, setRevision] = useState(0);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -17,7 +20,7 @@ export default function ComparisonDashboard() {
   async function upload(event) {
     event.preventDefault();
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith('.pdf') || file.size > 10 * 1024 * 1024) { setError('กรุณาเลือก PDF ขนาดไม่เกิน 10 MB'); return; }
+    if (!file.name.toLowerCase().endsWith('.pdf')) { setError('กรุณาเลือกไฟล์ PDF'); return; }
     controller.current?.abort();
     const request = new AbortController(); controller.current = request;
     setBusy(true); setError(''); setResult(null); setPage(0); setFilter('all'); setSearch('');
@@ -26,7 +29,7 @@ export default function ComparisonDashboard() {
       const response = await fetch(apiUrl('/api/admin/comparison'), { method: 'POST', body, signal: request.signal, headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
       const payload = await response.json();
       if (!response.ok || !payload.success) throw new Error(payload.message || 'ประมวลผลไม่สำเร็จ');
-      if (!request.signal.aborted) setResult({ ...payload.data, filename: file.name });
+      if (!request.signal.aborted) { setResult({ ...payload.data, filename: file.name }); setRevision(v => v + 1); }
     } catch (err) { if (!request.signal.aborted) setError(err.message || 'ไม่สามารถเชื่อมต่อ Server ได้'); }
     finally { if (!request.signal.aborted) setBusy(false); }
   }
@@ -44,18 +47,19 @@ export default function ComparisonDashboard() {
     </header>
     <section className="comparison-upload rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <h2 className="text-xl font-bold">อัปโหลดรายชื่อผู้สอบผ่าน</h2>
-      <p className="mt-2 text-sm leading-7 text-gray-600">เลือกเอกสารที่มีเฉพาะรายชื่อผู้สอบผ่าน ระบบจะเทียบกับข้อมูลผู้เข้าชมและผู้สนใจทั้งหมดในปัจจุบันโดยอัตโนมัติ ไม่แยกปีหรือรอบสอบ</p>
+      <p className="mt-2 text-sm leading-7 text-gray-600">อัปโหลดรายชื่อผู้สอบผ่านเพื่อสร้างผลเปรียบเทียบ ส่วนผู้เข้าชมและผู้สนใจใช้ข้อมูลทั้งหมด ณ เวลาอัปโหลด</p>
       <form onSubmit={upload} className="mt-4 flex flex-wrap items-end gap-4">
-        <label className="min-w-0 flex-1 text-sm font-semibold">ไฟล์ PDF (ไม่เกิน 10 MB / 30 หน้า)
+        <label className="min-w-0 flex-1 text-sm font-semibold">ไฟล์ PDF
           <input type="file" accept=".pdf,application/pdf" disabled={busy} onChange={e => { setFile(e.target.files[0] || null); setResult(null); setError(''); }} className="mt-2 block w-full rounded-xl border border-gray-300 p-3 file:mr-3 file:rounded-lg file:border-0 file:bg-[#701D10] file:px-4 file:py-2 file:text-white" />
         </label>
         <button type="submit" disabled={!file || busy} className="rounded-xl bg-[#701D10] px-6 py-3 font-semibold text-white disabled:opacity-50">{busy ? 'กำลังอ่าน PDF…' : 'อัปโหลดและเปรียบเทียบ'}</button>
         {busy && <button type="button" className="rounded-xl border px-4 py-3" onClick={() => { controller.current?.abort(); setBusy(false); }}>ยกเลิก</button>}
       </form>
-      <p className="mt-3 text-xs leading-6 text-gray-500">ประมวลผลใน Server ไม่ส่งบริการภายนอก ไม่เก็บ PDF หรือผลถาวร เปลี่ยนหน้าหรือรีเฟรชแล้วต้องอัปโหลดใหม่ • หน้าสแกนรองรับ OCR สูงสุด 10 หน้า และแยกเป็นรายการที่ยังยืนยันชื่อไม่ได้</p>
+      <p className="mt-3 text-xs leading-6 text-gray-500">เก็บรายชื่อและผลเปรียบเทียบในฐานข้อมูลเพื่อดูบน Dashboard ไม่เก็บ PDF ต้นฉบับ ไม่ส่งบริการภายนอก • รายการ OCR แยกไว้ตรวจสอบ</p>
       {busy && <p role="status" className="mt-4 text-[#701D10]">กำลังอ่านและจับคู่รายชื่อ ไฟล์สแกนอาจใช้เวลาประมาณ 1–2 นาที</p>}
       {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-4 text-red-700">{error}</p>}
     </section>
+    <ComparisonHistory revision={revision} />
     {!result && !busy && <section className="comparison-empty">
       <h3>เริ่มดูภาพรวมได้ใน 3 ขั้นตอน</h3>
       <div>{[['01', 'เลือกไฟล์ PDF', 'ใช้เอกสารรายชื่อผู้สอบผ่านเท่านั้น'], ['02', 'จับคู่ชื่อในระบบ', 'เทียบกับผู้เข้าชมและผู้สนใจ'], ['03', 'ดูผลเปรียบเทียบ', 'ยอดรวม เปอร์เซ็นต์ และรายชื่อ']].map(([number, title, detail]) => <article key={number}><span>{number}</span><h4>{title}</h4><p>{detail}</p></article>)}</div>
@@ -71,7 +75,8 @@ export default function ComparisonDashboard() {
         <p>แถวชื่อที่อ่านได้ใน PDF {result.records.pdf} แถว รวมเป็น {result.counts.passed} ชื่อไม่ซ้ำ • อาจมีแถวที่ระบบตรวจไม่พบชื่อ จึงไม่ถือว่าจำนวนนี้คือยอดผู้สอบผ่านทั้งเอกสาร</p>
         </details>
       </section>
-      <div className="comparison-totals grid gap-4 sm:grid-cols-3">{[['ผู้เข้าชมที่มีชื่อครบ', result.counts.visitors], ['ผู้สนใจที่มีชื่อครบ', result.counts.interested], ['ชื่อผู้สอบผ่านที่อ่านได้', result.counts.passed]].map(([label, value], index) => <div key={label} className="rounded-2xl border bg-white p-5"><span className="comparison-step">0{index + 1}</span><p className="text-sm text-gray-600">{label}</p><p className="mt-2 text-3xl font-bold">{value.toLocaleString()} <span className="text-sm font-normal">ชื่อ</span></p></div>)}</div>
+      <p className="text-sm">ปีการศึกษา {result.academicYear} · อัปโหลด {new Date(result.generatedAt).toLocaleString('th-TH')} · รายชื่อนับเป็นรายการรวมชื่อซ้ำ ส่วนเปอร์เซ็นต์ใช้ชื่อครบที่ไม่ซ้ำ</p>
+      <ComparisonNames result={result} />
       <div className="comparison-metrics grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards.map(([label, metric]) => <div key={label} className="rounded-2xl border bg-white p-5"><p className="text-sm font-semibold">{label}</p><p className="my-3 text-3xl font-bold text-[#701D10]">{pct(metric.percent)}</p><div className="comparison-meter" aria-hidden="true"><span style={{ width: `${Math.max(0, Math.min(100, metric.percent || 0))}%` }} /></div><p className="text-sm text-gray-600">{metric.numerator} จาก {metric.denominator} ชื่อ{metric.denominator === 0 ? ' — ไม่มีฐานข้อมูลสำหรับคำนวณ' : ''}</p></div>)}</div>
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border bg-white p-6"><h3 className="text-lg font-bold">เส้นทางจากผู้เข้าชมจนสอบผ่าน</h3><p className="mt-1 text-xs text-gray-600">ทุกขั้นนับเฉพาะกลุ่มที่เริ่มจากผู้เข้าชมชื่อครบ</p>

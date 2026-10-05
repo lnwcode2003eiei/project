@@ -33,7 +33,7 @@ test('name sets, duplicates, fuzzy uncertainty and all four percentage denominat
 });
 test('upload API auth, scope, invalid PDFs, exact calculations, parser failure and cleanup of busy flag', async () => {
   const app = express(); let reads = 0;
-  const db = { query(sql, callback) { callback(null, sql.includes('visitors') ? [{ name: 'สมชาย ใจดี' }] : [{ name: 'สมชาย ใจดี' }]); } };
+  const db = { query(sql, args, callback) { if (typeof args === 'function') return args(null, sql.includes('visitors') ? [{ name: 'สมชาย ใจดี' }] : [{ name: 'สมชาย ใจดี' }]); callback(null, {}); } };
   registerComparison(app, db, (req, res, next) => {
     if (!req.headers.authorization) return res.sendStatus(401);
     req.admin = { saka_path: req.headers.authorization }; next();
@@ -52,4 +52,50 @@ test('upload API auth, scope, invalid PDFs, exact calculations, parser failure a
     assert.equal((await request('all')).status, 422);
     assert.equal((await request('all')).status, 200);
   } finally { await new Promise(resolve => server.close(resolve)); }
+});
+
+test('all admins read snapshots but only all-scope editors delete them', async () => {
+  const saved = [];
+  const db = { query(sql, args, callback) {
+    if (typeof args === 'function') return args(null, [{ name: 'สมชาย ใจดี' }, { name: 'ไม่ระบุชื่อ' }]);
+    if (sql.startsWith('CREATE')) return callback(null, {});
+    if (sql.startsWith('INSERT')) { saved.push({ id: saved.length + 1, academic_year: args[0], filename: args[1], content: args[2] }); return callback(null, { insertId: saved.length }); }
+    if (sql.startsWith('SELECT content')) return callback(null, saved.filter(row => row.id === Number(args[0])));
+    if (sql.startsWith('SELECT id,')) return callback(null, saved.map(({ content, ...row }) => row));
+    if (sql.startsWith('DELETE')) { const index = saved.findIndex(row => row.id === Number(args[0])); if (index >= 0) saved.splice(index, 1); return callback(null, { affectedRows: index >= 0 ? 1 : 0 }); }
+    callback(new Error('Unexpected SQL'));
+  } };
+  const app = express();
+  registerComparison(app, db, (req, res, next) => {
+    if (!req.headers.authorization) return res.sendStatus(401);
+    req.admin = { saka_path: req.headers.authorization === 'readonly' ? 'all' : req.headers.authorization, can_edit: req.headers.authorization === 'readonly' ? 0 : 1 }; next();
+  }, async () => [{ number: 1, ocr: false, text: '1 นายสมชาย ใจดี' }]);
+  const server = app.listen(0, '127.0.0.1'); await new Promise(r => server.once('listening', r));
+  const base = `http://127.0.0.1:${server.address().port}/api/admin/comparison`;
+  const upload = (year, auth = 'all') => { const body = new FormData(); body.append('academicYear', year); body.append('pdf', new Blob(['%PDF-1.4'], { type: 'application/pdf' }), 'roster.pdf'); return fetch(base, { method: 'POST', body, headers: { Authorization: auth } }); };
+  try {
+    assert.equal((await upload('bad')).status, 400);
+    assert.equal((await upload('2570', 'readonly')).status, 403);
+    assert.equal((await upload('2570')).status, 200); assert.equal(saved.length, 1);
+    assert.equal((await upload('2571')).status, 200); assert.equal(saved.length, 2);
+    assert.equal((await fetch(base + '/reports')).status, 401);
+    assert.equal((await fetch(base + '/reports/1', { headers: { Authorization: 'computer' } })).status, 200);
+    assert.equal((await fetch(base + '/reports', { headers: { Authorization: 'computer' } })).status, 200);
+    const response = await (await fetch(base + '/reports/1', { headers: { Authorization: 'all' } })).json();
+    assert.equal(response.data.academicYear, 2570);
+    assert.equal(response.data.rosters.visitors.length, 2);
+    assert.equal(response.data.rosters.passed[0].name, 'สมชาย ใจดี');
+    assert.equal((await fetch(base + '/reports/999', { headers: { Authorization: 'all' } })).status, 404);
+    const remove = (id, auth) => fetch(base + '/reports/' + id, { method: 'DELETE', headers: auth ? { Authorization: auth } : {} });
+    assert.equal((await remove(1)).status, 401);
+    assert.equal((await remove(1, 'computer')).status, 403);
+    assert.equal((await remove(1, 'readonly')).status, 403);
+    assert.equal(saved.length, 2);
+    assert.equal((await remove('bad', 'all')).status, 400);
+    assert.equal((await remove(999, 'all')).status, 404);
+    assert.equal((await remove(1, 'all')).status, 200);
+    assert.equal(saved.length, 1);
+    assert.equal(saved[0].id, 2);
+    assert.equal((await fetch(base + '/reports/1', { headers: { Authorization: 'computer' } })).status, 404);
+  } finally { await new Promise(r => server.close(r)); }
 });

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { apiUrl } from "../../config/api";
 import VisitorChart from "./VisitorChart";
+import ComparisonHistory from "./ComparisonHistory";
+import KnowledgeFaqDashboard from './KnowledgeFaqDashboard';
 
 function Dashboard() {
   // ==========================================
@@ -638,6 +640,8 @@ function Dashboard() {
 
           </div>
 
+          <KnowledgeFaqDashboard />
+          <ComparisonHistory />
         </>
       )}
     </div>

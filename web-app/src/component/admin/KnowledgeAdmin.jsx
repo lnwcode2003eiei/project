@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiUrl } from '../../config/api';
 import { groupQuestions } from './knowledge-topics';
+import KnowledgeDocuments from './KnowledgeDocuments';
 
 const field = 'mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-[#701D10] focus:ring-2 focus:ring-orange-100';
 const primary = 'rounded-xl bg-[#701D10] px-5 py-3 text-sm font-semibold text-white hover:bg-[#8b2b1b] disabled:opacity-50';
@@ -122,6 +123,7 @@ export default function KnowledgeAdmin() {
       <div><h1 className="text-2xl font-bold">ข้อมูลให้ AI</h1><p className="mt-2 text-sm text-slate-500">เพิ่มข้อมูลที่ถูกต้อง แล้วให้ AI ช่วยตอบคำถามแทนคุณ</p></div>
       {data?.canEdit && <button disabled={busy} className={primary} onClick={() => open(fresh(data.scope))}>+ เพิ่มข้อมูลให้ AI</button>}
     </header>
+    <KnowledgeDocuments />
     {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</p>}
     {notice && <p role="status" className="rounded-xl bg-green-50 p-4 text-sm text-green-800">{notice}</p>}
     {loading && <p role="status" className="text-sm text-slate-500">กำลังโหลดข้อมูล…</p>}

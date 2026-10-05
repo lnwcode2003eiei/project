@@ -75,6 +75,7 @@ export function compareNames(visitors, interested, extracted) {
   const visitorInterested = [...v.map.keys()].filter(key => i.map.has(key)).length;
   const metric = (numerator, denominator) => ({ numerator, denominator, percent: denominator ? Number((numerator / denominator * 100).toFixed(1)) : null });
   return {
+    rosters: { visitors: visitors.map(row => ({ name: row.name || 'ไม่ระบุชื่อ' })), interested: interested.map(row => ({ name: row.name || 'ไม่ระบุชื่อ' })), passed: extracted.rows.map(row => ({ name: row.name, page: row.page })) },
     counts: { visitors: v.map.size, interested: i.map.size, passed: passed.map.size, inSystem, notFound, uncertain, visitorInterested, visitorPassed, interestedPassed, fullPath },
     excluded: { visitors: v.excluded, interested: i.excluded, pdf: extracted.unresolved.length },
     records: { visitors: v.records, interested: i.records, pdf: extracted.rows.length },
