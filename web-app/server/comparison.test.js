@@ -61,7 +61,7 @@ test('all admins read snapshots but only all-scope editors delete them', async (
     if (sql.startsWith('CREATE')) return callback(null, {});
     if (sql.startsWith('INSERT')) { saved.push({ id: saved.length + 1, academic_year: args[0], filename: args[1], content: args[2] }); return callback(null, { insertId: saved.length }); }
     if (sql.startsWith('SELECT content')) return callback(null, saved.filter(row => row.id === Number(args[0])));
-    if (sql.startsWith('SELECT id,')) return callback(null, saved.map(({ content, ...row }) => row));
+    if (sql.startsWith('SELECT id,')) return callback(null, saved.map(row => ({ id: row.id, academic_year: row.academic_year, filename: row.filename })));
     if (sql.startsWith('DELETE')) { const index = saved.findIndex(row => row.id === Number(args[0])); if (index >= 0) saved.splice(index, 1); return callback(null, { affectedRows: index >= 0 ? 1 : 0 }); }
     callback(new Error('Unexpected SQL'));
   } };

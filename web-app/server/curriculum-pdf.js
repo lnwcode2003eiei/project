@@ -76,7 +76,7 @@ export function registerCurriculumPdf(app, db, auth, permission, reader = readCu
       const filename = path.basename(req.file.originalname).slice(0, 250);
       await query('INSERT INTO curriculum_pdf_files (id,slug,filename,data) VALUES (?,?,?,?)', [id, req.params.slug, filename, req.file.buffer]);
       res.json({ success: true, fileId: id, filename, ...parsed, warning: 'ข้อมูลที่อ่านได้เป็นร่าง ต้องตรวจเทียบ PDF ทุกแถวก่อนบันทึก ไฟล์สแกน/ตารางซับซ้อนอาจอ่านไม่ครบ สามารถกรอกเองหรือแสดงเฉพาะ PDF ได้' });
-    } catch (e) { res.status(400).json({ success: false, message: 'อ่าน PDF ไม่สำเร็จ: กรุณาใช้ PDF ที่ไม่เข้ารหัส และลองใหม่' }); }
+    } catch { res.status(400).json({ success: false, message: 'อ่าน PDF ไม่สำเร็จ: กรุณาใช้ PDF ที่ไม่เข้ารหัส และลองใหม่' }); }
     finally { busy = false; }
   }));
   app.put('/api/curriculum-pdf/:slug', auth, allowed, route(async (req, res) => {

@@ -2,14 +2,21 @@ function Hero() {
   return (
     <section id="home" className="relative min-h-svh w-full overflow-hidden">
 
-      {/* Decorative generated background; keep the original video asset for rollback. */}
+      {/* Keep the original PNG; serve lighter responsive WebP assets. */}
+      <picture>
+      <source media="(max-width: 767px)" srcSet="/image/faculty-home-hero-v3-960.webp" />
       <img
-        src="/image/faculty-home-hero-v2.png"
+        src="/image/faculty-home-hero-v3-1672.webp"
+        srcSet="/image/faculty-home-hero-v3-1280.webp 1280w, /image/faculty-home-hero-v3-1672.webp 1672w"
+        sizes="100vw"
+        width="1672"
+        height="941"
         alt=""
         fetchPriority="high"
         decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
       />
+      </picture>
 
       {/* Content */}
       <div className="relative z-10 flex min-h-svh items-center justify-center px-6 pb-28 pt-32 text-center [text-shadow:0_2px_6px_rgb(0_0_0/90%)]">

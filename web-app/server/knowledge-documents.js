@@ -30,7 +30,7 @@ export function rankDocuments(rows, query) {
   }).filter(row => row.score >= 20 && row.excerpt).sort((a, b) => b.score - a.score || b.id - a.id).slice(0, 5);
 }
 
-export function registerKnowledgeDocuments(app, { pool, ensure, route, admin, allowed, branches, requireAdmin }) {
+export function registerKnowledgeDocuments(app, { pool, route, admin, allowed, branches, requireAdmin }) {
   // Knowledge PDFs are administrator-managed. Do not impose an arbitrary upload-size cap.
   const upload = multer({ storage: multer.memoryStorage(), limits: { files: 1, fields: 3, parts: 5 } }).single('pdf');
   const documentBranch = (user, requested) => {
@@ -60,6 +60,18 @@ export function registerKnowledgeDocuments(app, { pool, ensure, route, admin, al
     const id = randomUUID(), filename = normalizeUploadFilename(req.file.originalname).slice(0, 250);
     await pool.query('INSERT INTO knowledge_documents (id,branch,type,title,filename,data,extracted_text,pages,text_truncated,updated_by) VALUES (?,?,?,?,?,?,?,?,?,?)', [id, branch, type, req.body.title.trim(), filename, req.file.buffer, text, parsed.pages, parsed.truncated ? 1 : 0, user.id]);
     res.status(201).json({ success: true, document: { id, branch, type, title: req.body.title.trim(), filename, pages: parsed.pages, textTruncated: parsed.truncated } });
+  }));
+  app.patch('/api/admin/knowledge/documents/:id', requireAdmin, route(async (req, res) => {
+    const user = await admin(req, true);
+    const [[row]] = await pool.query('SELECT id,branch,type,title,filename,pages,text_truncated,updated_at FROM knowledge_documents WHERE id=?', [req.params.id]);
+    if (!row) { const error = new Error('ไม่พบเอกสาร'); error.status = 404; throw error; }
+    allowed(user, row.branch);
+    const branch = documentBranch(user, req.body.branch ?? row.branch);
+    const type = req.body.type;
+    const title = typeof req.body.title === 'string' ? req.body.title.trim() : '';
+    if (!documentTypes.includes(type) || !title || title.length > 250) { const error = new Error('กรอกชื่อเอกสารและประเภทให้ถูกต้อง'); error.status = 400; throw error; }
+    await pool.query('UPDATE knowledge_documents SET branch=?,type=?,title=? WHERE id=?', [branch, type, title, row.id]);
+    res.json({ success: true, document: { ...row, branch, type, title } });
   }));
   app.delete('/api/admin/knowledge/documents/:id', requireAdmin, route(async (req, res) => {
     const user = await admin(req, true);

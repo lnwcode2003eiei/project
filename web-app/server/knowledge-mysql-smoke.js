@@ -8,6 +8,11 @@ import { importStarter, starterRows } from './knowledge-import.js';
 if (process.env.RUN_KNOWLEDGE_SMOKE !== '1') throw new Error('Set RUN_KNOWLEDGE_SMOKE=1 to run');
 const suffix = randomBytes(6).toString('hex');
 const tables = ['knowledge_answers', 'knowledge_history', 'knowledge_questions', 'knowledge_events'];
+const cleanupTables = tables.map(table => {
+  const target = `test_${suffix}_${table}`;
+  if (!/^test_[a-f0-9]{12}_knowledge_(answers|history|questions|events)$/.test(target)) throw new Error('Unsafe cleanup name');
+  return target;
+});
 const pool = mysql.createPool({ host: process.env.DB_HOST, user: process.env.DB_USER, password: process.env.DB_PASSWORD, database: process.env.DB_NAME, charset: 'utf8mb4' });
 const wrap = connection => ({
   query(sql, values) {
@@ -128,9 +133,7 @@ try {
   console.log('PASS: immediate saves, atomic question linking, scope/readonly/conflict checks and removal from AI retrieval');
 } finally {
   await new Promise(resolve => server.close(resolve));
-  for (const table of tables) {
-    const target = `test_${suffix}_${table}`;
-    if (!/^test_[a-f0-9]{12}_knowledge_(answers|history|questions|events)$/.test(target)) throw new Error('Unsafe cleanup name');
+  for (const target of cleanupTables) {
     await pool.query(`DROP TABLE IF EXISTS \`${target}\``);
   }
   await pool.end();

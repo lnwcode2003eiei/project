@@ -26,21 +26,21 @@ function Recommendpage() {
       title: "ผู้บริหาร",
       description:
         "ข้อมูลผู้บริหารและบุคลากรที่มีส่วนสำคัญในการบริหารงานของคณะ",
-      image: "/image/A4.jpg",
+      image: "/image/A3.jpg",
       link: "http://industrial.uru.ac.th/board2.html",
     },
     {
       title: "คณาจารย์ / นักวิจัย",
       description:
         "พบกับคณาจารย์และนักวิจัยผู้เชี่ยวชาญในด้านต่าง ๆ",
-      image: "/image/A5.jpg",
+      image: "/image/A1.jpg",
       link: "http://industrial.uru.ac.th/board5.html",
     },
     {
       title: "หน่วยงาน",
       description:
         "ข้อมูลหน่วยงานและส่วนงานต่าง ๆ ภายในคณะ",
-      image: "/image/A6.jpg",
+      image: "/image/A2.jpg",
       link: "http://industrial.uru.ac.th/board4.html",
     },
   ];

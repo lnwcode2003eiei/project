@@ -3,5 +3,6 @@ dist
 uploads
 .git
 .env
+.env.*
 npm-debug.log*
 backups

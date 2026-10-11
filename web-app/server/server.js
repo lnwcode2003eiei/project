@@ -76,6 +76,17 @@ const ensureApplicationSecondMajorColumn = () => {
   });
 };
 
+const ensureLearningEnvironmentColumn = () => {
+  db.query("SHOW COLUMNS FROM course_info LIKE 'learning_environment'", (error, columns) => {
+    if (error) { console.error('Database migration failed:', error.message); process.exit(1); }
+    if (columns.length) return ensureApplicationSecondMajorColumn();
+    db.query('ALTER TABLE course_info ADD COLUMN learning_environment JSON NULL AFTER careers', (alterError) => {
+      if (alterError) { console.error('Database migration failed:', alterError.message); process.exit(1); }
+      ensureApplicationSecondMajorColumn();
+    });
+  });
+};
+
 const ensureCourseCurriculumTransferColumn = () => {
   db.query("SHOW COLUMNS FROM course_info LIKE 'curriculum_transfer'", (error, columns) => {
     if (error || columns.length > 0) {
@@ -2103,4 +2114,4 @@ app.post(
 // Start Server
 // ==========================================
 
-ensureApplicationSecondMajorColumn();
+ensureLearningEnvironmentColumn();

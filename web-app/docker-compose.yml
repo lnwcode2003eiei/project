@@ -103,6 +103,11 @@ services:
     container_name: webapp-caddy
     restart: unless-stopped
 
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-technologyfaculty.tech}
+      SITE_WWW_DOMAIN: ${SITE_WWW_DOMAIN:-www.technologyfaculty.tech}
+      N8N_DOMAIN: ${N8N_DOMAIN:-n8n.technologyfaculty.tech}
+
     depends_on:
       - frontend
 
@@ -117,7 +122,7 @@ services:
 
 
   n8n:
-    image: n8nio/n8n:latest
+    image: ${N8N_IMAGE:-n8nio/n8n:2.36.8}
     container_name: webapp-n8n
     restart: unless-stopped
 
@@ -125,11 +130,11 @@ services:
       - "127.0.0.1:5678:5678"
 
     environment:
-      N8N_HOST: n8n.technologyfaculty.tech
+      N8N_HOST: ${N8N_DOMAIN:-n8n.technologyfaculty.tech}
       N8N_PORT: 5678
       N8N_PROTOCOL: https
-      WEBHOOK_URL: https://n8n.technologyfaculty.tech/
-      N8N_EDITOR_BASE_URL: https://n8n.technologyfaculty.tech/
+      WEBHOOK_URL: https://${N8N_DOMAIN:-n8n.technologyfaculty.tech}/
+      N8N_EDITOR_BASE_URL: https://${N8N_DOMAIN:-n8n.technologyfaculty.tech}/
       N8N_PROXY_HOPS: 1
       GENERIC_TIMEZONE: Asia/Bangkok
       TZ: Asia/Bangkok

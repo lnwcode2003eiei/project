@@ -1,4 +1,4 @@
-technologyfaculty.tech, www.technologyfaculty.tech {
+{$SITE_DOMAIN}, {$SITE_WWW_DOMAIN} {
     encode zstd gzip
 
     # Send application data and uploaded files directly to Express.
@@ -16,7 +16,7 @@ technologyfaculty.tech, www.technologyfaculty.tech {
     }
 }
 
-n8n.technologyfaculty.tech {
+{$N8N_DOMAIN} {
     encode zstd gzip
     reverse_proxy n8n:5678
 }

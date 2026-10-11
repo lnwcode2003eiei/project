@@ -3,11 +3,7 @@
 -- UNIVERSITY WEB DATABASE
 -- =========================================================
 
-CREATE DATABASE IF NOT EXISTS university_web
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
-
-USE university_web;
+-- The official MySQL entrypoint selects MYSQL_DATABASE before running this file.
 
 SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
@@ -61,29 +57,8 @@ DEFAULT CHARSET = utf8mb4
 COLLATE = utf8mb4_unicode_ci;
 
 
--- =========================================================
--- SUPER ADMIN เริ่มต้น
--- Username: admintechno
--- กำหนดสิทธิ์เข้าถึงทุกสาขา และแก้ไขข้อมูลได้
--- =========================================================
-
-INSERT IGNORE INTO users (
-    username,
-    password,
-    first_name,
-    last_name,
-    saka_path,
-    can_edit
-) VALUES (
-    'admintechno',
-    'scrypt$e4d7421fd17d12459e4460d04c45cef0$4b0c68b18dda8e4a435c46ee3ec2a6a9ea1645711cd2a0f0e4bf849f3568eb5d7d7913282d1ccddfbdcdf02720925b796ee9114f3058f79f718bc0d87f00911a',
-    'Admin',
-    'Techno',
-    'all',
-    1
-);
-
-
+-- Admin accounts are created by the backend using ADMIN_BOOTSTRAP_*.
+-- Never seed a shared password or password hash here.
 
 -- =========================================================
 -- 3. NEWS
@@ -124,9 +99,7 @@ COLLATE = utf8mb4_unicode_ci;
 -- 5. COURSE INFO
 -- =========================================================
 
-DROP TABLE IF EXISTS course_info;
-
-CREATE TABLE course_info (
+CREATE TABLE IF NOT EXISTS course_info (
     id INT AUTO_INCREMENT PRIMARY KEY,
     saka_path VARCHAR(50) NOT NULL UNIQUE,
 
@@ -147,6 +120,7 @@ CREATE TABLE course_info (
     curriculum_transfer JSON,
     skills JSON,
     careers JSON,
+    learning_environment JSON,
 
     updated_at TIMESTAMP
         DEFAULT CURRENT_TIMESTAMP
@@ -231,7 +205,7 @@ SET @CURRICULUM_FREE = JSON_OBJECT(
 -- admin01
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
@@ -382,7 +356,7 @@ VALUES (
 -- admin02
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
@@ -531,7 +505,7 @@ VALUES (
 -- admin03
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
@@ -682,7 +656,7 @@ VALUES (
 -- admin04
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
@@ -833,7 +807,7 @@ VALUES (
 -- admin05
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
@@ -984,7 +958,7 @@ VALUES (
 -- admin06
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
@@ -1135,7 +1109,7 @@ VALUES (
 -- admin07
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
@@ -1286,7 +1260,7 @@ VALUES (
 -- admin08
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
@@ -1437,7 +1411,7 @@ VALUES (
 -- admin09
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
@@ -1588,7 +1562,7 @@ VALUES (
 -- admin10
 -- =========================================================
 
-INSERT INTO course_info (
+INSERT IGNORE INTO course_info (
     saka_path,
     faculty_name,
     title,
