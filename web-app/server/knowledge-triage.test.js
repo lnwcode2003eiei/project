@@ -36,6 +36,10 @@ test('search proof is event/branch/expiry bound and rejects forged tokens', () =
   assert.equal(verifySearch(token + 'x', secret, 'event1', 'computer', 1000), null);
   assert.equal(verifySearch('broken', secret, 'event1', 'computer', 1000), null);
 });
+test('search proof keeps the selected PDF document ids', () => {
+  const secret = 'x'.repeat(32), payload = { eventHash: 'event1', branch: null, expires: 2000, candidates: [], documents: ['9b782fe2-0a3f-4a2e-9524-2ecc1fd15f64'] };
+  assert.deepEqual(verifySearch(signSearch(payload, secret), secret, 'event1', null, 1000), payload);
+});
 test('duplicate suggestions stay in branch and only suggest pending items', () => {
   const q = { id: 1, branch: 'computer', question: 'ค่าเทอมคอมพิวเตอร์', status: 'pending', triage: null };
   assert.deepEqual(suggestQuestions(q, [q, { ...q, id: 2 }, { ...q, id: 3, branch: 'electrical' }, { ...q, id: 4, status: 'resolved' }]).map(r => r.id), [2]);

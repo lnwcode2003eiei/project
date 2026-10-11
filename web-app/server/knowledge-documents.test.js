@@ -23,3 +23,9 @@ test('document search segments a Thai question written without spaces', () => {
   assert.equal(results.length, 1);
   assert.match(results[0].excerpt, /วิศวกรรมคอมพิวเตอร์/);
 });
+
+test('document search can use a matching title for a broad question', () => {
+  const [result] = rankDocuments([{ id: 'computer', branch: 'computer', type: 'หลักสูตร', title: 'หลักสูตรวิศวกรรมคอมพิวเตอร์', filename: 'computer.pdf', extracted_text: 'เนื้อหาหลักสูตรและรายวิชา', updated_at: '2026-10-05' }], 'ถ้าชอบคอมพิวเตอร์');
+  assert.equal(result.id, 'computer');
+  assert.match(result.excerpt, /เนื้อหาหลักสูตร/);
+});

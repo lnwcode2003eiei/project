@@ -55,7 +55,7 @@ export function verifySearch(token, secret, eventHash, branch, now = Date.now())
     const supplied = Buffer.from(parts[1], 'base64url');
     if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) return null;
     const payload = JSON.parse(Buffer.from(parts[0], 'base64url').toString());
-    if (payload.eventHash !== eventHash || payload.branch !== branch || !Number.isFinite(payload.expires) || payload.expires < now || !Array.isArray(payload.candidates)) return null;
+    if (payload.eventHash !== eventHash || payload.branch !== branch || !Number.isFinite(payload.expires) || payload.expires < now || !Array.isArray(payload.candidates) || (payload.documents !== undefined && !Array.isArray(payload.documents))) return null;
     return payload;
   } catch { return null; }
 }
@@ -85,19 +85,29 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
     await ensure();
     const rows = await publishedRows(pool, branch), truncated = rows.length > 2000;
     const candidates = rankAnswers(rows.slice(0, 2000), query, branch);
-    const [documents] = await pool.query(`SELECT id,branch,type,title,filename,extracted_text,updated_at FROM knowledge_documents WHERE branch IN (?,?) ORDER BY updated_at DESC LIMIT 250`, [branch, 'all']);
+    const [documents] = await pool.query(
+      branch
+        ? `SELECT id,branch,type,title,filename,extracted_text,updated_at FROM knowledge_documents WHERE branch IN (?,?) ORDER BY updated_at DESC LIMIT 250`
+        : `SELECT id,branch,type,title,filename,extracted_text,updated_at FROM knowledge_documents WHERE branch <> 'unassigned' ORDER BY updated_at DESC LIMIT 250`,
+      branch ? [branch, 'all'] : [],
+    );
     const [documentedBranchRows] = await pool.query("SELECT DISTINCT branch FROM knowledge_documents WHERE branch NOT IN ('all','unassigned') ORDER BY branch");
     const documentedBranches = documentedBranchRows
       .filter(row => Object.hasOwn(branches, row.branch))
       .map(row => ({ code: row.branch, name: branches[row.branch] }));
     const documentCandidates = rankDocuments(documents, query);
-    const searchToken = signSearch({ eventHash: hash(eventId), branch, expires: Date.now() + 10 * 60 * 1000, candidates: candidates.map(({ id, version }) => ({ id, version })) }, process.env.N8N_KNOWLEDGE_TOKEN);
+    const searchToken = signSearch({ eventHash: hash(eventId), branch, expires: Date.now() + 10 * 60 * 1000, candidates: candidates.map(({ id, version }) => ({ id, version })), documents: documentCandidates.map(({ id }) => id) }, process.env.N8N_KNOWLEDGE_TOKEN);
+    const aiContext = [
+      ...candidates.slice(0, 3).map(row => `คำตอบที่เผยแพร่แล้ว: ${row.answer}`),
+      ...documentCandidates.slice(0, 3).map(row => `เอกสาร: ${row.title} (${row.type}, ${row.branch})\n${row.excerpt.slice(0, 2500)}`),
+    ].join('\n\n---\n\n');
     res.json({
       success: true,
       organization: { faculty: 'คณะเทคโนโลยีอุตสาหกรรม', university: 'มหาวิทยาลัยราชภัฏอุตรดิตถ์' },
       documentedBranches,
       candidates,
       documents: documentCandidates,
+      aiContext,
       searchToken,
       truncated,
       requiresEvaluation: true,
@@ -113,22 +123,29 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
     if (!categories.includes(category)) throw fail('ประเภทคำถามไม่ถูกต้อง');
     const summary = field(req.body.summary ?? question, 1000), detail = field(req.body.detail ?? '', 2000, false);
     if (decision === 'review' && !['not_found', 'incomplete', 'conflicting'].includes(req.body.reason)) throw fail('เหตุผลส่งต่อไม่ถูกต้อง');
-    const ids = req.body.answerIds ?? [];
+    const ids = req.body.answerIds ?? [], documentIds = req.body.documentIds ?? [];
     if (!Array.isArray(ids) || ids.length > 5 || ids.some(id => !Number.isSafeInteger(id) || id < 1) || new Set(ids).size !== ids.length) throw fail('รหัสคำตอบไม่ถูกต้อง');
+    if (!Array.isArray(documentIds) || documentIds.length > 5 || documentIds.some(id => typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id)) || new Set(documentIds).size !== documentIds.length) throw fail('รหัสเอกสารไม่ถูกต้อง');
     await ensure();
     const result = await tx(async c => {
       const eventHash = hash(eventId);
       await c.query('INSERT IGNORE INTO knowledge_events (event_hash) VALUES (?)', [eventHash]);
       const [[event]] = await c.query('SELECT result FROM knowledge_events WHERE event_hash=? FOR UPDATE', [eventHash]);
       if (event.result) return { ...parse(event.result), duplicate: true };
-      let status = decision, reason = req.body.reason || null, approvedAnswers = [];
+      let status = decision, reason = req.body.reason || null, approvedAnswers = [], approvedDocuments = [];
       if (decision === 'answered') {
         const proof = verifySearch(req.body.searchToken, process.env.N8N_KNOWLEDGE_TOKEN, eventHash, branch);
         if (proof && ids.length && ids.every(id => proof.candidates.some(candidate => candidate.id === id))) {
           const [current] = await c.query(`SELECT id,version,branch,answer,metadata FROM knowledge_answers WHERE status='published' AND id IN (${ids.map(() => '?').join(',')}) FOR SHARE`, ids);
           approvedAnswers = current.filter(row => (!branch || row.branch === branch || row.branch === 'all') && proof.candidates.some(ref => ref.id === row.id && ref.version === row.version)).map(approvedReply);
         }
-        if (approvedAnswers.length !== ids.length || !ids.length) { status = 'review'; reason = 'invalid_reference'; approvedAnswers = []; }
+        if (proof && documentIds.length && documentIds.every(id => proof.documents?.includes(id))) {
+          const [current] = await c.query(`SELECT id,branch,type,title,filename,updated_at FROM knowledge_documents WHERE id IN (${documentIds.map(() => '?').join(',')}) FOR SHARE`, documentIds);
+          approvedDocuments = current.filter(row => (!branch || row.branch === branch || row.branch === 'all') && proof.documents.includes(row.id)).map(({ id, branch: documentBranch, type, title, filename, updated_at: updatedAt }) => ({ id, branch: documentBranch, type, title, filename, updatedAt }));
+        }
+        const answerProof = ids.length > 0 && approvedAnswers.length === ids.length;
+        const documentProof = documentIds.length > 0 && approvedDocuments.length === documentIds.length;
+        if (!answerProof && !documentProof) { status = 'review'; reason = 'invalid_reference'; approvedAnswers = []; approvedDocuments = []; }
       }
       let questionId = null;
       if (status === 'review') {
@@ -139,7 +156,7 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
         const [[inbox]] = await c.query('SELECT id FROM knowledge_questions WHERE fingerprint=?', [fingerprint]);
         questionId = inbox.id;
       }
-      const response = { status, queued: status === 'review', questionId, duplicate: false, reason: status === 'review' ? reason : null, approvedAnswers, message: status === 'review' ? 'ตอนนี้ยังไม่พบข้อมูลที่เพียงพอสำหรับตอบคำถามนี้ครับ' : status === 'service_error' ? 'ระบบค้นหาข้อมูลขัดข้องชั่วคราว กรุณาลองใหม่ภายหลังครับ' : null };
+      const response = { status, queued: status === 'review', questionId, duplicate: false, reason: status === 'review' ? reason : null, approvedAnswers, approvedDocuments, message: status === 'review' ? 'ตอนนี้ยังไม่พบข้อมูลที่เพียงพอสำหรับตอบคำถามนี้ครับ' : status === 'service_error' ? 'ระบบค้นหาข้อมูลขัดข้องชั่วคราว กรุณาลองใหม่ภายหลังครับ' : null };
       // Store message text for the private Admin dashboard only; never store LINE user/reply identifiers.
       await c.query('INSERT IGNORE INTO knowledge_line_messages (event_hash,message,branch,category,decision,summary) VALUES (?,?,?,?,?,?)', [eventHash, question, branch || 'unassigned', category, status, summary]);
       // Never store LINE user identity, reply token, or any other LINE event metadata.
