@@ -29,3 +29,12 @@ test('document search can use a matching title for a broad question', () => {
   assert.equal(result.id, 'computer');
   assert.match(result.excerpt, /เนื้อหาหลักสูตร/);
 });
+
+test('document search can return more than the focused default result set', () => {
+  const rows = Array.from({ length: 12 }, (_, index) => ({
+    id: String(index), branch: 'all', type: 'หลักสูตร', title: `หลักสูตร ${index}`,
+    filename: `${index}.pdf`, extracted_text: 'หลักสูตรที่เปิดสอน', updated_at: '2026-10-05',
+  }));
+  assert.equal(rankDocuments(rows, 'หลักสูตรที่เปิดสอน').length, 10);
+  assert.equal(rankDocuments(rows, 'หลักสูตรที่เปิดสอน', 50).length, 12);
+});

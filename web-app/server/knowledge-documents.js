@@ -10,7 +10,7 @@ const searchTerms = value => [...new Set([...thaiSegmenter.segment(String(value 
   .filter(part => part.isWordLike && part.segment.length > 1 && !searchStopWords.has(part.segment))
   .map(part => part.segment))];
 
-export function rankDocuments(rows, query) {
+export function rankDocuments(rows, query, limit = 10) {
   const terms = searchTerms(query);
   return rows.map(row => {
     const text = row.extracted_text.normalize('NFC');
@@ -27,7 +27,7 @@ export function rankDocuments(rows, query) {
     const passages = anchors.map(at => text.slice(Math.max(0, at - 500), at + 1800).replace(/\s+/g, ' ').trim()).filter(Boolean);
     const excerpt = (passages.length ? passages : [text.slice(0, 1800).replace(/\s+/g, ' ').trim()]).join('\n\n…\n\n');
     return { id: row.id, branch: row.branch, type: row.type, title: row.title, filename: row.filename, updatedAt: row.updated_at, score: terms.length ? Math.round(hits / terms.length * 100) : 0, excerpt: excerpt.replace(/\s+/g, ' ').trim() };
-  }).filter(row => row.score >= 20 && row.excerpt).sort((a, b) => b.score - a.score || b.id - a.id).slice(0, 5);
+  }).filter(row => row.score >= 20 && row.excerpt).sort((a, b) => b.score - a.score || b.id - a.id).slice(0, limit);
 }
 
 export function registerKnowledgeDocuments(app, { pool, route, admin, allowed, branches, requireAdmin }) {

@@ -8,6 +8,7 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 const segmenter = new Intl.Segmenter('th', { granularity: 'word' });
 const stopWords = new Set(['ครับ', 'ค่ะ', 'คะ', 'ไหม', 'อะไร', 'ที่', 'ของ', 'มี', 'เป็น', 'ได้', 'อยาก', 'ทราบ', 'ขอ', 'ให้', 'และ']);
 const words = value => new Set([...segmenter.segment(norm(value))].filter(v => v.isWordLike && v.segment.length > 1 && !stopWords.has(v.segment)).map(v => v.segment));
+const isCatalogQuestion = query => /(?:มี.*(?:สาขา|หลักสูตร)|(?:สาขา|หลักสูตร).*อะไร|(?:สาขา|หลักสูตร).*เปิดสอน|เปิดสอน.*(?:สาขา|หลักสูตร))/.test(norm(query));
 
 // Keep the existing n8n mapping (approvedAnswers[].answer) compatible.
 export function approvedReply(row) {
@@ -95,11 +96,14 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
     const documentedBranches = documentedBranchRows
       .filter(row => Object.hasOwn(branches, row.branch))
       .map(row => ({ code: row.branch, name: branches[row.branch] }));
-    const documentCandidates = rankDocuments(documents, query);
+    // A catalogue question needs enough results to enumerate the available
+    // documents. Specific questions stay small so the AI receives focused text.
+    const catalogue = isCatalogQuestion(query);
+    const documentCandidates = rankDocuments(documents, query, catalogue ? 50 : 10);
     const searchToken = signSearch({ eventHash: hash(eventId), branch, expires: Date.now() + 10 * 60 * 1000, candidates: candidates.map(({ id, version }) => ({ id, version })), documents: documentCandidates.map(({ id }) => id) }, process.env.N8N_KNOWLEDGE_TOKEN);
     const aiContext = [
       ...candidates.slice(0, 3).map(row => `คำตอบที่เผยแพร่แล้ว: ${row.answer}`),
-      ...documentCandidates.slice(0, 3).map(row => `เอกสาร: ${row.title} (${row.type}, ${row.branch})\n${row.excerpt.slice(0, 2500)}`),
+      ...documentCandidates.slice(0, catalogue ? 20 : 5).map(row => `เอกสาร: ${row.title} (${row.type}, ${row.branch})\n${row.excerpt.slice(0, catalogue ? 900 : 2500)}`),
     ].join('\n\n---\n\n');
     res.json({
       success: true,
@@ -107,6 +111,7 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
       documentedBranches,
       candidates,
       documents: documentCandidates,
+      catalogue,
       aiContext,
       searchToken,
       truncated,
