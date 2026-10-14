@@ -1198,7 +1198,7 @@ function ProgramEditor() {
                     key={index}
                     className="rounded-2xl border border-gray-100 bg-slate-50 p-7 shadow-sm"
                   >
-                    <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-red-50">
+                    <div className="mx-auto mb-8 flex h-64 w-full items-center justify-center overflow-hidden rounded-2xl">
                       {highlightImagePreviews[
                         index
                       ] ||
@@ -1216,7 +1216,7 @@ function ProgramEditor() {
                             item.title ||
                             "Highlight"
                           }
-                          className="h-full w-full object-contain p-2"
+                          className="h-full w-full object-contain"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
@@ -1415,9 +1415,9 @@ function ProgramEditor() {
                   data-description={career.description || ""}
                   className="career-showcase__card"
                 >
-                  {career.image && (
+                  {(careerImagePreviews[index] || career.image) && (
                     <img
-                      src={getImageUrl(career.image)}
+                      src={careerImagePreviews[index] || getImageUrl(career.image)}
                       alt={career.title || "อาชีพ"}
                       className="h-12 w-12 rounded-lg object-cover"
                     />
@@ -1471,18 +1471,18 @@ function ProgramEditor() {
 
       {editing && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8">
+          <div role="dialog" aria-modal="true" aria-labelledby="program-editor-title" className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl md:p-8">
 
             {/* Modal Header */}
 
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  แก้ไขข้อมูล
+                <h2 id="program-editor-title" className="text-xl font-bold text-gray-900 md:text-2xl">
+                  {({ hero: "แก้ไขข้อมูลสาขา", about: "แก้ไขข้อมูลเกี่ยวกับสาขา", highlights: "แก้ไขจุดเด่นของสาขาวิชา", careers: "แก้ไขอาชีพหลังสำเร็จการศึกษา", atmosphere: "แก้ไขบรรยากาศการเรียนการสอน" })[editing] || "แก้ไขข้อมูลหลักสูตร"}
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">
-                  {editing}
+                  ปรับรูปภาพและข้อมูล แล้วกดบันทึกเมื่อแก้ไขเรียบร้อย
                 </p>
               </div>
 
@@ -1710,17 +1710,18 @@ function ProgramEditor() {
                     ) => (
                       <div
                         key={index}
-                        className="rounded-2xl border border-gray-200 p-5"
+                        className="grid items-start gap-x-6 rounded-2xl border border-gray-200 bg-slate-50/50 p-5 md:grid-cols-[minmax(0,300px)_minmax(0,1fr)]"
                       >
                         {/* รูปภาพ */}
 
-                        <div>
+                        <div className="min-w-0 md:row-span-3">
                           <label className="mb-2 block text-sm font-semibold text-gray-700">
                             รูปภาพจุดเด่น
                           </label>
 
                           <ImageFileInput selectedFiles={highlightImageFiles[index]}
-
+                            showPreview={false}
+                            buttonLabel={highlightImagePreviews[index] || item.image ? "เปลี่ยนรูป" : "เลือกรูป"}
                             accept="image/jpeg,image/png,image/webp,image/jpg"
                             onChange={(e) =>
                               handleHighlightImageChange(
@@ -1742,7 +1743,7 @@ function ProgramEditor() {
                             item.image
                           ) && (
                             <div className="mt-4 flex justify-center">
-                              <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
+                              <div className="flex h-64 w-full items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
                                 <img
                                   src={
                                     highlightImagePreviews[
@@ -1834,7 +1835,7 @@ function ProgramEditor() {
                               index,
                             )
                           }
-                          className="mt-4 text-sm font-semibold text-red-600"
+                          className="mt-4 justify-self-end rounded-xl bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 md:col-start-2"
                         >
                           ลบจุดเด่น
                         </button>
@@ -2125,27 +2126,34 @@ function ProgramEditor() {
                     ) => (
                       <div
                         key={index}
-                        className="grid gap-3 rounded-2xl border border-gray-200 p-3 md:grid-cols-[130px_1fr_auto]"
+                        className="grid items-start gap-5 rounded-2xl border border-gray-200 bg-slate-50/50 p-5 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)]"
                       >
 
-                        <label className="flex min-h-12 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-50 text-xs font-semibold text-gray-500 hover:border-[#701D10] hover:text-[#701D10]">
+                        <div className="min-w-0 md:row-span-3">
+                          <p className="mb-2 text-sm font-semibold text-gray-700">รูปภาพอาชีพที่ {index + 1}</p>
+                          <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-white">
                           {careerImagePreviews[index] || career.image ? (
                             <img
                               src={careerImagePreviews[index] || getImageUrl(career.image)}
                               alt={career.title || "ตัวอย่างรูปอาชีพ"}
-                              className="h-16 w-full object-cover"
+                              className="h-full w-full object-contain"
                             />
                           ) : (
-                            "เพิ่มรูป"
+                            <span className="text-sm text-gray-400">ยังไม่มีรูปภาพ</span>
                           )}
+                          </div>
                           <ImageFileInput selectedFiles={careerImageFiles[index]}
-
+                            showPreview={false}
+                            buttonLabel={careerImagePreviews[index] || career.image ? "เปลี่ยนรูป" : "เลือกรูป"}
                             accept="image/jpeg,image/png,image/webp,image/jpg"
                             onChange={(e) => handleCareerImageChange(index, e)}
                             className="sr-only"
                           />
-                        </label>
+                          <p className="text-xs text-gray-500">JPG, PNG หรือ WebP ขนาดไม่เกิน 5MB</p>
+                        </div>
 
+                        <label className="block min-w-0 text-sm font-semibold text-gray-700">
+                          ชื่อตำแหน่งงาน
                         <input
                           value={
                             career.title ||
@@ -2160,10 +2168,14 @@ function ProgramEditor() {
                             )
                           }
                           placeholder="ตำแหน่งงาน"
-                          className="rounded-xl border px-4 py-3"
+                          className="mt-2 block h-12 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 font-normal focus:border-[#701D10] focus:outline-none focus:ring-1 focus:ring-[#701D10]"
                         />
+                        </label>
 
-                        <input
+                        <label className="block min-w-0 text-sm font-semibold text-gray-700">
+                          คำอธิบายอาชีพ (ไม่บังคับ)
+                        <textarea
+                          rows={3}
                           value={career.description || ""}
                           onChange={(e) =>
                             updateCareer(
@@ -2173,8 +2185,9 @@ function ProgramEditor() {
                             )
                           }
                           placeholder="คำอธิบายสั้นของอาชีพ (ไม่บังคับ)"
-                          className="rounded-xl border px-4 py-3 md:col-start-2"
+                          className="mt-2 block w-full resize-y rounded-xl border border-gray-300 bg-white px-4 py-3 font-normal focus:border-[#701D10] focus:outline-none focus:ring-1 focus:ring-[#701D10]"
                         />
+                        </label>
 
                         <button
                           type="button"
@@ -2183,9 +2196,9 @@ function ProgramEditor() {
                               index,
                             )
                           }
-                          className="rounded-xl bg-red-50 px-4 text-sm font-semibold text-red-600"
+                          className="justify-self-end rounded-xl bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 md:col-start-2"
                         >
-                          ลบ
+                          ลบอาชีพนี้
                         </button>
                       </div>
                     ),
@@ -2225,7 +2238,7 @@ function ProgramEditor() {
             {/* Modal Buttons */}
             {/* ================================= */}
 
-            <div className="mt-8 flex justify-end gap-3 border-t pt-5">
+            <div className="sticky -bottom-5 z-10 -mx-5 mt-8 flex justify-end gap-3 border-t border-gray-200 bg-white px-5 py-4 md:-bottom-8 md:-mx-8 md:px-8">
               <button
                 type="button"
                 onClick={() =>
