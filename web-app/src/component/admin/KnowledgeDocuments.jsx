@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiUrl } from '../../config/api';
 import './knowledge-panels.css';
 
 const headers = () => ({ Authorization: 'Bearer ' + localStorage.getItem('token') });
 
 export default function KnowledgeDocuments() {
+  const editFormRef = useRef(null), editTitleRef = useRef(null);
   const [data, setData] = useState(null), [file, setFile] = useState(null), [title, setTitle] = useState(''), [type, setType] = useState('หลักสูตร'), [branch, setBranch] = useState('');
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState(''), [editing, setEditing] = useState(null);
   const load = useCallback(async () => {
@@ -14,6 +15,12 @@ export default function KnowledgeDocuments() {
     setData(body); setBranch(current => current || (body.scope === 'all' ? 'all' : body.scope));
   }, []);
   useEffect(() => { const timer = setTimeout(() => load().catch(value => setError(value.message)), 0); return () => clearTimeout(timer); }, [load]);
+  useEffect(() => {
+    if (!editing) return;
+    editFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const timer = setTimeout(() => editTitleRef.current?.focus({ preventScroll: true }), 450);
+    return () => clearTimeout(timer);
+  }, [editing]);
   const branchOptions = scope => Object.entries(data.branches).filter(([key]) => key !== 'unassigned' && (scope === 'all' || key === scope)).map(([key, value]) => <option key={key} value={key}>{value}</option>);
   const upload = async event => {
     event.preventDefault(); if (!file || busy) return;
@@ -55,13 +62,13 @@ export default function KnowledgeDocuments() {
       <label className="text-sm font-semibold">ไฟล์ PDF<input required type="file" accept="application/pdf,.pdf" onChange={event => setFile(event.target.files?.[0] || null)} className="mt-2 block w-full rounded-lg border bg-white p-2 file:mr-3 file:rounded-md file:border-0 file:bg-[#701D10] file:px-3 file:py-2 file:text-white" /></label>
       <div className="md:col-span-2"><button disabled={!file || busy} className="rounded-xl bg-[#701D10] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{busy ? 'กำลังอ่าน PDF…' : 'อัปโหลดเข้าคลัง AI'}</button></div>
     </form>}
-    {editing && <form onSubmit={saveEdit} className="grid gap-3 rounded-xl border border-[#701D10]/20 bg-[#fff9f7] p-4 md:grid-cols-2">
+    {editing && <form ref={editFormRef} onSubmit={saveEdit} className="grid scroll-mt-6 gap-3 rounded-xl border border-[#701D10]/20 bg-[#fff9f7] p-4 md:grid-cols-2">
       <div className="md:col-span-2"><h3 className="font-bold text-[#701D10]">แก้ไขข้อมูลเอกสาร</h3><p className="mt-1 text-xs text-slate-500">ไฟล์เดิม: {editing.filename} · การบันทึกนี้ไม่อัปโหลดหรืออ่าน PDF ซ้ำ</p></div>
-      <label className="text-sm font-semibold">ชื่อเอกสาร<input required maxLength="250" value={editing.title} onChange={event => setEditing(current => ({ ...current, title: event.target.value }))} className="mt-2 w-full rounded-lg border bg-white p-3" /></label>
+      <label className="text-sm font-semibold">ชื่อเอกสาร<input ref={editTitleRef} required maxLength="250" value={editing.title} onChange={event => setEditing(current => ({ ...current, title: event.target.value }))} className="mt-2 w-full rounded-lg border bg-white p-3" /></label>
       <label className="text-sm font-semibold">ประเภท<select value={editing.type} onChange={event => setEditing(current => ({ ...current, type: event.target.value }))} className="mt-2 w-full rounded-lg border bg-white p-3">{data.types.map(value => <option key={value}>{value}</option>)}</select></label>
       <label className="text-sm font-semibold">ข้อมูลสำหรับ<select value={editing.branch} disabled={data.scope !== 'all'} onChange={event => setEditing(current => ({ ...current, branch: event.target.value }))} className="mt-2 w-full rounded-lg border bg-white p-3">{branchOptions(data.scope)}</select></label>
       <div className="flex items-end gap-3"><button disabled={busy} className="rounded-xl bg-[#701D10] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{busy ? 'กำลังบันทึก…' : 'บันทึกการแก้ไข'}</button><button type="button" disabled={busy} onClick={() => setEditing(null)} className="rounded-xl border px-5 py-3 text-sm font-bold text-slate-600 disabled:opacity-50">ยกเลิก</button></div>
     </form>}
-    <div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead className="border-b text-slate-500"><tr><th className="p-3">เอกสาร</th><th className="p-3">ขอบเขตข้อมูล</th><th className="p-3">รายละเอียด</th><th className="p-3">อัปเดต</th><th className="p-3">จัดการ</th></tr></thead><tbody>{data.documents.map(row => <tr key={row.id} className="border-b"><td className="p-3"><strong>{row.title}</strong><p className="mt-1 text-xs text-slate-500">{row.filename}</p></td><td className="p-3">{label(row.branch)}</td><td className="p-3">{row.type} · {row.pages} หน้า{row.text_truncated ? ' · ข้อความยาว ตัดบางส่วน' : ''}</td><td className="p-3 text-xs">{new Date(row.updated_at).toLocaleString('th-TH')}</td><td className="p-3">{editable && (data.scope === 'all' || row.branch === data.scope) ? <div className="flex gap-2"><button type="button" disabled={busy} onClick={() => startEdit(row)} className="text-[#701D10] hover:underline disabled:opacity-50">แก้ไข</button><button type="button" disabled={busy} onClick={() => remove(row)} className="text-red-700 hover:underline disabled:opacity-50">ลบ</button></div> : <span className="text-slate-400">ดูข้อมูล</span>}</td></tr>)}{!data.documents.length && <tr><td colSpan="5" className="p-8 text-center text-slate-500">ยังไม่มีเอกสาร PDF ในคลัง AI</td></tr>}</tbody></table></div>
+    <div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead className="border-b text-slate-500"><tr><th className="p-3">เอกสาร</th><th className="p-3">ขอบเขตข้อมูล</th><th className="p-3">รายละเอียด</th><th className="p-3">อัปเดต</th><th className="p-3">จัดการ</th></tr></thead><tbody>{data.documents.map(row => <tr key={row.id} className="border-b transition-colors hover:bg-amber-50"><td className="p-3"><strong>{row.title}</strong><p className="mt-1 text-xs text-slate-500">{row.filename}</p></td><td className="p-3">{label(row.branch)}</td><td className="p-3">{row.type} · {row.pages} หน้า{row.text_truncated ? ' · ข้อความยาว ตัดบางส่วน' : ''}</td><td className="p-3 text-xs">{new Date(row.updated_at).toLocaleString('th-TH')}</td><td className="p-3">{editable && (data.scope === 'all' || row.branch === data.scope) ? <div className="flex gap-2"><button type="button" disabled={busy} onClick={() => startEdit(row)} className="rounded-lg px-3 py-1.5 text-[#701D10] transition-colors hover:bg-amber-200 focus-visible:bg-amber-200 focus-visible:outline-none disabled:opacity-50">แก้ไข</button><button type="button" disabled={busy} onClick={() => remove(row)} className="rounded-lg px-3 py-1.5 text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50">ลบ</button></div> : <span className="text-slate-400">ดูข้อมูล</span>}</td></tr>)}{!data.documents.length && <tr><td colSpan="5" className="p-8 text-center text-slate-500">ยังไม่มีเอกสาร PDF ในคลัง AI</td></tr>}</tbody></table></div>
   </section>;
 }

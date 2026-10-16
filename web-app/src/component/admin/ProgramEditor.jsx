@@ -1488,10 +1488,11 @@ function ProgramEditor() {
 
               <button
                 type="button"
+                aria-label="ปิดหน้าต่างแก้ไข"
                 onClick={() =>
                   setEditing(null)
                 }
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-red-600 hover:text-white focus-visible:bg-red-600 focus-visible:text-white focus-visible:outline-none"
               >
                 ปิด
               </button>
