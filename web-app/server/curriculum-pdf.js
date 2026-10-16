@@ -7,6 +7,32 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 const exec = promisify(execFile);
 
+// Only rows with a course code are publishable; totals and transcript notes are not courses.
+export function extractCourses(text) {
+  const rows = [], issues = [], seen = new Map();
+  let pending = '';
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (/หมายเหตุรายวิชา/.test(line)) break;
+    const start = /(?:^|\s)(\d{6,8}|[xX]{2,}\d*|\d{3})\s+(.+)/u.exec(line);
+    if (start) pending = `${start[1]} ${start[2]}`;
+    else if (pending && !/รวม|ภาคเรียน|รหัสวิชา|Page|หน่วยกิต/.test(line)) pending += ` ${line}`;
+    else { pending = ''; continue; }
+    const match = /^(\S+)\s+(.+?)\s+(\d{1,3}\s*\(\s*\d+\s*-\s*\d+\s*-\s*\d+\s*\)|\d{1,3}(?=\s*(?:หน่วยกิต)?$))/u.exec(pending);
+    if (!match) continue;
+    pending = '';
+    const row = { code: match[1], name: match[2].replace(/\s+/g, ' ').trim(), credits: match[3].replace(/\s/g, '') };
+    if (!/^\d{6,8}$/.test(row.code)) { issues.push({ ...row, reason: 'รหัสไม่ครบหรือเป็นรหัสแทนหมวด กรุณาตรวจ PDF' }); continue; }
+    if (seen.has(row.code)) {
+      if (JSON.stringify(seen.get(row.code)) !== JSON.stringify(row)) issues.push({ ...row, reason: 'รหัสซ้ำแต่ข้อมูลต่างกัน กรุณาตรวจ PDF' });
+      continue;
+    }
+    seen.set(row.code, row); rows.push(row);
+  }
+  return { rows, issues };
+}
+
 export function extractRows(text) {
   const rows = [];
   for (const line of text.split(/\r?\n/)) {
@@ -36,15 +62,15 @@ export async function readCurriculumPdf(buffer) {
     const { stdout: info } = await exec('pdfinfo', [file], options);
     const pages = Number(/^Pages:\s+(\d+)/m.exec(info)?.[1]);
     if (!Number.isSafeInteger(pages) || pages < 1 || /^Encrypted:\s+yes/m.test(info)) throw new Error('กรุณาใช้ PDF ที่อ่านได้และไม่เข้ารหัส');
-    const chunks = [], rows = [];
+    const chunks = [];
     const textFile = path.join(dir, 'page.txt');
     for (let page = 1; page <= pages; page++) {
       await exec('pdftotext', ['-f', String(page), '-l', String(page), '-layout', '-enc', 'UTF-8', file, textFile], options);
       const text = await readFile(textFile, 'utf8');
       chunks.push(text);
-      rows.push(...extractRows(text));
     }
-    return { rows, text: chunks.join('\n'), pages, truncated: false };
+    const text = chunks.join('\n');
+    return { ...extractCourses(text), text, pages, truncated: false };
   } finally { await rm(dir, { recursive: true, force: true }); }
 }
 
@@ -75,13 +101,14 @@ export function registerCurriculumPdf(app, db, auth, permission, reader = readCu
       const parsed = await reader(req.file.buffer), id = randomUUID();
       const filename = path.basename(req.file.originalname).slice(0, 250);
       await query('INSERT INTO curriculum_pdf_files (id,slug,filename,data) VALUES (?,?,?,?)', [id, req.params.slug, filename, req.file.buffer]);
-      res.json({ success: true, fileId: id, filename, ...parsed, warning: 'ข้อมูลที่อ่านได้เป็นร่าง ต้องตรวจเทียบ PDF ทุกแถวก่อนบันทึก ไฟล์สแกน/ตารางซับซ้อนอาจอ่านไม่ครบ สามารถกรอกเองหรือแสดงเฉพาะ PDF ได้' });
+      res.json({ success: true, fileId: id, filename, ...parsed, warning: 'ข้อมูลที่อ่านได้เป็นร่าง ต้องตรวจเทียบ PDF ทุกแถวก่อนบันทึก ไฟล์สแกน/ตารางซับซ้อนอาจอ่านไม่ครบ สามารถเพิ่มหรือแก้ไขรายวิชาเองได้ PDF เปิดได้เฉพาะผู้ดูแล' });
     } catch { res.status(400).json({ success: false, message: 'อ่าน PDF ไม่สำเร็จ: กรุณาใช้ PDF ที่ไม่เข้ารหัส และลองใหม่' }); }
     finally { busy = false; }
   }));
   app.put('/api/curriculum-pdf/:slug', auth, allowed, route(async (req, res) => {
     let content;
     try { content = validateCurriculum(req.body); } catch (e) { return res.status(400).json({ success: false, message: e.message }); }
+    if (content.rows.some(row => !/^\d{6,8}$/.test(row.code) || !row.credits || ['category', 'total'].includes(row.type)) || new Set(content.rows.map(row => row.code)).size !== content.rows.length) return res.status(400).json({ success: false, message: 'กรุณาระบุรหัสวิชา 6–8 หลักที่ไม่ซ้ำ ชื่อวิชา และหน่วยกิตให้ครบทุกแถว' });
     if (req.body.reviewed !== true || !Number.isSafeInteger(req.body.version) || req.body.version < 0 || typeof req.body.fileId !== 'string') return res.status(400).json({ success: false, message: 'กรุณาตรวจข้อมูลและยืนยันก่อนบันทึก' });
     const files = await query('SELECT id FROM curriculum_pdf_files WHERE id=? AND slug=?', [req.body.fileId, req.params.slug]);
     if (!files.length) return res.status(400).json({ success: false, message: 'ไฟล์ไม่ตรงกับสาขา' });
@@ -99,6 +126,6 @@ export function registerCurriculumPdf(app, db, auth, permission, reader = readCu
     if (!rows.length) return res.status(404).end();
     res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename="curriculum.pdf"', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store', 'Content-Security-Policy': "sandbox" }).send(rows[0].data);
   };
-  app.get('/api/curriculum-pdf/:slug/files/:id', route((req, res) => sendPdf(req, res, false)));
+  app.get('/api/curriculum-pdf/:slug/files/:id', auth, allowed, route((req, res) => sendPdf(req, res, false)));
   app.get('/api/curriculum-pdf/:slug/drafts/:id', auth, allowed, route((req, res) => sendPdf(req, res, true)));
 }

@@ -1,7 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
-import { extractRows, validateCurriculum, registerCurriculumPdf } from './curriculum-pdf.js';
+import { extractRows, extractCourses, validateCurriculum, registerCurriculumPdf } from './curriculum-pdf.js';
+
+test('course extraction excludes grades, summaries, placeholders and repeated notes', () => {
+  const parsed = extractCourses('1/2567 * กลุ่มวิชาเลือก 0001101 ภาษาไทยเพื่อการสื่อสาร 3(3-0-6) 1/2567 : A\n7012301 โครงสร้างข้อมูล\nและอัลกอริทึม 3(2-2-5) ยังไม่ได้ลงทะเบียนเรียน\n7012301 โครงสร้างข้อมูล และอัลกอริทึม 3(2-2-5)\nรวมหน่วยกิต 6\n309 ระบบฐานข้อมูลขั้นสูง 3(2-2-5)\nxxxxxx2 หมวดวิชาเลือกเสรี 6(0-0-0)\nหมายเหตุรายวิชา\n0001101 ภาษาไทยเพื่อการสื่อสาร เทียบโอน');
+  assert.equal(parsed.rows.length, 2);
+  assert.deepEqual(parsed.rows[0], { code: '0001101', name: 'ภาษาไทยเพื่อการสื่อสาร', credits: '3(3-0-6)' });
+  assert.equal(parsed.rows[1].name, 'โครงสร้างข้อมูล และอัลกอริทึม');
+  assert.equal(parsed.issues.length, 2);
+});
 import { rowType, curriculumTotal } from '../src/config/curriculumTable.js';
 
 test('category table preserves types and does not double count children', () => {
@@ -54,7 +62,7 @@ test('upload is private until reviewed publication; auth, branch scope, signatur
     assert.equal((await upload('computer', 'computer', 'not pdf')).status, 400); assert.equal(calls, 0);
     const draft = await (await upload('computer', 'computer')).json(); assert.equal(draft.success, true);
     assert.equal((await (await fetch(base + 'computer')).json()).data, null);
-    assert.equal((await fetch(base + `computer/files/${draft.fileId}`)).status, 404);
+    assert.equal((await fetch(base + `computer/files/${draft.fileId}`)).status, 401);
     assert.equal((await fetch(base + `computer/drafts/${draft.fileId}`)).status, 401);
     assert.equal((await fetch(base + `computer/drafts/${draft.fileId}`, { headers: { Authorization: 'computer' } })).status, 200);
     const body = { fileId: draft.fileId, title: 'ทดสอบ', year: '', rows: [], version: 0, reviewed: true };
@@ -62,10 +70,12 @@ test('upload is private until reviewed publication; auth, branch scope, signatur
     assert.equal((await save('electrical', body)).status, 400);
     assert.equal((await save('computer', body)).status, 200);
     assert.equal((await save('computer', body)).status, 409);
-    assert.equal((await fetch(base + `computer/files/${draft.fileId}`)).headers.get('content-type'), 'application/pdf');
+    assert.equal((await fetch(base + `computer/files/${draft.fileId}`)).status, 401);
+    assert.equal((await fetch(base + `computer/files/${draft.fileId}`, { headers: { Authorization: 'electrical' } })).status, 403);
+    assert.equal((await fetch(base + `computer/files/${draft.fileId}`, { headers: { Authorization: 'computer' } })).headers.get('content-type'), 'application/pdf');
     const next = await (await upload('computer', 'computer')).json();
     assert.equal((await (await fetch(base + 'computer')).json()).data.fileId, draft.fileId);
     assert.equal((await save('computer', { ...body, fileId: next.fileId, version: 1 })).status, 200);
-    assert.equal((await fetch(base + `computer/files/${draft.fileId}`)).status, 404);
+    assert.equal((await fetch(base + `computer/files/${draft.fileId}`, { headers: { Authorization: 'computer' } })).status, 404);
   } finally { await new Promise(r => server.close(r)); }
 });
