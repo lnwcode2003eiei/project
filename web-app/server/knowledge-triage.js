@@ -16,7 +16,7 @@ const segmenter = new Intl.Segmenter('th', { granularity: 'word' });
 const stopWords = new Set(['ครับ', 'ค่ะ', 'คะ', 'ไหม', 'อะไร', 'ที่', 'ของ', 'มี', 'เป็น', 'ได้', 'อยาก', 'ทราบ', 'ขอ', 'ให้', 'และ']);
 const words = value => new Set([...segmenter.segment(norm(value))].filter(v => v.isWordLike && v.segment.length > 1 && !stopWords.has(v.segment)).map(v => v.segment));
 const isCatalogQuestion = query => /(?:มี.*(?:สาขา|หลักสูตร)|(?:สาขา|หลักสูตร).*อะไร|(?:สาขา|หลักสูตร).*เปิดสอน|เปิดสอน.*(?:สาขา|หลักสูตร))/.test(norm(query));
-export const replyForEvent = (systemMessage, proposedReply) => systemMessage || proposedReply || null;
+export const replyForEvent = (systemMessage, proposedReply) => proposedReply || systemMessage || null;
 
 // Keep the existing n8n mapping (approvedAnswers[].answer) compatible.
 export function approvedReply(row) {
