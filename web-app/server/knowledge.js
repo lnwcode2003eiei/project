@@ -99,8 +99,9 @@ export function registerKnowledge(app, db, requireAdmin) {
   }));
   app.get('/api/admin/knowledge/messages', requireAdmin, route(async (req, res) => {
     const user = await admin(req);
-    const scope = user.saka_path === 'all' ? '' : ' WHERE branch=?';
-    const [messages] = await pool.query(`SELECT id,message,branch,category,decision,summary,created_at FROM knowledge_line_messages${scope} ORDER BY id DESC LIMIT 500`, user.saka_path === 'all' ? [] : [user.saka_path]);
+    const scope = user.saka_path === 'all' ? '' : ' WHERE m.branch=?';
+    const [messageRows] = await pool.query(`SELECT m.id,m.message,m.branch,m.category,m.decision,m.summary,m.created_at,e.result AS response FROM knowledge_line_messages m LEFT JOIN knowledge_events e ON e.event_hash=m.event_hash${scope} ORDER BY m.id DESC LIMIT 500`, user.saka_path === 'all' ? [] : [user.saka_path]);
+    const messages = messageRows.map(row => ({ ...row, response: parse(row.response) || null }));
     // Include the prior LINE-question inbox as a read-only fallback, so the
     // dashboard remains useful immediately after upgrading.
     let legacy = [];
@@ -108,7 +109,7 @@ export function registerKnowledge(app, db, requireAdmin) {
       const [questions] = await pool.query(`SELECT id,question,branch,category,status,triage,last_seen FROM knowledge_questions${scope} ORDER BY last_seen DESC LIMIT 500`, user.saka_path === 'all' ? [] : [user.saka_path]);
       legacy = questions.map(row => {
         const triage = parse(row.triage) || {};
-        return { id: `legacy-${row.id}`, message: row.question, branch: row.branch, category: row.category, decision: row.status === 'resolved' ? 'answered' : row.status === 'ignored' ? 'smalltalk' : 'review', summary: triage.summary || row.question, created_at: row.last_seen };
+        return { id: `legacy-${row.id}`, message: row.question, branch: row.branch, category: row.category, decision: row.status === 'resolved' ? 'answered' : row.status === 'ignored' ? 'smalltalk' : 'review', summary: triage.summary || row.question, created_at: row.last_seen, response: null };
       });
     }
     res.json({ success: true, messages: messages.length ? messages : legacy, legacy: !messages.length && legacy.length > 0, branches, scope: user.saka_path });

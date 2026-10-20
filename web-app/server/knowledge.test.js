@@ -46,6 +46,7 @@ test('API restricts branch and write permission; LINE redelivery does not duplic
       if (sql.startsWith('INSERT IGNORE INTO knowledge_events')) { if (!events.has(args[0])) events.set(args[0], null); return [{}]; }
       if (sql.startsWith('SELECT result FROM knowledge_events')) return [[{ result: events.get(args[0]) }]];
       if (sql.startsWith('SELECT id,branch,question')) return [[{ ...base, id: 10 }]];
+      if (sql.startsWith('SELECT m.id,m.message')) return [[{ id: 1, message: 'เรียนอะไร', branch: 'computer', category: 'หลักสูตร', decision: 'answered', summary: 'ถามเกี่ยวกับหลักสูตร', created_at: '2026-10-20T00:00:00.000Z', response: JSON.stringify({ status: 'answered', approvedAnswers: [{ id: 10, answer: base.answer }] }) }]];
       if (sql.startsWith('INSERT INTO knowledge_questions')) { count++; return [{}]; }
       if (sql.startsWith('SELECT id FROM knowledge_questions')) return [[{ id: 7 }]];
       if (sql.startsWith('UPDATE knowledge_events')) { events.set(args[2], args[1]); return [{}]; }
@@ -64,6 +65,9 @@ test('API restricts branch and write permission; LINE redelivery does not duplic
     assert.equal((await fetch(url + '/api/admin/knowledge')).status, 401);
     assert.equal((await fetch(url + '/api/admin/knowledge', { headers: { Authorization: '1' } })).status, 200);
     assert.ok(calls.some(call => call.sql.includes('WHERE branch = ?') && call.args[0] === 'computer'));
+    const messages = await (await fetch(url + '/api/admin/knowledge/messages', { headers: { Authorization: '1' } })).json();
+    assert.equal(messages.messages[0].response.approvedAnswers[0].answer, base.answer);
+    assert.ok(calls.some(call => call.sql.includes('LEFT JOIN knowledge_events') && call.sql.includes('WHERE m.branch=?')));
     assert.equal((await post('/api/admin/knowledge/answers', { ...base, branch: 'electrical' }, { Authorization: '1' })).status, 403);
     assert.equal((await post('/api/admin/knowledge/answers', base, { Authorization: '2' })).status, 403);
     assert.equal((await fetch(url + '/api/admin/knowledge/answers/9', { method: 'PUT', headers: { Authorization: '1', 'Content-Type': 'application/json' }, body: JSON.stringify({ ...base, version: 1 }) })).status, 403);

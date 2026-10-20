@@ -45,6 +45,20 @@ export function registerKnowledgeDocuments(app, { pool, route, admin, allowed, b
     const [rows] = await pool.query(`SELECT id,branch,type,title,filename,pages,text_truncated,created_at,updated_at FROM knowledge_documents${where} ORDER BY updated_at DESC,id DESC`, args);
     res.json({ success: true, documents: rows, branches, types: documentTypes, scope: user.saka_path, canEdit: Number(user.can_edit) === 1 });
   }));
+  app.get('/api/admin/knowledge/documents/:id/file', requireAdmin, route(async (req, res) => {
+    const user = await admin(req);
+    const [[row]] = await pool.query('SELECT branch,filename,data FROM knowledge_documents WHERE id=?', [req.params.id]);
+    if (!row) { const error = new Error('ไม่พบเอกสาร'); error.status = 404; throw error; }
+    if (row.branch !== 'all') allowed(user, row.branch);
+    const encodedFilename = encodeURIComponent(row.filename || 'knowledge-document.pdf');
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="knowledge-document.pdf"; filename*=UTF-8''${encodedFilename}`,
+      'X-Content-Type-Options': 'nosniff',
+      'Cache-Control': 'no-store',
+      'Content-Security-Policy': 'sandbox',
+    }).send(row.data);
+  }));
   app.post('/api/admin/knowledge/documents', requireAdmin, route(async (req, res) => {
     const user = await admin(req, true);
     await new Promise((resolve, reject) => upload(req, res, error => error ? reject(error) : resolve()));

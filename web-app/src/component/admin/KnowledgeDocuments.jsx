@@ -7,7 +7,7 @@ const headers = () => ({ Authorization: 'Bearer ' + localStorage.getItem('token'
 export default function KnowledgeDocuments() {
   const editFormRef = useRef(null), editTitleRef = useRef(null);
   const [data, setData] = useState(null), [file, setFile] = useState(null), [title, setTitle] = useState(''), [type, setType] = useState('หลักสูตร'), [branch, setBranch] = useState('');
-  const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState(''), [editing, setEditing] = useState(null);
+  const [busy, setBusy] = useState(false), [previewingId, setPreviewingId] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState(''), [editing, setEditing] = useState(null);
   const load = useCallback(async () => {
     const response = await fetch(apiUrl('/api/admin/knowledge/documents'), { headers: headers() });
     const body = await response.json();
@@ -33,6 +33,20 @@ export default function KnowledgeDocuments() {
     } catch (value) { setError(value.message); } finally { setBusy(false); }
   };
   const startEdit = row => { setEditing({ id: row.id, title: row.title, type: row.type, branch: row.branch, filename: row.filename }); setError(''); setNotice(''); };
+  const viewDocument = async row => {
+    if (previewingId) return;
+    const preview = window.open('about:blank', '_blank');
+    if (!preview) { setError('เบราว์เซอร์ปิดกั้นหน้าต่างใหม่ กรุณาอนุญาตป๊อปอัปแล้วลองอีกครั้ง'); return; }
+    preview.opener = null;
+    setPreviewingId(row.id); setError('');
+    try {
+      const response = await fetch(apiUrl(`/api/admin/knowledge/documents/${row.id}/file`), { headers: headers() });
+      if (!response.ok) { const result = await response.json().catch(() => ({})); throw new Error(result.message || 'เปิดเอกสารไม่สำเร็จ'); }
+      const url = URL.createObjectURL(await response.blob());
+      preview.location.replace(url);
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (value) { preview.close(); setError(value.message); } finally { setPreviewingId(''); }
+  };
   const saveEdit = async event => {
     event.preventDefault(); if (!editing || busy) return;
     setBusy(true); setError(''); setNotice('');
@@ -69,6 +83,6 @@ export default function KnowledgeDocuments() {
       <label className="text-sm font-semibold">ข้อมูลสำหรับ<select value={editing.branch} disabled={data.scope !== 'all'} onChange={event => setEditing(current => ({ ...current, branch: event.target.value }))} className="mt-2 w-full rounded-lg border bg-white p-3">{branchOptions(data.scope)}</select></label>
       <div className="flex items-end gap-3"><button disabled={busy} className="rounded-xl bg-[#701D10] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{busy ? 'กำลังบันทึก…' : 'บันทึกการแก้ไข'}</button><button type="button" disabled={busy} onClick={() => setEditing(null)} className="rounded-xl border px-5 py-3 text-sm font-bold text-slate-600 disabled:opacity-50">ยกเลิก</button></div>
     </form>}
-    <div className="overflow-x-auto"><table className="w-full min-w-[650px] text-left text-sm"><thead className="border-b text-slate-500"><tr><th className="p-3">เอกสาร</th><th className="p-3">ขอบเขตข้อมูล</th><th className="p-3">รายละเอียด</th><th className="p-3">อัปเดต</th><th className="p-3">จัดการ</th></tr></thead><tbody>{data.documents.map(row => <tr key={row.id} className="border-b transition-colors hover:bg-amber-50"><td className="p-3"><strong>{row.title}</strong><p className="mt-1 text-xs text-slate-500">{row.filename}</p></td><td className="p-3">{label(row.branch)}</td><td className="p-3">{row.type} · {row.pages} หน้า{row.text_truncated ? ' · ข้อความยาว ตัดบางส่วน' : ''}</td><td className="p-3 text-xs">{new Date(row.updated_at).toLocaleString('th-TH')}</td><td className="p-3">{editable && (data.scope === 'all' || row.branch === data.scope) ? <div className="flex gap-2"><button type="button" disabled={busy} onClick={() => startEdit(row)} className="rounded-lg px-3 py-1.5 text-[#701D10] transition-colors hover:bg-amber-200 focus-visible:bg-amber-200 focus-visible:outline-none disabled:opacity-50">แก้ไข</button><button type="button" disabled={busy} onClick={() => remove(row)} className="rounded-lg px-3 py-1.5 text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50">ลบ</button></div> : <span className="text-slate-400">ดูข้อมูล</span>}</td></tr>)}{!data.documents.length && <tr><td colSpan="5" className="p-8 text-center text-slate-500">ยังไม่มีเอกสาร PDF ในคลัง AI</td></tr>}</tbody></table></div>
+    <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left text-sm"><thead className="border-b text-slate-500"><tr><th className="p-3">เอกสาร</th><th className="p-3">ขอบเขตข้อมูล</th><th className="p-3">รายละเอียด</th><th className="p-3">อัปเดต</th><th className="p-3">จัดการ</th></tr></thead><tbody>{data.documents.map(row => <tr key={row.id} className="border-b transition-colors hover:bg-amber-50"><td className="p-3"><strong>{row.title}</strong><p className="mt-1 text-xs text-slate-500">{row.filename}</p></td><td className="p-3">{label(row.branch)}</td><td className="p-3">{row.type} · {row.pages} หน้า{row.text_truncated ? ' · ข้อความยาว ตัดบางส่วน' : ''}</td><td className="p-3 text-xs">{new Date(row.updated_at).toLocaleString('th-TH')}</td><td className="p-3"><div className="flex flex-wrap gap-2"><button type="button" disabled={busy || !!previewingId} onClick={() => viewDocument(row)} className="rounded-lg border border-blue-200 px-3 py-1.5 font-medium text-blue-700 transition-colors hover:bg-blue-100 focus-visible:bg-blue-100 focus-visible:outline-none disabled:opacity-50">{previewingId === row.id ? 'กำลังเปิด…' : 'รายละเอียด'}</button>{editable && (data.scope === 'all' || row.branch === data.scope) ? <><button type="button" disabled={busy || !!previewingId} onClick={() => startEdit(row)} className="rounded-lg px-3 py-1.5 text-[#701D10] transition-colors hover:bg-amber-200 focus-visible:bg-amber-200 focus-visible:outline-none disabled:opacity-50">แก้ไข</button><button type="button" disabled={busy || !!previewingId} onClick={() => remove(row)} className="rounded-lg px-3 py-1.5 text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50">ลบ</button></> : <span className="self-center text-slate-400">ดูข้อมูล</span>}</div></td></tr>)}{!data.documents.length && <tr><td colSpan="5" className="p-8 text-center text-slate-500">ยังไม่มีเอกสาร PDF ในคลัง AI</td></tr>}</tbody></table></div>
   </section>;
 }
