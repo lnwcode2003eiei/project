@@ -23,4 +23,4 @@
 
 ให้ AI ตอบได้เฉพาะเมื่อ `candidates` หรือ `documents` มีข้อมูลที่เพียงพอ ห้ามแต่งข้อเท็จจริงจากความจำ หากใช้ `candidates` ให้ส่ง `answerIds` และ `searchToken` ตามกติกาเดิม
 
-หากใช้ PDF ตอบ ให้ส่ง `documentIds` ที่เลือกจาก `documents[].id` พร้อม `searchToken` ไป Triage API เช่น `{ "decision": "answered", "answerIds": [], "documentIds": ["uuid"], "searchToken": "..." }` แล้วส่งคำตอบ AI ได้ก็ต่อเมื่อ Triage คืน `status: "answered"`.
+หากใช้ PDF ตอบ ให้ส่ง `documentIds` ที่เลือกจาก `documents[].id`, `reply` ซึ่งเป็นข้อความสุดท้ายที่จะส่งเข้า LINE และ `searchToken` ไป Triage API เช่น `{ "decision": "answered", "reply": "คำตอบจาก AI", "answerIds": [], "documentIds": ["uuid"], "searchToken": "..." }` แล้วส่งคำตอบ AI ได้ก็ต่อเมื่อ Triage คืน `status: "answered"`.

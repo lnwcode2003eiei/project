@@ -41,6 +41,12 @@
 .knowledge-panel td:last-child { white-space: nowrap; }
 .knowledge-panel td button { border: 1px solid #f0d7d1; border-radius: 9px; padding: 5px 12px; background: #fff7f5; font-weight: 600; }
 .knowledge-panel td button:hover { background: #fbe7e1; }
+.knowledge-line td:last-child button:hover,
+.knowledge-line td:last-child button:focus-visible {
+  color: #dc2626 !important;
+  background: #fef2f2 !important;
+  border-color: #fca5a5;
+}
 .knowledge-panel .border-t, .knowledge-panel .border-b, .knowledge-panel .border-y { border-color: #e8edf2; }
 .knowledge-line > .flex.flex-wrap { padding: 20px; background: #f7f8fa; border: 1px solid #edf0f3; border-radius: 16px; gap: 18px; align-items: end; }
 .knowledge-line > .flex.flex-wrap label { display: flex; flex-direction: column; gap: 8px; color: #65748a; }

@@ -1,6 +1,13 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { rankDocuments } from './knowledge-documents.js';
 
+const MAX_DOCUMENT_REFERENCES = 50;
+export function validDocumentIds(ids) {
+  return Array.isArray(ids) && ids.length <= MAX_DOCUMENT_REFERENCES
+    && ids.every(id => typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id))
+    && new Set(ids).size === ids.length;
+}
+
 export const reviewReasons = { not_found: 'ไม่พบข้อมูล', incomplete: 'ข้อมูลไม่ครบ', conflicting: 'ข้อมูลขัดแย้ง', invalid_reference: 'คำตอบอ้างอิงตรวจสอบไม่ผ่าน' };
 const parse = value => typeof value === 'string' ? JSON.parse(value) : value;
 const norm = value => value.normalize('NFC').trim().replace(/\s+/g, ' ').toLowerCase();
@@ -9,6 +16,7 @@ const segmenter = new Intl.Segmenter('th', { granularity: 'word' });
 const stopWords = new Set(['ครับ', 'ค่ะ', 'คะ', 'ไหม', 'อะไร', 'ที่', 'ของ', 'มี', 'เป็น', 'ได้', 'อยาก', 'ทราบ', 'ขอ', 'ให้', 'และ']);
 const words = value => new Set([...segmenter.segment(norm(value))].filter(v => v.isWordLike && v.segment.length > 1 && !stopWords.has(v.segment)).map(v => v.segment));
 const isCatalogQuestion = query => /(?:มี.*(?:สาขา|หลักสูตร)|(?:สาขา|หลักสูตร).*อะไร|(?:สาขา|หลักสูตร).*เปิดสอน|เปิดสอน.*(?:สาขา|หลักสูตร))/.test(norm(query));
+export const replyForEvent = (systemMessage, proposedReply) => systemMessage || proposedReply || null;
 
 // Keep the existing n8n mapping (approvedAnswers[].answer) compatible.
 export function approvedReply(row) {
@@ -99,7 +107,7 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
     // A catalogue question needs enough results to enumerate the available
     // documents. Specific questions stay small so the AI receives focused text.
     const catalogue = isCatalogQuestion(query);
-    const documentCandidates = rankDocuments(documents, query, catalogue ? 50 : 10);
+    const documentCandidates = rankDocuments(documents, query, catalogue ? MAX_DOCUMENT_REFERENCES : 10);
     const searchToken = signSearch({ eventHash: hash(eventId), branch, expires: Date.now() + 10 * 60 * 1000, candidates: candidates.map(({ id, version }) => ({ id, version })), documents: documentCandidates.map(({ id }) => id) }, process.env.N8N_KNOWLEDGE_TOKEN);
     const aiContext = [
       ...candidates.slice(0, 3).map(row => `คำตอบที่เผยแพร่แล้ว: ${row.answer}`),
@@ -127,10 +135,11 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
     const category = req.body.category ?? 'ทั่วไป';
     if (!categories.includes(category)) throw fail('ประเภทคำถามไม่ถูกต้อง');
     const summary = field(req.body.summary ?? question, 1000), detail = field(req.body.detail ?? '', 2000, false);
+    const proposedReply = field(req.body.reply ?? '', 4000, false);
     if (decision === 'review' && !['not_found', 'incomplete', 'conflicting'].includes(req.body.reason)) throw fail('เหตุผลส่งต่อไม่ถูกต้อง');
     const ids = req.body.answerIds ?? [], documentIds = req.body.documentIds ?? [];
     if (!Array.isArray(ids) || ids.length > 5 || ids.some(id => !Number.isSafeInteger(id) || id < 1) || new Set(ids).size !== ids.length) throw fail('รหัสคำตอบไม่ถูกต้อง');
-    if (!Array.isArray(documentIds) || documentIds.length > 5 || documentIds.some(id => typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id)) || new Set(documentIds).size !== documentIds.length) throw fail('รหัสเอกสารไม่ถูกต้อง');
+    if (!validDocumentIds(documentIds)) throw fail('รหัสเอกสารไม่ถูกต้อง: ต้องเป็น array ของรหัสเอกสาร ไม่ซ้ำ และไม่เกิน 50 รายการ');
     await ensure();
     const result = await tx(async c => {
       const eventHash = hash(eventId);
@@ -162,6 +171,7 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
         questionId = inbox.id;
       }
       const response = { status, queued: status === 'review', questionId, duplicate: false, reason: status === 'review' ? reason : null, approvedAnswers, approvedDocuments, message: status === 'review' ? 'ตอนนี้ยังไม่พบข้อมูลที่เพียงพอสำหรับตอบคำถามนี้ครับ' : status === 'service_error' ? 'ระบบค้นหาข้อมูลขัดข้องชั่วคราว กรุณาลองใหม่ภายหลังครับ' : null };
+      response.reply = replyForEvent(response.message, proposedReply);
       // Store message text for the private Admin dashboard only; never store LINE user/reply identifiers.
       await c.query('INSERT IGNORE INTO knowledge_line_messages (event_hash,message,branch,category,decision,summary) VALUES (?,?,?,?,?,?)', [eventHash, question, branch || 'unassigned', category, status, summary]);
       // Never store LINE user identity, reply token, or any other LINE event metadata.

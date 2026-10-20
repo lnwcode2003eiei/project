@@ -2,8 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
 import { validateAnswer, chooseAnswer, integrationAuth, registerKnowledge } from './knowledge.js';
+import { replyForEvent } from './knowledge-triage.js';
 import { starterRows } from './knowledge-import.js';
 const base = { branch: 'computer', category: 'หลักสูตร', question: 'เรียนอะไร', aliases: ['เรียนอะไรบ้าง'], answer: 'คำตอบที่อนุมัติ', status: 'published' };
+test('dashboard stores the actual reply while system errors override an AI draft', () => {
+  assert.equal(replyForEvent(null, 'คำตอบที่ส่งเข้า LINE'), 'คำตอบที่ส่งเข้า LINE');
+  assert.equal(replyForEvent('ข้อมูลยังไม่เพียงพอ', 'คำตอบร่าง'), 'ข้อมูลยังไม่เพียงพอ');
+  assert.equal(replyForEvent(null, ''), null);
+});
 test('starter data keeps 26 central drafts and validates metadata without enabling keyword matching', () => {
   assert.equal(starterRows.length, 26);
   assert.equal(new Set(starterRows.map(row => row.question)).size, 26);

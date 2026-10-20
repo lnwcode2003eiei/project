@@ -88,6 +88,7 @@ category รับค่าประเภทที่เว็บรองร�
   "question": "สมัครที่ไหนครับ",
   "branch": null,
   "decision": "answered",
+  "reply": "ข้อความคำตอบเดียวกับที่จะส่งให้ผู้ใช้ LINE",
   "answerIds": [123],
   "searchToken": "ค่าจาก_Search_API_ของ_event_นี้"
 }
@@ -95,7 +96,9 @@ category รับค่าประเภทที่เว็บรองร�
 
 ให้ workflow ส่ง token จากผลค้นจริง ไม่ให้ AI ประดิษฐ์ token หากอ้างรหัสที่ไม่อยู่ในผลค้น เป็นคนละ event/branch หมดอายุ ถูกแก้เวอร์ชัน หรือปิดเผยแพร่แล้ว ระบบเปลี่ยนผลเป็น review + invalid_reference และไม่คืนคำตอบที่ผ่านตรวจ
 
-ผลสำคัญ: success, status, queued, questionId, duplicate, reason, approvedAnswers, message
+`reply` ต้องเป็นข้อความสุดท้ายจาก AI ที่ workflow เตรียมส่งให้ผู้ใช้ ไม่เกิน 4,000 ตัวอักษร ระบบเก็บไว้เฉพาะหน้า Admin โดยไม่เก็บ replyToken หรือข้อมูลระบุตัวผู้ใช้ สำหรับ `review` และ `service_error` Backend จะใช้ข้อความมาตรฐานของระบบแทนค่า reply ที่ส่งมา
+
+ผลสำคัญ: success, status, queued, questionId, duplicate, reason, approvedAnswers, message, reply
 ตรวจ `status` ที่ backend คืน ไม่ใช้ decision จาก AI โดยไม่ตรวจผล
 `approvedAnswers` เป็นข้อความต้นฉบับที่เผยแพร่และตรวจผ่านแล้ว ไม่มีการรับรองความหมายของข้อความที่ AI แต่ง: เลือกส่งต้นฉบับเพื่อความเข้มงวดที่สุด หรือเรียบเรียงเฉพาะข้อมูลนี้โดยห้ามเพิ่มข้อเท็จจริง
 

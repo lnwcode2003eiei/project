@@ -1,6 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rankAnswers, signSearch, verifySearch, suggestQuestions, approvedReply } from './knowledge-triage.js';
+import { rankAnswers, signSearch, verifySearch, suggestQuestions, approvedReply, validDocumentIds } from './knowledge-triage.js';
+
+test('multi-branch references accept retrieved document capacity but reject malformed or duplicate ids', () => {
+  const ids = Array.from({ length: 51 }, (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`);
+  assert.equal(validDocumentIds(ids.slice(0, 10)), true);
+  assert.equal(validDocumentIds(ids.slice(0, 50)), true);
+  assert.equal(validDocumentIds(ids), false);
+  for (const value of [null, JSON.stringify(ids), [123], ['bad-id'], [ids[0], ids[0]]]) {
+    assert.equal(validDocumentIds(value), false);
+  }
+});
 
 test('approved replies append public source without duplicating it or leaking metadata', () => {
   const row = { id: 7, answer: 'ติดต่อเพจสาขาครับ', metadata: { source: 'https://www.facebook.com/example', notes: 'PRIVATE' } };
