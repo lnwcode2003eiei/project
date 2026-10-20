@@ -37,11 +37,11 @@ export default function KnowledgeLineDashboard() {
       const key = row.message.normalize('NFC').trim().replace(/\s+/g, ' ').toLowerCase();
       const existing = items.get(key);
       if (!existing) {
-        items.set(key, { ...row, occurrences: 1 });
+        items.set(key, { ...row, summary: row.message, occurrences: 1 });
         return;
       }
       existing.occurrences += 1;
-      if (new Date(row.created_at) > new Date(existing.created_at)) Object.assign(existing, row, { occurrences: existing.occurrences });
+      if (new Date(row.created_at) > new Date(existing.created_at)) Object.assign(existing, row, { summary: row.message, occurrences: existing.occurrences });
     });
     return [...items.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, [filtered]);
