@@ -2,9 +2,80 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { rankDocuments } from './knowledge-documents.js';
 
 const MAX_DOCUMENT_REFERENCES = 50;
+const MAX_CURRICULUM_CONTEXT = 15000;
+const curriculumIdPattern = /^curriculum:([a-z0-9-]{1,50}):([1-9]\d*)$/;
+const curriculumSlugs = {
+  computer: ['computer'],
+  'computer-ai': ['computer-ai', 'computerAI'],
+  construction: ['construction'],
+  digital: ['digital'],
+  electrical: ['electrical'],
+  energy: ['energy'],
+  industrial: ['industrial'],
+  logistics: ['logistics'],
+  management: ['management'],
+  survey: ['survey'],
+};
+const curriculumPagePaths = { 'computer-ai': 'computerAI' };
+
+export const isStudyPlanQuestion = query =>
+  /(?:เรียน(?:วิชา)?อะไร|มีวิชาอะไร|วิชาอะไรบ้าง|รายวิชา|แผนการเรียน|โครงสร้างหลักสูตร|รหัสวิชา|หน่วยกิต)/i.test(norm(query));
+
+export function curriculumDocumentId(branch, version) {
+  if (!Object.hasOwn(curriculumSlugs, branch) || !Number.isSafeInteger(Number(version)) || Number(version) < 1) return null;
+  return `curriculum:${branch}:${Number(version)}`;
+}
+
+export function parseCurriculumDocumentId(id) {
+  if (typeof id !== 'string') return null;
+  const match = curriculumIdPattern.exec(id);
+  if (!match || !Object.hasOwn(curriculumSlugs, match[1])) return null;
+  const version = Number(match[2]);
+  return Number.isSafeInteger(version) ? { branch: match[1], version } : null;
+}
+
+const publicCourseUrl = branch => {
+  const base = String(process.env.PUBLIC_SITE_URL || '').trim().replace(/\/$/, '');
+  return base ? `${base}/${curriculumPagePaths[branch] || branch}#course-curriculum` : '';
+};
+
+export function curriculumDocument(row, branch, branchName) {
+  const content = parse(row?.content) || {};
+  const courses = Array.isArray(content.rows)
+    ? content.rows.filter(item => item && /^\d{6,8}$/.test(String(item.code || '')) && typeof item.name === 'string' && item.name.trim() && typeof item.credits === 'string' && item.credits.trim())
+    : [];
+  const id = curriculumDocumentId(branch, Number(row?.version));
+  if (!id || !courses.length) return null;
+  const source = publicCourseUrl(branch);
+  const heading = [
+    `COURSE_PLAN_ID: ${id}`,
+    `หลักสูตร: ${String(content.title || branchName || '').trim()}`,
+    content.year ? `ปีหลักสูตร: ${String(content.year).trim()}` : '',
+    'รายการรายวิชาที่เผยแพร่บนเว็บไซต์ (รหัสวิชา | ชื่อวิชา | หน่วยกิต)',
+  ].filter(Boolean);
+  const lines = courses.map(item => `${item.code} | ${item.name.trim()} | ${item.credits.trim()} หน่วยกิต`);
+  if (source) lines.push(`ดูแผนการเรียนบนเว็บไซต์: ${source}`);
+  const fullExcerpt = [...heading, ...lines].join('\n');
+  const excerpt = fullExcerpt.length <= MAX_CURRICULUM_CONTEXT
+    ? fullExcerpt
+    : `${fullExcerpt.slice(0, MAX_CURRICULUM_CONTEXT - 120)}\n[รายการยาวเกินบริบท โปรดดูรายการต่อในหน้าเว็บไซต์]${source ? `\n${source}` : ''}`;
+  return {
+    id,
+    branch,
+    type: 'แผนการเรียน',
+    title: String(content.title || `แผนการเรียน${branchName || branch}`).trim(),
+    filename: 'ข้อมูลแผนการเรียนที่เผยแพร่บนเว็บไซต์',
+    excerpt,
+    source,
+    version: Number(row.version),
+    courseCount: courses.length,
+    truncated: excerpt.length < fullExcerpt.length,
+  };
+}
+
 export function validDocumentIds(ids) {
   return Array.isArray(ids) && ids.length <= MAX_DOCUMENT_REFERENCES
-    && ids.every(id => typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id))
+    && ids.every(id => typeof id === 'string' && (/^[0-9a-f-]{36}$/i.test(id) || parseCurriculumDocumentId(id)))
     && new Set(ids).size === ids.length;
 }
 
@@ -88,6 +159,22 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
     const [rows] = await db.query(`SELECT id,version,branch,category,question,aliases,answer,metadata,status FROM knowledge_answers WHERE status='published'${branch ? ' AND branch IN (?,?)' : ''} ORDER BY id LIMIT 2001`, branch ? [branch, 'all'] : []);
     return rows;
   };
+  const publishedCurriculum = async (db, branch) => {
+    if (!branch || !Object.hasOwn(curriculumSlugs, branch)) return null;
+    const slugs = curriculumSlugs[branch];
+    try {
+      const [rows] = await db.query(
+        `SELECT slug,file_id,content,version FROM curriculum_pdf_publications WHERE slug IN (${slugs.map(() => '?').join(',')})`,
+        slugs,
+      );
+      const row = slugs.map(slug => rows.find(item => item.slug === slug)).find(Boolean);
+      return row ? curriculumDocument(row, branch, branches[branch]) : null;
+    } catch (error) {
+      // A fresh installation may not have published a curriculum yet.
+      if (error?.code === 'ER_NO_SUCH_TABLE') return null;
+      throw error;
+    }
+  };
   app.post('/api/integrations/knowledge/search', route(async (req, res) => {
     authorize(req);
     const query = field(req.body.query, 1000), eventId = field(req.body.eventId, 200), branch = branchValue(req.body.branch);
@@ -107,11 +194,17 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
     // A catalogue question needs enough results to enumerate the available
     // documents. Specific questions stay small so the AI receives focused text.
     const catalogue = isCatalogQuestion(query);
-    const documentCandidates = rankDocuments(documents, query, catalogue ? MAX_DOCUMENT_REFERENCES : 10);
+    const rankedDocuments = rankDocuments(documents, query, catalogue ? MAX_DOCUMENT_REFERENCES : 10);
+    const studyPlanDocument = isStudyPlanQuestion(query) ? await publishedCurriculum(pool, branch) : null;
+    const documentCandidates = studyPlanDocument
+      ? [studyPlanDocument, ...rankedDocuments.filter(row => row.id !== studyPlanDocument.id)].slice(0, MAX_DOCUMENT_REFERENCES)
+      : rankedDocuments;
     const searchToken = signSearch({ eventHash: hash(eventId), branch, expires: Date.now() + 10 * 60 * 1000, candidates: candidates.map(({ id, version }) => ({ id, version })), documents: documentCandidates.map(({ id }) => id) }, process.env.N8N_KNOWLEDGE_TOKEN);
     const aiContext = [
       ...candidates.slice(0, 3).map(row => `คำตอบที่เผยแพร่แล้ว: ${row.answer}`),
-      ...documentCandidates.slice(0, catalogue ? 20 : 5).map(row => `เอกสาร: ${row.title} (${row.type}, ${row.branch})\n${row.excerpt.slice(0, catalogue ? 900 : 2500)}`),
+      ...documentCandidates.slice(0, catalogue ? 20 : 5).map(row => row.type === 'แผนการเรียน'
+        ? `แผนการเรียนที่เผยแพร่บนเว็บไซต์: ${row.title} (${row.branch})\n${row.excerpt}`
+        : `เอกสาร: ${row.title} (${row.type}, ${row.branch})\n${row.excerpt.slice(0, catalogue ? 900 : 2500)}`),
     ].join('\n\n---\n\n');
     res.json({
       success: true,
@@ -120,6 +213,7 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
       candidates,
       documents: documentCandidates,
       catalogue,
+      studyPlan: Boolean(studyPlanDocument),
       aiContext,
       searchToken,
       truncated,
@@ -154,8 +248,28 @@ export function registerKnowledgeTriage(app, { pool, ensure, route, tx, integrat
           approvedAnswers = current.filter(row => (!branch || row.branch === branch || row.branch === 'all') && proof.candidates.some(ref => ref.id === row.id && ref.version === row.version)).map(approvedReply);
         }
         if (proof && documentIds.length && documentIds.every(id => proof.documents?.includes(id))) {
-          const [current] = await c.query(`SELECT id,branch,type,title,filename,updated_at FROM knowledge_documents WHERE id IN (${documentIds.map(() => '?').join(',')}) FOR SHARE`, documentIds);
-          approvedDocuments = current.filter(row => (!branch || row.branch === branch || row.branch === 'all') && proof.documents.includes(row.id)).map(({ id, branch: documentBranch, type, title, filename, updated_at: updatedAt }) => ({ id, branch: documentBranch, type, title, filename, updatedAt }));
+          const pdfIds = documentIds.filter(id => !parseCurriculumDocumentId(id));
+          if (pdfIds.length) {
+            const [current] = await c.query(`SELECT id,branch,type,title,filename,updated_at FROM knowledge_documents WHERE id IN (${pdfIds.map(() => '?').join(',')}) FOR SHARE`, pdfIds);
+            approvedDocuments = current.filter(row => (!branch || row.branch === branch || row.branch === 'all') && proof.documents.includes(row.id)).map(({ id, branch: documentBranch, type, title, filename, updated_at: updatedAt }) => ({ id, branch: documentBranch, type, title, filename, updatedAt }));
+          }
+          for (const id of documentIds.filter(value => parseCurriculumDocumentId(value))) {
+            const ref = parseCurriculumDocumentId(id);
+            if (!ref || ref.branch !== branch) continue;
+            const current = await publishedCurriculum(c, ref.branch);
+            if (!current || current.id !== id || current.version !== ref.version) continue;
+            approvedDocuments.push({
+              id: current.id,
+              branch: current.branch,
+              type: current.type,
+              title: current.title,
+              filename: current.filename,
+              updatedAt: null,
+              source: current.source,
+              version: current.version,
+              courseCount: current.courseCount,
+            });
+          }
         }
         const answerProof = ids.length > 0 && approvedAnswers.length === ids.length;
         const documentProof = documentIds.length > 0 && approvedDocuments.length === documentIds.length;

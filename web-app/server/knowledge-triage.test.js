@@ -1,14 +1,63 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rankAnswers, signSearch, verifySearch, suggestQuestions, approvedReply, validDocumentIds } from './knowledge-triage.js';
+import {
+  approvedReply,
+  curriculumDocument,
+  curriculumDocumentId,
+  isStudyPlanQuestion,
+  parseCurriculumDocumentId,
+  rankAnswers,
+  signSearch,
+  suggestQuestions,
+  validDocumentIds,
+  verifySearch,
+} from './knowledge-triage.js';
 
 test('multi-branch references accept retrieved document capacity but reject malformed or duplicate ids', () => {
   const ids = Array.from({ length: 51 }, (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`);
   assert.equal(validDocumentIds(ids.slice(0, 10)), true);
   assert.equal(validDocumentIds(ids.slice(0, 50)), true);
+  assert.equal(validDocumentIds([ids[0], 'curriculum:construction:3']), true);
   assert.equal(validDocumentIds(ids), false);
-  for (const value of [null, JSON.stringify(ids), [123], ['bad-id'], [ids[0], ids[0]]]) {
+  for (const value of [null, JSON.stringify(ids), [123], ['bad-id'], ['curriculum:construction:0'], ['curriculum:unknown:1'], [ids[0], ids[0]]]) {
     assert.equal(validDocumentIds(value), false);
+  }
+});
+
+test('study-plan questions are detected and curriculum references round trip', () => {
+  for (const question of ['สาขานี้เรียนอะไรบ้าง', 'ขอรายวิชาและรหัสวิชา', 'ดูแผนการเรียน', 'หลักสูตรมีกี่หน่วยกิต']) {
+    assert.equal(isStudyPlanQuestion(question), true);
+  }
+  assert.equal(isStudyPlanQuestion('สมัครเรียนวันไหน'), false);
+  assert.equal(curriculumDocumentId('construction', 7), 'curriculum:construction:7');
+  assert.deepEqual(parseCurriculumDocumentId('curriculum:construction:7'), { branch: 'construction', version: 7 });
+  assert.equal(parseCurriculumDocumentId('curriculum:construction:x'), null);
+});
+
+test('published curriculum becomes a focused document containing only valid course rows', () => {
+  const previous = process.env.PUBLIC_SITE_URL;
+  process.env.PUBLIC_SITE_URL = 'http://localhost/technology/';
+  try {
+    const result = curriculumDocument({
+      version: 2,
+      content: JSON.stringify({
+        title: 'หลักสูตรวิศวกรรมบริหารงานก่อสร้าง',
+        year: '2570',
+        rows: [
+          { code: '1234567', name: 'การบริหารงานก่อสร้าง', credits: '3(2-2-5)' },
+          { type: 'category', name: 'หมวดวิชาเฉพาะ' },
+          { code: 'ABC', name: 'ข้อมูลไม่ถูกต้อง', credits: '3' },
+        ],
+      }),
+    }, 'construction', 'วิศวกรรมบริหารงานก่อสร้าง');
+    assert.equal(result.id, 'curriculum:construction:2');
+    assert.equal(result.courseCount, 1);
+    assert.match(result.excerpt, /1234567 \| การบริหารงานก่อสร้าง \| 3\(2-2-5\) หน่วยกิต/);
+    assert.doesNotMatch(result.excerpt, /ข้อมูลไม่ถูกต้อง/);
+    assert.equal(result.source, 'http://localhost/technology/construction#course-curriculum');
+  } finally {
+    if (previous === undefined) delete process.env.PUBLIC_SITE_URL;
+    else process.env.PUBLIC_SITE_URL = previous;
   }
 });
 
@@ -49,6 +98,10 @@ test('search proof is event/branch/expiry bound and rejects forged tokens', () =
 test('search proof keeps the selected PDF document ids', () => {
   const secret = 'x'.repeat(32), payload = { eventHash: 'event1', branch: null, expires: 2000, candidates: [], documents: ['9b782fe2-0a3f-4a2e-9524-2ecc1fd15f64'] };
   assert.deepEqual(verifySearch(signSearch(payload, secret), secret, 'event1', null, 1000), payload);
+});
+test('search proof keeps a curriculum document id', () => {
+  const secret = 'x'.repeat(32), payload = { eventHash: 'event1', branch: 'construction', expires: 2000, candidates: [], documents: ['curriculum:construction:4'] };
+  assert.deepEqual(verifySearch(signSearch(payload, secret), secret, 'event1', 'construction', 1000), payload);
 });
 test('duplicate suggestions stay in branch and only suggest pending items', () => {
   const q = { id: 1, branch: 'computer', question: 'ค่าเทอมคอมพิวเตอร์', status: 'pending', triage: null };
