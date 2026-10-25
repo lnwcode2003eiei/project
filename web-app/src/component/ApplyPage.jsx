@@ -335,7 +335,7 @@ export default function ApplyPage() {
                 <input
                   type="text"
                   required
-                  placeholder="เช่น นายสมชาย ใจดี"
+                  placeholder="เช่น สมชาย ใจดี"
                   value={formData.fullname}
                   onChange={(e) =>
                     setFormData({ ...formData, fullname: e.target.value })
