@@ -108,6 +108,27 @@ function Slider() {
 
           </SwiperSlide>
 
+          {/* วิศวกรรมไฟฟ้า */}
+          <SwiperSlide>
+            <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
+              <ProgramPoster src="/image/6.png" alt="วิศวกรรมไฟฟ้า" />
+              <div className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900">วิศวกรรมไฟฟ้า</h3>
+                <p className="mt-2 text-sm text-[#701D10]">Electrical Engineering</p>
+                <p className="mt-5 text-sm leading-7 text-gray-600">
+                  ศึกษาระบบไฟฟ้ากำลัง เครื่องจักรไฟฟ้า ระบบควบคุม
+                  และการออกแบบทางวิศวกรรมไฟฟ้า
+                </p>
+                <Link
+                  to="/electrical-engineering"
+                  className="mt-6 block rounded-xl bg-[#701D10] px-5 py-3 text-center font-semibold text-white transition hover:bg-[#093341]"
+                >
+                  ดูรายละเอียดหลักสูตร →
+                </Link>
+              </div>
+            </div>
+          </SwiperSlide>
+
 
           {/* ================================= */}
           {/* เทคโนโลยีดิจิทัลเพื่อการออกแบบ */}

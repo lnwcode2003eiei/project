@@ -954,7 +954,38 @@ VALUES (
 
 
 -- =========================================================
--- 12. ENERGY
+-- 12. ELECTRICAL ENGINEERING
+-- แยกจากสาขาเทคโนโลยีไฟฟ้า
+-- =========================================================
+
+INSERT IGNORE INTO course_info (
+    saka_path, faculty_name, title, english_title, hero_description,
+    about_title, about_description_1, about_description_2, image,
+    highlights, curriculum, curriculum_transfer, skills, careers, learning_environment
+)
+SELECT
+    'electrical-engineering',
+    faculty_name,
+    'วิศวกรรมไฟฟ้า',
+    'Electrical Engineering',
+    'เรียนรู้ระบบไฟฟ้ากำลัง เครื่องจักรไฟฟ้า ระบบควบคุม และการออกแบบทางวิศวกรรมไฟฟ้า',
+    'เรียนอะไรในวิศวกรรมไฟฟ้า?',
+    'ศึกษาพื้นฐานและการประยุกต์ใช้ระบบไฟฟ้ากำลัง วงจรไฟฟ้า เครื่องจักรไฟฟ้า ระบบควบคุม และงานออกแบบทางวิศวกรรม',
+    'มุ่งเน้นการวิเคราะห์ ออกแบบ และปฏิบัติงานตามหลักวิศวกรรม เพื่อเตรียมความพร้อมสู่สายงานวิศวกรรมไฟฟ้า',
+    image,
+    JSON_ARRAY(),
+    JSON_ARRAY(),
+    JSON_ARRAY(),
+    JSON_ARRAY(),
+    JSON_ARRAY(),
+    NULL
+FROM course_info
+WHERE saka_path = 'electrical'
+LIMIT 1;
+
+
+-- =========================================================
+-- 13. ENERGY
 -- admin06
 -- =========================================================
 

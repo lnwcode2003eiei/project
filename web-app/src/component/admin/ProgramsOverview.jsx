@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 
-// รายการ 10 สาขาวิชา
+// รายการสาขาวิชา
 const allPrograms = [
   { id: "computer", name: "วิศวกรรมคอมพิวเตอร์", path: "/admin/courses/computer" },
   { id: "computer-ai", name: "คอมพิวเตอร์และปัญญาประดิษฐ์", path: "/admin/courses/computer-ai" },
   { id: "construction", name: "เทคโนโลยีก่อสร้าง", path: "/admin/courses/construction" },
   { id: "digital", name: "เทคโนโลยีดิจิทัล", path: "/admin/courses/digital" },
-  { id: "electrical", name: "วิศวกรรมไฟฟ้า", path: "/admin/courses/electrical" },
+  { id: "electrical", name: "เทคโนโลยีไฟฟ้า", path: "/admin/courses/electrical" },
+  { id: "electrical-engineering", name: "วิศวกรรมไฟฟ้า", path: "/admin/courses/electrical-engineering" },
   { id: "energy", name: "เทคโนโลยีพลังงาน", path: "/admin/courses/energy" },
   { id: "industrial", name: "วิศวกรรมอุตสาหการ", path: "/admin/courses/industrial" },
   { id: "logistics", name: "การจัดการโลจิสติกส์", path: "/admin/courses/logistics" },

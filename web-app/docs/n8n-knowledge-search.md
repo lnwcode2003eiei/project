@@ -6,9 +6,10 @@
 { "eventId": "LINE event id", "query": "ข้อความผู้ใช้", "branch": "electrical" }
 ```
 
-ก่อนเรียก Search Knowledge ให้ AI ระบุ `branch` หนึ่งค่า: `computer`, `computer-ai`, `construction`, `digital`, `electrical`, `energy`, `industrial`, `logistics`, `management`, หรือ `survey`.
+ก่อนเรียก Search Knowledge ให้ AI ระบุ `branch` หนึ่งค่า: `computer`, `computer-ai`, `construction`, `digital`, `electrical`, `electrical-engineering`, `energy`, `industrial`, `logistics`, `management`, หรือ `survey`.
 
 - คำถามสาขาไฟฟ้าใช้ `electrical` แล้วผลค้นจะมีเอกสารไฟฟ้าและข้อมูลส่วนกลางเท่านั้น
+- “เทคโนโลยีไฟฟ้า” ใช้ `electrical` ส่วน “วิศวกรรมไฟฟ้า” ใช้ `electrical-engineering` ห้ามใช้แทนกัน
 - คำถามเรื่องวันสมัคร ค่าเทอม หรือประกาศกลาง ให้ AI เลือกสาขาที่ผู้ใช้กล่าวถึง หากไม่ระบุ ให้ถามสาขาเพิ่มก่อน ไม่ต้องเดา
 - คำถามกว้าง เช่น “ถ้าชอบคอมพิวเตอร์” ส่ง `branch: null` ได้ ระบบจะค้นเอกสารทุกสาขาและคืนเฉพาะเอกสารที่ชื่อหรือเนื้อหาตรงคำถาม ห้ามสรุปว่าสาขาใดเปิดรับสมัครจากรายชื่อเอกสารเพียงอย่างเดียว
 - อย่าส่ง `all` หรือ `unassigned` เป็น `branch` ให้ endpoint นี้

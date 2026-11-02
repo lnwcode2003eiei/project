@@ -7,6 +7,13 @@ import { getVisitorName } from "../config/visitor";
   // 📌 แยกข้อมูลสาขาวิชาตามระดับการศึกษา
   const bachelorMajors = [
     {
+      id: "electrical-eng",
+      name: "วิศวกรรมไฟฟ้า",
+      degree: "วศ.บ. (วิศวกรรมศาสตร์บัณฑิต)",
+      desc: "หลักสูตรวิศวกรรมไฟฟ้า",
+      icon: "mdi:transmission-tower",
+    },
+    {
       id: "elec-tech",
       name: "เทคโนโลยีไฟฟ้า",
       degree: "ทล.บ. (เทคโนโลยีบัณฑิต)",

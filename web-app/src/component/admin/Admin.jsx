@@ -53,6 +53,9 @@ const branchNames = {
   electrical:
     "เทคโนโลยีไฟฟ้า",
 
+  "electrical-engineering":
+    "วิศวกรรมไฟฟ้า",
+
   energy:
     "วิศวกรรมการจัดการพลังงานในงานอุตสาหกรรม",
 

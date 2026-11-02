@@ -17,6 +17,7 @@ import Recommendpage from "./component/Nextrecommend/Recommendpage";
 
 import Computer from "./component/saka/computer";
 import Electrical from "./component/saka/electrical";
+import ElectricalEngineering from "./component/saka/electricalEngineering";
 import Digital from "./component/saka/digital";
 import Industrial from "./component/saka/industrial";
 import Survey from "./component/saka/survey";
@@ -133,6 +134,7 @@ function AppContent() {
         <Route path="/computer" element={<Computer />} />
 
         <Route path="/electrical" element={<Electrical />} />
+        <Route path="/electrical-engineering" element={<ElectricalEngineering />} />
 
         <Route path="/digital" element={<Digital />} />
 

@@ -20,7 +20,7 @@ export function groupQuestions(rows) {
     // Short contextual follow-ups must keep their full summary context.
     // Self-contained interest questions should not split because the AI describes
     // different search failures. Preserve context for ambiguous follow-ups.
-    const standalone = /^อยากเรียน(?:สาขา)?(?:วิศวกรรมคอมพิวเตอร์|วิศวกรรมโลจิสติกส์|เทคโนโลยีไฟฟ้า|เทคโนโลยีอุตสาหการ|เทคโนโลยีดิจิทัลเพื่อการออกแบบ|เทคโนโลยีสำรวจและภูมิสารสนเทศ)$/.test(original);
+    const standalone = /^อยากเรียน(?:สาขา)?(?:วิศวกรรมคอมพิวเตอร์|วิศวกรรมโลจิสติกส์|วิศวกรรมไฟฟ้า|เทคโนโลยีไฟฟ้า|เทคโนโลยีอุตสาหการ|เทคโนโลยีดิจิทัลเพื่อการออกแบบ|เทคโนโลยีสำรวจและภูมิสารสนเทศ)$/.test(original);
     const summary = row.triage?.summary || '';
     const constraints = summary.match(/(?:25|20)\d{2}|ปวช|ปวส|ม\.?\s?6|ปริญญาโท|ปริญญาเอก/g) || [];
     const context = standalone ? [...new Set(constraints)].sort().join('|') : (summary ? topicKey(summary.split(/แต่(?:จาก|ยัง|ไม่)|จึงยัง/)[0]) : '');

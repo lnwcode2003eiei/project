@@ -54,6 +54,7 @@ function Dashboard() {
     construction: "วิศวกรรมบริหารงานก่อสร้าง",
     digital: "เทคโนโลยีดิจิทัลเพื่อการออกแบบ",
     electrical: "เทคโนโลยีไฟฟ้า",
+    "electrical-engineering": "วิศวกรรมไฟฟ้า",
     energy:
       "วิศวกรรมการจัดการพลังงานในงานอุตสาหกรรม",
     industrial: "เทคโนโลยีอุตสาหการ",

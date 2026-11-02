@@ -6,7 +6,12 @@ import CurriculumSwitcher from "./CurriculumSwitcher";
 import CourseDetails, { CourseSectionNav } from "./CourseDetails";
 import CurriculumPdf from "./CurriculumPdf";
 
-function Electrical() {
+function Electrical({
+  slug = "electrical",
+  applicationMajor = "elec-tech",
+  fallbackTitle = "เทคโนโลยีไฟฟ้า",
+  fallbackEnglishTitle = "Electrical Technology",
+} = {}) {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -22,7 +27,7 @@ function Electrical() {
         setError("");
 
         const response = await fetch(
-          apiUrl("/api/courses/electrical")
+          apiUrl(`/api/courses/${slug}`)
         );
 
         const data = await response.json();
@@ -36,7 +41,7 @@ function Electrical() {
         setCourse(data.data);
       } catch (err) {
         console.error(
-          "โหลดข้อมูล Electrical ไม่สำเร็จ:",
+          `โหลดข้อมูล ${slug} ไม่สำเร็จ:`,
           err
         );
 
@@ -49,7 +54,7 @@ function Electrical() {
     };
 
     loadCourse();
-  }, []);
+  }, [slug]);
 
   // ==========================================
   // คำนวณหน่วยกิตรวม
@@ -121,7 +126,7 @@ function Electrical() {
   return (
     <div className="course-page min-h-screen bg-slate-50 text-gray-800 antialiased">
       {/* Hero */}
-      <HeaderSection course={course} />
+      <HeaderSection course={course} slug={slug} fallbackTitle={fallbackTitle} fallbackEnglishTitle={fallbackEnglishTitle} />
       <CourseSectionNav />
 
       {/* About */}
@@ -131,7 +136,7 @@ function Electrical() {
       <HighlightsSection course={course} />
 
       {/* Curriculum */}
-      <div id="course-curriculum" className="scroll-mt-44"><CurriculumPdf slug="electrical"><StudyPlanSection course={course} totalCredits={totalCredits} /></CurriculumPdf></div>
+      <div id="course-curriculum" className="scroll-mt-44"><CurriculumPdf slug={slug}><StudyPlanSection course={course} totalCredits={totalCredits} /></CurriculumPdf></div>
 
       {/* Skills */}
       <SkillsSection course={course} />
@@ -141,8 +146,8 @@ function Electrical() {
       <CareersSection course={course} />
 
       {/* Footer */}
-      <CourseDetails slug="electrical" />
-      <FooterCTA course={course} />
+      <CourseDetails slug={slug} />
+      <FooterCTA course={course} applicationMajor={applicationMajor} />
     </div>
   );
 }
@@ -170,21 +175,21 @@ function getImageUrl(imagePath) {
 // Hero
 // ==========================================
 
-function HeaderSection({ course }) {
+function HeaderSection({ course, slug, fallbackTitle, fallbackEnglishTitle }) {
   return (
-    <section style={courseHeroStyle("electrical")} className="course-generated-hero relative overflow-hidden bg-gradient-to-br from-[#701D10] via-[#701D10] to-[#093341] px-6 py-20 text-white shadow-lg">
+    <section style={courseHeroStyle(slug)} className="course-generated-hero relative overflow-hidden bg-gradient-to-br from-[#701D10] via-[#701D10] to-[#093341] px-6 py-20 text-white shadow-lg">
       <div className="mx-auto max-w-7xl">
         <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-red-200 backdrop-blur-md">
-          {course.english_title || "Electrical Technology"}
+          {course.english_title || fallbackEnglishTitle}
         </span>
 
         <h1 className="mt-4 text-4xl font-extrabold tracking-tight md:text-6xl lg:text-7xl">
-          {course.title || "เทคโนโลยีไฟฟ้า"}
+          {course.title || fallbackTitle}
         </h1>
 
         <p className="mt-6 max-w-3xl text-lg font-light leading-relaxed text-red-50/90 md:text-xl">
           {course.hero_description ||
-            "เรียนรู้เทคโนโลยีไฟฟ้า ระบบควบคุม ระบบอัตโนมัติ และการประยุกต์ใช้พลังงาน เพื่อรองรับอุตสาหกรรมยุคใหม่"}
+            `เรียนรู้${fallbackTitle} ระบบควบคุม ระบบอัตโนมัติ และการประยุกต์ใช้พลังงาน เพื่อรองรับอุตสาหกรรมยุคใหม่`}
         </p>
       </div>
     </section>
@@ -226,7 +231,7 @@ function AboutSection({ course }) {
           </div>
 
           <h2 className="text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
-            {course.about_title || "เรียนอะไรในเทคโนโลยีไฟฟ้า?"}
+            {course.about_title || `เรียนอะไรใน${course.title || "เทคโนโลยีไฟฟ้า"}?`}
           </h2>
 
           <p className="text-lg leading-relaxed text-gray-600">
@@ -484,7 +489,7 @@ function CareersSection({ course }) {
           </h2>
 
           <p className="mt-3 text-red-100/80">
-            แนวทางสายงานและโอกาสการทำงานในสายอาชีพเทคโนโลยีไฟฟ้าและระบบอัตโนมัติ
+            แนวทางสายงานและโอกาสการทำงานในสายอาชีพ{course.title || "เทคโนโลยีไฟฟ้า"}และระบบอัตโนมัติ
           </p>
         </div>
 
@@ -519,12 +524,12 @@ function CareersSection({ course }) {
 // Footer
 // ==========================================
 
-function FooterCTA({ course }) {
+function FooterCTA({ course, applicationMajor }) {
   return (
     <section className="bg-white px-6 py-20 text-center">
       <div className="mx-auto max-w-3xl space-y-6">
         <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">
-          สร้างอนาคตด้วยเทคโนโลยีไฟฟ้า
+          สร้างอนาคตด้วย{course?.title || "เทคโนโลยีไฟฟ้า"}
         </h2>
 
         <p className="text-lg leading-relaxed text-gray-600">
@@ -533,7 +538,7 @@ function FooterCTA({ course }) {
         </p>
 
         <div>
-          <a href="/apply?major=elec-tech" className="inline-block rounded-xl bg-[#F7941D] px-8 py-4 font-semibold text-black shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#701D10] hover:text-white focus-visible:bg-[#701D10] focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#701D10] hover:shadow-xl">
+          <a href={`/apply?major=${applicationMajor}`} className="inline-block rounded-xl bg-[#F7941D] px-8 py-4 font-semibold text-black shadow-lg transition duration-300 hover:-translate-y-0.5 hover:bg-[#701D10] hover:text-white focus-visible:bg-[#701D10] focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#701D10] hover:shadow-xl">
             สนใจเข้าศึกษา
           </a>
         </div>

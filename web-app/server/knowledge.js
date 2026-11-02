@@ -2,7 +2,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { registerKnowledgeTriage, reviewReasons, suggestQuestions } from './knowledge-triage.js';
 import { registerKnowledgeDocuments } from './knowledge-documents.js';
 
-export const branches = { all: 'ข้อมูลส่วนกลาง', unassigned: 'ยังไม่ระบุสาขา', computer: 'วิศวกรรมคอมพิวเตอร์', 'computer-ai': 'วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์', construction: 'วิศวกรรมบริหารงานก่อสร้าง', digital: 'เทคโนโลยีดิจิทัลเพื่อการออกแบบ', electrical: 'เทคโนโลยีไฟฟ้า', energy: 'วิศวกรรมการจัดการพลังงานในงานอุตสาหกรรม', industrial: 'เทคโนโลยีอุตสาหการ', logistics: 'วิศวกรรมโลจิสติกส์', management: 'การจัดการงานวิศวกรรม', survey: 'เทคโนโลยีสำรวจและภูมิสารสนเทศ' };
+export const branches = { all: 'ข้อมูลส่วนกลาง', unassigned: 'ยังไม่ระบุสาขา', computer: 'วิศวกรรมคอมพิวเตอร์', 'computer-ai': 'วิศวกรรมคอมพิวเตอร์และปัญญาประดิษฐ์', construction: 'วิศวกรรมบริหารงานก่อสร้าง', digital: 'เทคโนโลยีดิจิทัลเพื่อการออกแบบ', electrical: 'เทคโนโลยีไฟฟ้า', 'electrical-engineering': 'วิศวกรรมไฟฟ้า', energy: 'วิศวกรรมการจัดการพลังงานในงานอุตสาหกรรม', industrial: 'เทคโนโลยีอุตสาหการ', logistics: 'วิศวกรรมโลจิสติกส์', management: 'การจัดการงานวิศวกรรม', survey: 'เทคโนโลยีสำรวจและภูมิสารสนเทศ' };
 export const categories = ['ทั่วไป', 'หลักสูตร', 'คุณสมบัติผู้เรียน', 'ค่าใช้จ่าย', 'อาชีพหลังเรียนจบ', 'การติดต่อ', 'ข่าวสาร', 'การรับสมัคร', 'สาขาวิชา', 'ติดต่อ', 'ข้อมูลคณะ', 'คุณสมบัติ', 'เอกสาร'];
 export const normalize = value => value.normalize('NFC').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
 const hash = value => createHash('sha256').update(value).digest('hex');

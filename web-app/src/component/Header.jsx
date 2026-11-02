@@ -45,7 +45,7 @@ function Header() {
     };
   }, [location.pathname]);
 
-  const isCoursePage = ["/computer", "/computerAI", "/computer-ai", "/construction", "/digital", "/electrical", "/energy", "/industrial", "/logistics", "/management", "/survey"].includes(location.pathname.replace(/\/$/, ""));
+  const isCoursePage = ["/computer", "/computerAI", "/computer-ai", "/construction", "/digital", "/electrical", "/electrical-engineering", "/energy", "/industrial", "/logistics", "/management", "/survey"].includes(location.pathname.replace(/\/$/, ""));
   const isFacultyPage = ["/recommendpage", "/history", "/vision", "/structure", "/executive", "/teacher", "/department"].includes(location.pathname.toLowerCase().replace(/\/$/, ""));
   const activePath = isCoursePage ? "/#programs" : isFacultyPage ? "/Recommendpage" : location.pathname.startsWith("/news") ? "/news" : location.pathname === "/" || location.pathname === "/home"
     ? activeSection

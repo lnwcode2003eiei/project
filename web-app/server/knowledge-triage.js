@@ -10,6 +10,7 @@ const curriculumSlugs = {
   construction: ['construction'],
   digital: ['digital'],
   electrical: ['electrical'],
+  'electrical-engineering': ['electrical-engineering'],
   energy: ['energy'],
   industrial: ['industrial'],
   logistics: ['logistics'],
